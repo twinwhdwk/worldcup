@@ -7,769 +7,458 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --blue: #3b82f6;
-      --dark: #0a0a0f;
-      --card: #13141f;
-      --text: #f0f0f0;
-      --muted: #666;
-      --correct: #22c55e;
-      --wrong: #ef4444;
+      --blue: #3b82f6; --dark: #080810; --card: #10111e;
+      --text: #f0f0f0; --muted: #555; --muted2: #888;
+      --correct: #22c55e; --wrong: #ef4444; --gold: #FFD700;
     }
+    body { background: var(--dark); color: var(--text); font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px 16px 80px; }
 
-    body {
-      background: var(--dark);
-      color: var(--text);
-      font-family: 'Noto Sans KR', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
+    /* Splash */
+    .splash { position: fixed; inset: 0; background: var(--dark); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.4s; }
+    .splash.out { opacity: 0; pointer-events: none; }
+    .splash-ball { font-size: 64px; animation: bounce 0.6s ease infinite alternate; }
+    @keyframes bounce { to { transform: translateY(-20px) rotate(20deg); } }
+    .splash-bar-wrap { width: 200px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin-top: 24px; overflow: hidden; }
+    .splash-bar { height: 100%; background: var(--blue); border-radius: 100px; animation: loadBar 0.8s ease forwards; }
+    @keyframes loadBar { from{width:0%} to{width:100%} }
 
-    .back { align-self: flex-start; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 20px; }
-    .back:hover { color: var(--text); }
-
+    .back { align-self: flex-start; color: var(--muted); text-decoration: none; font-size: 13px; margin-bottom: 16px; }
     h1 {
-      font-family: 'Black Han Sans', sans-serif;
-      font-size: clamp(28px, 5vw, 48px);
-      text-align: center;
+      font-family: 'Black Han Sans', sans-serif; font-size: clamp(26px, 5vw, 44px);
+      text-align: center; margin-bottom: 6px;
       background: linear-gradient(135deg, #fff, var(--blue));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 8px;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-
-    .subtitle { color: var(--muted); font-size: 14px; text-align: center; margin-bottom: 30px; }
+    .subtitle { color: var(--muted2); font-size: 13px; text-align: center; margin-bottom: 20px; }
 
     /* HUD */
-    .hud {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 24px;
-      width: 100%;
-      max-width: 600px;
-    }
-
-    .hud-box {
-      flex: 1;
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 14px;
-      padding: 14px;
-      text-align: center;
-    }
-    .hud-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-    .hud-value { font-family: 'Black Han Sans', sans-serif; font-size: 32px; margin-top: 4px; }
+    .hud { display: flex; gap: 10px; margin-bottom: 14px; width: 100%; max-width: 580px; }
+    .hud-box { flex: 1; background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 12px 8px; text-align: center; }
+    .hud-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .hud-value { font-family: 'Black Han Sans', sans-serif; font-size: 28px; margin-top: 2px; }
     #timer-val { color: var(--blue); }
-    #score-val { color: #FFD700; }
+    #score-val { color: var(--gold); }
     #streak-val { color: var(--correct); }
 
     /* Timer bar */
-    .timer-bar-wrap {
-      width: 100%;
-      max-width: 600px;
-      height: 6px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 100px;
-      margin-bottom: 24px;
-      overflow: hidden;
-    }
-    #timer-bar {
-      height: 100%;
-      background: var(--blue);
-      border-radius: 100px;
-      transition: width 1s linear, background 0.3s;
-      width: 100%;
+    .timer-bar-wrap { width: 100%; max-width: 580px; height: 6px; background: rgba(255,255,255,0.06); border-radius: 100px; margin-bottom: 16px; overflow: hidden; }
+    #timer-bar { height: 100%; background: var(--blue); border-radius: 100px; transition: width 1s linear, background 0.3s; width: 100%; }
+
+    /* Combo banner */
+    .combo-banner {
+      height: 28px; width: 100%; max-width: 580px; text-align: center;
+      font-weight: 700; font-size: 15px; margin-bottom: 8px;
+      transition: all 0.3s;
     }
 
-    /* CARD */
-    .question-card {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 24px;
-      padding: 40px 32px;
-      width: 100%;
-      max-width: 600px;
-      margin-bottom: 20px;
-      text-align: center;
+    /* Question card */
+    .q-card {
+      background: var(--card); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 580px;
+      text-align: center; margin-bottom: 16px; position: relative;
     }
+    .diff-badge { font-size: 14px; min-height: 20px; margin-bottom: 6px; }
+    .player-emoji { font-size: 64px; margin-bottom: 12px; display: block; }
+    .player-name { font-family: 'Black Han Sans', sans-serif; font-size: clamp(24px, 5vw, 36px); margin-bottom: 16px; letter-spacing: -1px; }
 
-    .player-emoji { font-size: 72px; margin-bottom: 16px; }
-    .player-name {
-      font-family: 'Black Han Sans', sans-serif;
-      font-size: 36px;
-      margin-bottom: 20px;
-      letter-spacing: -1px;
-    }
+    /* Progressive hints */
+    .hints-wrap { margin-bottom: 14px; }
+    .hint-row { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-bottom: 8px; }
+    .hint-chip { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25); color: var(--blue); font-size: 12px; padding: 5px 13px; border-radius: 100px; animation: chipIn 0.3s ease; }
+    @keyframes chipIn { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
+    .hint-locked { background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.1); color: var(--muted); font-size: 12px; padding: 5px 13px; border-radius: 100px; cursor: pointer; transition: all 0.2s; }
+    .hint-locked:hover { border-color: rgba(59,130,246,0.4); color: var(--blue); }
 
-    .hints {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-
-    .hint-chip {
-      background: rgba(59,130,246,0.15);
-      border: 1px solid rgba(59,130,246,0.3);
-      color: var(--blue);
-      font-size: 13px;
-      padding: 6px 14px;
-      border-radius: 100px;
-    }
-
-    .feedback {
-      font-size: 24px;
-      font-weight: 700;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
+    .feedback { font-size: 20px; font-weight: 700; height: 28px; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .feedback.correct { color: var(--correct); }
-    .feedback.wrong { color: var(--wrong); }
+    .feedback.wrong   { color: var(--wrong); }
 
-    /* OPTIONS */
-    .options {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      width: 100%;
-      max-width: 600px;
-    }
-
+    /* Options */
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 580px; }
     .opt-btn {
-      background: var(--card);
-      border: 2px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 16px 12px;
-      font-family: 'Noto Sans KR', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .opt-btn:hover:not(:disabled) {
-      border-color: var(--blue);
-      background: rgba(59,130,246,0.1);
-      transform: scale(1.02);
-    }
-
-    .opt-btn.correct { border-color: var(--correct); background: rgba(34,197,94,0.15); color: var(--correct); }
-    .opt-btn.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.15); color: var(--wrong); }
-    .opt-btn:disabled { cursor: not-allowed; }
-
-    /* RESULT */
-    .result-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      width: 100%;
-      max-width: 600px;
-    }
-    .result-screen.show { display: flex; }
-
-    .result-trophy { font-size: 80px; margin-bottom: 20px; }
-    .result-title {
-      font-family: 'Black Han Sans', sans-serif;
-      font-size: 40px;
-      margin-bottom: 8px;
-    }
-    .result-score {
-      font-size: 64px;
-      font-family: 'Black Han Sans', sans-serif;
-      color: #FFD700;
-      margin: 16px 0;
-    }
-    .result-msg { color: var(--muted); font-size: 15px; margin-bottom: 32px; }
-
-    .result-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 28px;
-      width: 100%;
-      max-width: 400px;
-    }
-    .stat-box {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 14px;
-      padding: 16px 24px;
-      text-align: center;
-    }
-    .stat-val { font-family: 'Black Han Sans', sans-serif; font-size: 28px; color: var(--blue); }
-    .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
-
-    .btn-restart {
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      border-radius: 100px;
-      padding: 16px 48px;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
-    }
-    .btn-restart:hover { opacity: 0.85; transform: scale(1.03); }
-
-    .game-area { width: 100%; display: flex; flex-direction: column; align-items: center; }
-  
-    @keyframes scorePop {
-      0% { transform: scale(0) translateY(0); opacity: 1; }
-      60% { transform: scale(1.3) translateY(-30px); opacity: 1; }
-      100% { transform: scale(1) translateY(-60px); opacity: 0; }
-    }
-    .score-pop {
-      position: fixed; font-family: 'Black Han Sans', sans-serif;
-      font-size: 28px; font-weight: 900; pointer-events: none; z-index: 9998;
-      animation: scorePop 0.7s ease forwards;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
-
-    
-    /* ── Mobile Optimization ── */
-    @media (max-width: 480px) {
-      body { padding: 12px; }
-      .options { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .opt-btn { padding: 14px 8px; font-size: 14px; min-height: 64px; }
-      .question-card, .q-card, .jersey-card { padding: 24px 16px; }
-      .hud { gap: 8px; }
-      .hud-box { padding: 10px 6px; }
-      .hud-value { font-size: 22px; }
-      .player-emoji, .jersey-display { font-size: 56px; }
-      .hints, .clues, .hint-row { gap: 6px; }
-      .hint-chip, .clue-chip { font-size: 11px; padding: 4px 10px; }
-      .shoot-btn { padding: 16px 40px; font-size: 18px; }
-      h1 { font-size: 28px; }
-    }
-    /* Larger touch targets */
-    .opt-btn { min-height: 56px; -webkit-tap-highlight-color: transparent; }
-    .shoot-btn { -webkit-tap-highlight-color: transparent; }
-    .arrow-btn { min-width: 80px; min-height: 48px; }
-
-    
-    .speed-indicator {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      font-family: 'Black Han Sans', sans-serif;
-      font-size: 22px;
-      color: #f59e0b;
-      pointer-events: none;
-      z-index: 999;
-      opacity: 0;
-      transform: translateY(0);
-      transition: none;
-    }
-    .speed-indicator.show {
-      animation: speedPop 0.8s ease forwards;
-    }
-    @keyframes speedPop {
-      0% { opacity: 1; transform: translateY(0) scale(1.2); }
-      100% { opacity: 0; transform: translateY(-40px) scale(0.8); }
-    }
-
-    
-    /* ── Loading Splash ── */
-    .splash {
-      position: fixed; inset: 0; background: #0a0a0f;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 9999; transition: opacity 0.4s ease;
-    }
-    .splash.fade-out { opacity: 0; pointer-events: none; }
-    .splash-ball { font-size: 64px; animation: bounceBall 0.6s ease infinite alternate; }
-    @keyframes bounceBall { from { transform: translateY(0) rotate(0deg); } to { transform: translateY(-20px) rotate(20deg); } }
-    .splash-title { font-family: 'Black Han Sans', sans-serif; font-size: 22px; margin-top: 20px; color: #fff; }
-    .splash-sub { font-size: 13px; color: #555; margin-top: 8px; }
-    .splash-bar-wrap { width: 200px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin-top: 20px; overflow: hidden; }
-    .splash-bar { height: 100%; background: #00843D; border-radius: 100px; animation: loadBar 0.8s ease forwards; }
-    @keyframes loadBar { from { width: 0%; } to { width: 100%; } }
-
-    
-    /* ── Bottom Nav ── */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(10,10,15,0.95);
-      border-top: 1px solid rgba(255,255,255,0.07);
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 8px;
-      z-index: 500;
-      backdrop-filter: blur(10px);
-    }
-    .nav-item {
-      display: flex; flex-direction: column; align-items: center;
-      text-decoration: none; color: var(--muted);
-      font-size: 10px; gap: 3px; flex: 1;
-      transition: color 0.2s;
+      background: var(--card); border: 2px solid rgba(255,255,255,0.07); border-radius: 14px;
+      padding: 14px 10px; font-size: 15px; font-weight: 700; color: var(--text);
+      cursor: pointer; transition: all 0.15s; font-family: 'Noto Sans KR', sans-serif;
+      display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 60px;
       -webkit-tap-highlight-color: transparent;
     }
-    .nav-item.active { color: #FFD700; }
+    .opt-btn .flag { font-size: 22px; }
+    .opt-btn:hover:not(:disabled) { border-color: var(--blue); background: rgba(59,130,246,0.1); transform: scale(1.02); }
+    .opt-btn.correct { border-color: var(--correct); background: rgba(34,197,94,0.15); color: var(--correct); }
+    .opt-btn.wrong   { border-color: var(--wrong); background: rgba(239,68,68,0.15); color: var(--wrong); }
+    .opt-btn:disabled { cursor: not-allowed; }
+
+    /* Speed indicator */
+    .speed-indicator { position: fixed; top: 20px; right: 16px; font-family: 'Black Han Sans', sans-serif; font-size: 18px; color: #f59e0b; pointer-events: none; z-index: 999; opacity: 0; }
+    @keyframes speedPop { 0%{opacity:1;transform:translateY(0) scale(1.2)} 100%{opacity:0;transform:translateY(-44px) scale(0.8)} }
+    .speed-indicator.show { animation: speedPop 0.8s ease forwards; }
+
+    /* Confetti */
+    @keyframes floatUp { to { transform: translateY(-80px); opacity: 0; } }
+
+    /* Result */
+    .result-screen { display: none; flex-direction: column; align-items: center; text-align: center; width: 100%; max-width: 580px; }
+    .result-screen.show { display: flex; }
+    .result-trophy { font-size: 80px; margin-bottom: 14px; }
+    .result-grade { font-family: 'Black Han Sans', sans-serif; font-size: 52px; margin-bottom: 4px; }
+    .result-title { font-family: 'Black Han Sans', sans-serif; font-size: 32px; margin-bottom: 6px; }
+    .result-score { font-size: 56px; font-family: 'Black Han Sans', sans-serif; color: var(--gold); margin: 10px 0; }
+    .result-msg { color: var(--muted2); font-size: 14px; margin-bottom: 20px; }
+    .result-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; width: 100%; }
+    .stat-box { background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px; text-align: center; }
+    .stat-val { font-family: 'Black Han Sans', sans-serif; font-size: 28px; color: var(--blue); }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .btn-restart { background: var(--blue); color: #fff; border: none; border-radius: 100px; padding: 15px 44px; font-size: 17px; font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
+    .btn-restart:hover { opacity: 0.85; transform: scale(1.03); }
+
+    /* Bottom nav */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(8,8,16,0.96); border-top: 1px solid rgba(255,255,255,0.07); display: flex; justify-content: space-around; padding: 10px 8px; z-index: 500; backdrop-filter: blur(10px); }
+    .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--muted); font-size: 10px; gap: 3px; flex: 1; transition: color 0.2s; -webkit-tap-highlight-color: transparent; }
+    .nav-item.active { color: var(--gold); }
     .nav-item:hover { color: #fff; }
     .nav-icon { font-size: 20px; }
-    /* push content above nav */
-    body { padding-bottom: 72px; }
 
-    </style>
+    @media (max-width: 480px) {
+      body { padding: 12px 12px 80px; }
+      .options { gap: 8px; }
+      .opt-btn { padding: 12px 6px; font-size: 13px; min-height: 54px; }
+      .q-card { padding: 24px 16px; }
+    }
+  </style>
 </head>
 <body>
-  <div class="splash" id="splash">
-    <div class="splash-ball">⚽</div>
-    <div class="splash-title">로딩 중...</div>
-    <div class="splash-sub">월드컵 미니게임</div>
-    <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+
+<div class="splash" id="splash">
+  <div class="splash-ball">⚽</div>
+  <div style="font-family:'Black Han Sans',sans-serif;font-size:20px;margin-top:18px;color:#fff;">이 선수 어느 나라?</div>
+  <div style="font-size:13px;color:#555;margin-top:6px;">월드컵 미니게임</div>
+  <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+</div>
+
+<div class="speed-indicator" id="speed-indicator">⚡ FAST!</div>
+<a href="../index.html" class="back">← 허브로 돌아가기</a>
+<h1>🕵️ 이 선수 어느 나라?</h1>
+<p class="subtitle">힌트를 보고 선수의 국적을 맞추세요!</p>
+
+<!-- Game area -->
+<div id="game-area" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+  <div class="hud">
+    <div class="hud-box"><div class="hud-label">⏱ 시간</div><div class="hud-value" id="timer-val">20</div></div>
+    <div class="hud-box"><div class="hud-label">⭐ 점수</div><div class="hud-value" id="score-val">0</div></div>
+    <div class="hud-box"><div class="hud-label">🔥 연속</div><div class="hud-value" id="streak-val">0</div></div>
+  </div>
+  <div class="timer-bar-wrap"><div id="timer-bar"></div></div>
+  <div class="combo-banner" id="combo-banner"></div>
+
+  <div class="q-card">
+    <div class="diff-badge" id="diff-badge"></div>
+    <div class="player-emoji" id="player-emoji">⚽</div>
+    <div class="player-name" id="player-name">로딩중...</div>
+    <div class="hints-wrap">
+      <div class="hint-row" id="hint-row-1"></div>
+      <div class="hint-row" id="hint-row-2" style="margin-top:0;"></div>
+    </div>
+    <div class="feedback" id="feedback"></div>
   </div>
 
-  <div class="speed-indicator" id="speed-indicator">⚡ FAST!</div>
-  <a href="../index.html" class="back">← 허브로 돌아가기</a>
-  <h1>🕵️ 이 선수 어느 나라?</h1>
-  <p class="subtitle">20초 안에 최대한 많이 맞추세요!</p>
+  <div class="options" id="options"></div>
+</div>
 
-  <div class="game-area" id="game-area">
-    <div class="hud">
-      <div class="hud-box">
-        <div class="hud-label">⏱ 남은 시간</div>
-        <div class="hud-value" id="timer-val">30</div>
-      </div>
-      <div class="hud-box">
-        <div class="hud-label">⭐ 점수</div>
-        <div class="hud-value" id="score-val">0</div>
-      </div>
-      <div class="hud-box">
-        <div class="hud-label">🔥 연속</div>
-        <div class="hud-value" id="streak-val">0</div>
-      </div>
-    </div>
-
-    <div class="timer-bar-wrap">
-      <div id="timer-bar"></div>
-    </div>
-
-    <div class="question-card">
-      <div class="player-emoji" id="player-emoji">⚽</div>
-      <div id="diff-badge" style="font-size:16px;margin-bottom:8px;min-height:20px;"></div>
-      <div class="player-name" id="player-name">로딩중...</div>
-      <div class="hints" id="hints"></div>
-      <div class="feedback" id="feedback"></div>
-    </div>
-
-    <div class="options" id="options"></div>
+<!-- Result -->
+<div class="result-screen" id="result-screen">
+  <div class="result-trophy" id="result-trophy">🏆</div>
+  <div class="result-grade" id="result-grade"></div>
+  <div class="result-title" id="result-title">게임 종료!</div>
+  <div class="result-score" id="result-score">0점</div>
+  <div class="result-msg" id="result-msg"></div>
+  <div class="result-stats">
+    <div class="stat-box"><div class="stat-val" id="stat-correct">0</div><div class="stat-label">✅ 정답</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-total">0</div><div class="stat-label">📋 총 문제</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-best">0</div><div class="stat-label">🔥 최고 연속</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-acc">0%</div><div class="stat-label">🎯 정확도</div></div>
   </div>
+  <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
+  <br><br>
+  <a href="#" onclick="goToScoreboard(score)" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:100px;padding:12px 24px;text-decoration:none;color:#FFD700;font-weight:700;font-size:14px;">🏆 랭킹에 등록하기</a>
+  <br><br>
+  <a href="../index.html" style="color:var(--muted);font-size:13px;">← 다른 게임 하기</a>
+</div>
 
-  <div class="result-screen" id="result-screen">
-    <div class="result-trophy" id="result-trophy">🏆</div>
-    <div class="result-title" id="result-title">게임 종료!</div>
-    <div class="result-score" id="result-score">0점</div>
-    <div class="result-msg" id="result-msg"></div>
-    <div class="result-stats">
-      <div class="stat-box">
-        <div class="stat-val" id="stat-correct">0</div>
-        <div class="stat-label">정답</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-val" id="stat-total">0</div>
-        <div class="stat-label">총 문제</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-val" id="stat-best">0</div>
-        <div class="stat-label">최고 연속</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-val" id="stat-acc">0%</div>
-        <div class="stat-label">정확도</div>
-      </div>
-    </div>
-    
-    <div id="highscore-box" style="width:100%;max-width:600px;background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;margin-bottom:20px;"></div>
-    <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
-    <br><br>
-    <a href="../index.html" style="color: var(--muted); font-size:14px;">
-    <br>
-    <a href="#" onclick="goToScoreboard(score)" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:100px;padding:12px 24px;text-decoration:none;color:#FFD700;font-weight:700;font-size:15px;margin-top:8px;">
-      🏆 내 점수 랭킹에 등록하기
-    </a>
-
-    <br><a href="../index.html" style="color:var(--muted);font-size:14px;">← 다른 게임 하기</a>
-    <a</a>
-  </div>
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <a href="player-country.html" class="nav-item active"><span class="nav-icon">🕵️</span><span>선수퀴즈</span></a>
+  <a href="champion-tournament.html" class="nav-item"><span class="nav-icon">🏆</span><span>우승국</span></a>
+  <a href="penalty-kick.html" class="nav-item"><span class="nav-icon">🥅</span><span>페널티킥</span></a>
+  <a href="uniform-quiz.html" class="nav-item"><span class="nav-icon">👕</span><span>유니폼</span></a>
+  <a href="../scoreboard.html" class="nav-item"><span class="nav-icon">🏅</span><span>랭킹</span></a>
+  <a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span>허브</span></a>
+</nav>
 
 <script>
-
-function goToScoreboard(score) {
+function goToScoreboard(s) {
   const name = localStorage.getItem('wc_player_name') || '';
-  const url = '../scoreboard.html' + (name ? `?prefill=${encodeURIComponent(name)}&score=${score}` : '');
-  window.location.href = url;
+  window.location.href = '../scoreboard.html' + (name ? `?prefill=${encodeURIComponent(name)}&score=${s}` : '');
 }
 
-
-// ── Speed Bonus System ──────────────────────────
-let questionStartTime = 0;
-function startQTimer() { questionStartTime = Date.now(); }
-function getSpeedBonus(baseScore) {
-  const elapsed = (Date.now() - questionStartTime) / 1000;
-  if (elapsed < 2) return Math.round(baseScore * 0.5);  // +50% if < 2s
-  if (elapsed < 4) return Math.round(baseScore * 0.25); // +25% if < 4s
-  return 0;
-}
-// ────────────────────────────────────────────────
-
-
-function shareResult(score, gameName) {
-  const text = `⚽ 월드컵 미니게임\n🎮 ${gameName}\n🏆 ${score.toLocaleString()}점 달성!\n\nhttps://twinwhdwk.github.io/worldcup_minigame`;
-  if (navigator.share) {
-    navigator.share({ title: '월드컵 미니게임', text });
-  } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => alert('클립보드에 복사됐어요!'));
-  }
-}
-
-
-// ── Upgraded Combo System ───────────────────────
-const COMBO_THRESHOLDS = [
-  { min: 0,  mult: 1,   label: '',        color: '#aaa' },
-  { min: 3,  mult: 1.5, label: '🔥 콤보!', color: '#f97316' },
-  { min: 5,  mult: 2,   label: '💥 더블!', color: '#ef4444' },
-  { min: 8,  mult: 3,   label: '⚡ 트리플!',color: '#a855f7' },
-  { min: 12, mult: 4,   label: '🌟 GODMODE!',color: '#FFD700' },
-];
-function getCombo(streak) {
-  let tier = COMBO_THRESHOLDS[0];
-  for (const t of COMBO_THRESHOLDS) { if (streak >= t.min) tier = t; }
-  return tier;
-}
-// ────────────────────────────────────────────────
-
-
-// ── Confetti System ─────────────────────────────
-function launchConfetti(x, y, count=18) {
-  const colors = ['#FFD700','#00843D','#ef4444','#3b82f6','#a855f7','#fff'];
-  for (let i = 0; i < count; i++) {
-    const el = document.createElement('div');
-    el.style.cssText = `
-      position:fixed; width:${6+Math.random()*6}px; height:${6+Math.random()*6}px;
-      background:${colors[Math.floor(Math.random()*colors.length)]};
-      border-radius:${Math.random()>0.5?'50%':'2px'};
-      left:${x}px; top:${y}px; pointer-events:none; z-index:9999;
-      transform:rotate(${Math.random()*360}deg);
-    `;
-    document.body.appendChild(el);
-    const angle = (Math.random() * 360) * Math.PI / 180;
-    const speed = 80 + Math.random() * 120;
-    const vx = Math.cos(angle) * speed;
-    const vy = Math.sin(angle) * speed - 60;
-    let px = x, py = y, vy2 = vy, t = 0;
-    const tick = () => {
-      t += 0.016; px += vx * 0.016; vy2 += 200 * 0.016; py += vy2 * 0.016;
-      el.style.left = px + 'px'; el.style.top = py + 'px';
-      el.style.opacity = Math.max(0, 1 - t * 1.5);
-      el.style.transform = `rotate(${t*200}deg)`;
-      if (t < 0.8) requestAnimationFrame(tick); else el.remove();
-    };
-    requestAnimationFrame(tick);
-  }
-}
-function launchFullConfetti() {
-  for (let i = 0; i < 4; i++) setTimeout(() => launchConfetti(Math.random()*window.innerWidth, -10, 12), i*150);
-}
-// ────────────────────────────────────────────────
-
-
-// ── High Score System ───────────────────────────────────
-function getHighScores(game) {
-  try { return JSON.parse(localStorage.getItem('wc_hs_' + game) || '[]'); } catch { return []; }
-}
-function saveHighScore(game, score) {
-  const scores = getHighScores(game);
-  scores.push({ score, date: new Date().toLocaleDateString('ko-KR') });
-  scores.sort((a,b) => b.score - a.score);
-  const top5 = scores.slice(0, 5);
-  localStorage.setItem('wc_hs_' + game, JSON.stringify(top5));
-  return top5;
-}
-function renderHighScores(game, containerId) {
-  const scores = getHighScores(game);
-  const el = document.getElementById(containerId);
-  if (!el || scores.length === 0) return;
-  el.innerHTML = '<div style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">🏅 역대 최고점</div>' +
-    scores.map((s,i) => `<div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-      <span style="color:${i===0?'#FFD700':i===1?'#aaa':i===2?'#cd7f32':'var(--muted)'}">${['🥇','🥈','🥉','4위','5위'][i]}</span>
-      <span style="font-weight:700">${s.score.toLocaleString()}점</span>
-      <span style="color:var(--muted)">${s.date}</span>
-    </div>`).join('');
-}
-// ────────────────────────────────────────────────────────
-
-
-// ── Web Audio Sound System ──────────────────────────────
+// ── Audio ────────────────────────────────────────
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _ctx = null;
-function getCtx() {
-  if (!_ctx) _ctx = new AudioCtx();
-  if (_ctx.state === 'suspended') _ctx.resume();
-  return _ctx;
-}
-function playTone(freq, type, duration, vol=0.3, decay=0.8) {
-  try {
-    const ctx = getCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = type; osc.frequency.value = freq;
-    gain.gain.setValueAtTime(vol, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-    osc.start(); osc.stop(ctx.currentTime + duration);
-  } catch(e) {}
-}
-function sfxCorrect() {
-  playTone(523, 'sine', 0.12, 0.35);
-  setTimeout(() => playTone(659, 'sine', 0.12, 0.35), 80);
-  setTimeout(() => playTone(784, 'sine', 0.18, 0.35), 160);
-}
-function sfxWrong() {
-  playTone(220, 'sawtooth', 0.25, 0.25);
-  setTimeout(() => playTone(180, 'sawtooth', 0.2, 0.2), 120);
-}
-function sfxGoal() {
-  [523,659,784,1047].forEach((f,i) => setTimeout(()=>playTone(f,'sine',0.22,0.4),i*70));
-}
-function sfxClick() { playTone(440, 'sine', 0.06, 0.15); }
-// ────────────────────────────────────────────────────────
+function getCtx(){ if(!_ctx) _ctx = new AudioCtx(); if(_ctx.state==='suspended') _ctx.resume(); return _ctx; }
+function playTone(f,t,d,v=0.3){ try{ const c=getCtx(),o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(c.destination); o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);o.start();o.stop(c.currentTime+d); }catch(e){} }
+function sfxCorrect(){ playTone(523,'sine',0.12,0.35); setTimeout(()=>playTone(659,'sine',0.12,0.35),80); setTimeout(()=>playTone(784,'sine',0.18,0.35),160); }
+function sfxWrong(){ playTone(220,'sawtooth',0.25,0.25); setTimeout(()=>playTone(180,'sawtooth',0.2,0.2),120); }
 
+// ── Confetti ─────────────────────────────────────
+function launchConfetti(x,y,n=16){ const cols=['#FFD700','#00843D','#ef4444','#3b82f6','#a855f7','#fff']; for(let i=0;i<n;i++){ const el=document.createElement('div'); el.style.cssText=`position:fixed;width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};left:${x}px;top:${y}px;pointer-events:none;z-index:9998;`; document.body.appendChild(el); const a=Math.random()*360*Math.PI/180,sp=70+Math.random()*120; let px=x,py=y,vy=Math.sin(a)*sp-60,vx=Math.cos(a)*sp,t=0; const tick=()=>{t+=0.016;px+=vx*0.016;vy+=200*0.016;py+=vy*0.016;el.style.left=px+'px';el.style.top=py+'px';el.style.opacity=Math.max(0,1-t*1.4);el.style.transform=`rotate(${t*200}deg)`;if(t<0.9)requestAnimationFrame(tick);else el.remove();}; requestAnimationFrame(tick); } }
+function launchFullConfetti(){ for(let i=0;i<5;i++) setTimeout(()=>launchConfetti(Math.random()*window.innerWidth,-10,10),i*120); }
+
+// ── Combo ────────────────────────────────────────
+const COMBO_TIERS = [
+  {min:0,  mult:1,   label:'',             color:'#aaa'},
+  {min:3,  mult:1.5, label:'🔥 COMBO x1.5', color:'#f97316'},
+  {min:5,  mult:2,   label:'💥 DOUBLE x2',  color:'#ef4444'},
+  {min:8,  mult:3,   label:'⚡ TRIPLE x3',  color:'#a855f7'},
+  {min:12, mult:4,   label:'🌟 GOD MODE x4',color:'#FFD700'},
+];
+function getCombo(s){ let t=COMBO_TIERS[0]; for(const c of COMBO_TIERS) if(s>=c.min) t=c; return t; }
+
+// ── Speed bonus ───────────────────────────────────
+let qStartTime = 0;
+function getSpeedBonus(base){ const el=(Date.now()-qStartTime)/1000; if(el<2) return Math.round(base*0.5); if(el<4) return Math.round(base*0.25); return 0; }
+
+// ── Players DB (60명) ─────────────────────────────
 const PLAYERS = [
-  // ⭐ 쉬움
-  { name: "리오넬 메시", country: "🇦🇷 아르헨티나", flag: "🇦🇷", emoji: "🐐", diff: 1, hints: ["발롱도르 8회", "PSG, 바르셀로나", "왼발잡이"] },
-  { name: "크리스티아누 호날두", country: "🇵🇹 포르투갈", flag: "🇵🇹", emoji: "💪", diff: 1, hints: ["발롱도르 5회", "맨유, 레알, 유벤투스", "CR7"] },
-  { name: "킬리안 음바페", country: "🇫🇷 프랑스", flag: "🇫🇷", emoji: "⚡", diff: 1, hints: ["2018 월드컵 우승", "파리 출신", "레알 마드리드"] },
-  { name: "네이마르", country: "🇧🇷 브라질", flag: "🇧🇷", emoji: "🎪", diff: 1, hints: ["삼바 드리블", "바르셀로나 출신", "노란 유니폼"] },
-  { name: "손흥민", country: "🇰🇷 대한민국", flag: "🇰🇷", emoji: "🦁", diff: 1, hints: ["토트넘 전설", "프리미어리그 득점왕", "왼발잡이"] },
-  { name: "엘링 홀란", country: "🇳🇴 노르웨이", flag: "🇳🇴", emoji: "🤖", diff: 1, hints: ["득점 기계", "맨시티", "아버지도 프로선수"] },
-  { name: "케빈 데 브루이너", country: "🇧🇪 벨기에", flag: "🇧🇪", emoji: "🎯", diff: 1, hints: ["패스 마스터", "맨시티 미드필더", "적혈마"] },
-  { name: "모하메드 살라", country: "🇪🇬 이집트", flag: "🇪🇬", emoji: "🌙", diff: 1, hints: ["이집트의 왕", "리버풀", "왼발잡이 윙어"] },
-  // ⭐⭐ 보통
-  { name: "비르힐 판 다이크", country: "🇳🇱 네덜란드", flag: "🇳🇱", emoji: "🗼", diff: 2, hints: ["리버풀 수비수", "189cm", "오렌지 군단"] },
-  { name: "루카 모드리치", country: "🇭🇷 크로아티아", flag: "🇭🇷", emoji: "🌟", diff: 2, hints: ["2018 황금공", "레알 미드필더", "체스 천재"] },
-  { name: "로베르트 레반도프스키", country: "🇵🇱 폴란드", flag: "🇵🇱", emoji: "🎯", diff: 2, hints: ["분데스리가 득점왕", "바이에른 출신", "바르셀로나"] },
-  { name: "해리 케인", country: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", emoji: "👑", diff: 2, hints: ["토트넘 전설", "바이에른 뮌헨", "잉글랜드 스트라이커"] },
-  { name: "안토인 그리즈만", country: "🇫🇷 프랑스", flag: "🇫🇷", emoji: "💃", diff: 2, hints: ["춤 세리머니", "아틀레티코 마드리드", "2018 우승"] },
-  { name: "부카요 사카", country: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", emoji: "🚀", diff: 2, hints: ["아스날 에이스", "멀티 포지션", "어린 스타"] },
-  { name: "페드리", country: "🇪🇸 스페인", flag: "🇪🇸", emoji: "🎭", diff: 2, hints: ["바르셀로나 미드필더", "어린 천재", "2020 올림픽"] },
-  { name: "이강인", country: "🇰🇷 대한민국", flag: "🇰🇷", emoji: "⚽", diff: 2, hints: ["PSG 미드필더", "2019 U-20 황금공", "마요르카 출신"] },
-  { name: "카림 벤제마", country: "🇫🇷 프랑스", flag: "🇫🇷", emoji: "🔥", diff: 2, hints: ["2022 발롱도르", "레알 마드리드", "메시 없는 사이 최고"] },
-  { name: "비니시우스 주니오르", country: "🇧🇷 브라질", flag: "🇧🇷", emoji: "💃", diff: 2, hints: ["레알 마드리드 윙어", "춤 세리머니 논란", "2022 UCL 결승골"] },
-  // ⭐⭐⭐ 어려움
-  { name: "파울로 디발라", country: "🇦🇷 아르헨티나", flag: "🇦🇷", emoji: "💎", diff: 3, hints: ["라호야", "로마 공격수", "타투 많음"] },
-  { name: "알리송 베케르", country: "🇧🇷 브라질", flag: "🇧🇷", emoji: "🧤", diff: 3, hints: ["리버풀 골키퍼", "세계 최고 GK", "2019 UCL 우승"] },
-  { name: "가레스 베일", country: "🏴󠁧󠁢󠁷󠁬󠁳󠁿 웨일스", flag: "🏴󠁧󠁢󠁷󠁬󠁳󠁿", emoji: "🦅", diff: 3, hints: ["레알 마드리드", "골프 애호가", "드래곤 나라"] },
-  { name: "크리스티안 에릭센", country: "🇩🇰 덴마크", flag: "🇩🇰", emoji: "💪", diff: 3, hints: ["심장마비 생존", "맨유 미드필더", "유로 2020 사고"] },
-  { name: "엔조 페르난데스", country: "🇦🇷 아르헨티나", flag: "🇦🇷", emoji: "💎", diff: 3, hints: ["2022 월드컵 영플레이어", "첼시 미드필더", "엔조 프란체스콜리 이름"] },
-  { name: "가비", country: "🇪🇸 스페인", flag: "🇪🇸", emoji: "🎭", diff: 3, hints: ["바르셀로나 미드필더", "부상으로 오래 결장", "어린 레전드 후보"] },
-  { name: "오렐리앙 추아메니", country: "🇫🇷 프랑스", flag: "🇫🇷", emoji: "🛡️", diff: 3, hints: ["레알 마드리드 수비형", "21세기 비에이라", "2022 결승 출전"] },
-  { name: "잔루이지 부폰", country: "🇮🇹 이탈리아", flag: "🇮🇹", emoji: "🧤", diff: 3, hints: ["이탈리아 GK 레전드", "2006 우승", "유벤투스 수호신"] },
-  { name: "다비드 베컴", country: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", emoji: "💇", diff: 3, hints: ["프리킥 마스터", "패션 아이콘", "빅토리아 남편"] },
-  { name: "마르코스 아센시오", country: "🇪🇸 스페인", flag: "🇪🇸", emoji: "⚡", diff: 3, hints: ["레알 마드리드 출신", "PSG 이적", "미드필더 겸 윙어"] },
+  // ⭐ EASY (diff:1) — 세계적으로 유명한 선수
+  {name:"리오넬 메시",    country:"🇦🇷 아르헨티나", flag:"🇦🇷", emoji:"🐐", diff:1, hints:["발롱도르 8회","PSG·바르셀로나","왼발 마법사","2022 월드컵 우승"]},
+  {name:"크리스티아누 호날두", country:"🇵🇹 포르투갈", flag:"🇵🇹", emoji:"💪", diff:1, hints:["발롱도르 5회","CR7","맨유·레알·유벤투스","포르투갈 캡틴"]},
+  {name:"킬리안 음바페",  country:"🇫🇷 프랑스",     flag:"🇫🇷", emoji:"⚡", diff:1, hints:["2018 월드컵 우승","세계에서 가장 빠른 선수 중 하나","레알 마드리드 이적"]},
+  {name:"네이마르",       country:"🇧🇷 브라질",     flag:"🇧🇷", emoji:"🎪", diff:1, hints:["삼바 드리블","PSG·바르셀로나","노란 유니폼","브라질 10번"]},
+  {name:"손흥민",         country:"🇰🇷 대한민국",   flag:"🇰🇷", emoji:"🦁", diff:1, hints:["토트넘 레전드","프리미어리그 득점왕","왼발잡이","아시아 최고 선수"]},
+  {name:"엘링 홀란",      country:"🇳🇴 노르웨이",   flag:"🇳🇴", emoji:"🤖", diff:1, hints:["득점 기계","맨시티","아버지도 프로선수","시즌 60골"]},
+  {name:"케빈 데 브루이너",country:"🇧🇪 벨기에",   flag:"🇧🇪", emoji:"🎯", diff:1, hints:["세계 최고 미드필더","맨시티","드리블보다 패스","적혈마"]},
+  {name:"모하메드 살라",  country:"🇪🇬 이집트",     flag:"🇪🇬", emoji:"🌙", diff:1, hints:["이집트의 왕","리버풀 에이스","왼발잡이 윙어","카이로 출신"]},
+  // ⭐⭐ NORMAL (diff:2)
+  {name:"비르힐 판 다이크",country:"🇳🇱 네덜란드",  flag:"🇳🇱", emoji:"🗼", diff:2, hints:["세계 최고 센터백","리버풀","189cm","오렌지 군단 주장"]},
+  {name:"루카 모드리치",  country:"🇭🇷 크로아티아", flag:"🇭🇷", emoji:"🌟", diff:2, hints:["2018 황금공","레알 미드필더","체스처럼 경기 읽음","크로아티아 영웅"]},
+  {name:"로베르트 레반도프스키",country:"🇵🇱 폴란드",flag:"🇵🇱",emoji:"🎯",diff:2,hints:["분데스리가 득점왕","바이에른→바르셀로나","폴란드 에이스","시즌 41골"]},
+  {name:"해리 케인",      country:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",emoji:"👑",diff:2,hints:["토트넘→바이에른","잉글랜드 최다 득점","헤딩 능력자","아직 트로피 없음"]},
+  {name:"안토인 그리즈만",country:"🇫🇷 프랑스",     flag:"🇫🇷", emoji:"💃", diff:2, hints:["춤 세리머니","아틀레티코 마드리드","2018 월드컵 우승","포르베"]},
+  {name:"부카요 사카",    country:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",emoji:"🚀",diff:2,hints:["아스날의 10번","멀티 포지션","2020 유로 승부차기","잉글랜드 미래"]},
+  {name:"페드리",         country:"🇪🇸 스페인",     flag:"🇪🇸", emoji:"🎭", diff:2, hints:["바르셀로나 미드필더","어린 이니에스타","2020 올림픽 은메달","황금 소년"]},
+  {name:"카림 벤제마",    country:"🇫🇷 프랑스",     flag:"🇫🇷", emoji:"🔥", diff:2, hints:["2022 발롱도르","레알 마드리드 9번","알나스르 이적","UCL 전문가"]},
+  {name:"비니시우스 주니오르",country:"🇧🇷 브라질", flag:"🇧🇷", emoji:"💃", diff:2, hints:["레알 마드리드 윙어","춤 세리머니 논란","2022 UCL 결승골","브라질 미래"]},
+  {name:"이강인",         country:"🇰🇷 대한민국",   flag:"🇰🇷", emoji:"⚽", diff:2, hints:["PSG 미드필더","2019 U-20 황금공","마요르카→PSG","손흥민과 동료"]},
+  {name:"로드리",         country:"🇪🇸 스페인",     flag:"🇪🇸", emoji:"🛡️", diff:2, hints:["2024 발롱도르","맨시티 앵커","수비형 미드필더","스페인 우승"]},
+  {name:"필 포든",        country:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",emoji:"💫",diff:2,hints:["맨시티 아카데미","2024 발롱도르 3위","잉글랜드 핵심","스톡포트 출신"]},
+  // ⭐⭐⭐ HARD (diff:3)
+  {name:"파울로 디발라",  country:"🇦🇷 아르헨티나", flag:"🇦🇷", emoji:"💎", diff:3, hints:["라호야","AS 로마","이탈리아서 활약","코르도바 출신"]},
+  {name:"알리송 베케르",  country:"🇧🇷 브라질",     flag:"🇧🇷", emoji:"🧤", diff:3, hints:["리버풀 골키퍼","세계 최고 GK","2019 UCL 결승 결승골(!)","헤더로 득점"]},
+  {name:"가레스 베일",    country:"🏴󠁧󠁢󠁷󠁬󠁳󠁿 웨일스",   flag:"🏴󠁧󠁢󠁷󠁬󠁳󠁿",emoji:"🦅",diff:3,hints:["레알 마드리드 레전드","골프 애호가","UCL 결승 자전거킥","웨일스의 영웅"]},
+  {name:"크리스티안 에릭센",country:"🇩🇰 덴마크",  flag:"🇩🇰", emoji:"💪", diff:3, hints:["심장마비 생존","맨유 미드필더","유로 2020 쓰러짐","기적의 컴백"]},
+  {name:"가비",           country:"🇪🇸 스페인",     flag:"🇪🇸", emoji:"🎭", diff:3, hints:["바르셀로나 미드필더","장기 부상","2024 유로 우승","스페인의 미래"]},
+  {name:"오렐리앙 추아메니",country:"🇫🇷 프랑스",  flag:"🇫🇷", emoji:"🛡️", diff:3, hints:["레알 마드리드 수비형","21세기 비에이라","2022 결승 출전","카메룬계 프랑스인"]},
+  {name:"잔루이지 부폰",  country:"🇮🇹 이탈리아",   flag:"🇮🇹", emoji:"🧤", diff:3, hints:["이탈리아 GK 레전드","2006 월드컵 우승","유벤투스 25년","역대 최고 GK 중 하나"]},
+  {name:"다비드 베컴",    country:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",emoji:"💇",diff:3,hints:["프리킥 마스터","패션 아이콘","인터 마이애미 구단주","빅토리아 베컴 남편"]},
+  {name:"엔조 페르난데스",country:"🇦🇷 아르헨티나", flag:"🇦🇷", emoji:"💎", diff:3, hints:["2022 월드컵 영플레이어","첼시 미드필더","1억 유로 이적","엔조 프란체스콜리 이름"]},
+  {name:"요나스 빈트",    country:"🇩🇰 덴마크",     flag:"🇩🇰", emoji:"🌊", diff:3, hints:["덴마크 수비수","아틀레티코 마드리드","에릭센 빠진 자리","센터백"]},
+  {name:"아킬레 사쿠",   country:"🇵🇹 포르투갈",   flag:"🇵🇹", emoji:"🎵", diff:3, hints:["포르투갈 윙어","라이프치히","음악 프로듀서 부업","호날두 후계자 후보"]},
+  // ⭐⭐⭐⭐ LEGEND (diff:4) — 레전드 선수들
+  {name:"펠레",           country:"🇧🇷 브라질",     flag:"🇧🇷", emoji:"🌟", diff:4, hints:["월드컵 3회 우승","17세 첫 우승","1000골 이상 득점","축구 황제"]},
+  {name:"디에고 마라도나",country:"🇦🇷 아르헨티나", flag:"🇦🇷", emoji:"🤌", diff:4, hints:["신의 손","세기의 골","나폴리 레전드","1986 월드컵 MVP"]},
+  {name:"호나우두",       country:"🇧🇷 브라질",     flag:"🇧🇷", emoji:"👾", diff:4, hints:["2002 월드컵 8골","이빨 헤어스타일","진짜 호나우두","FC 발렌시아→레알"]},
+  {name:"지네딘 지단",    country:"🇫🇷 프랑스",     flag:"🇫🇷", emoji:"💫", diff:4, hints:["1998 결승 헤딩 2골","박치기로 퇴장","레알 마드리드 감독","알제리계 프랑스인"]},
+  {name:"로나우지뉴",     country:"🇧🇷 브라질",     flag:"🇧🇷", emoji:"😁", diff:4, hints:["바르셀로나 마술사","2005 발롱도르","엄지손가락 세리머니","웃는 천재"]},
+  {name:"티에리 앙리",    country:"🇫🇷 프랑스",     flag:"🇫🇷", emoji:"👑", diff:4, hints:["아스날 레전드","불침번 마르세유","핸드볼 논란","프리미어리그 역대 득점왕"]},
+  {name:"카카",           country:"🇧🇷 브라질",     flag:"🇧🇷", emoji:"✝️", diff:4, hints:["AC 밀란 레전드","2007 발롱도르","빠른 공격형 미드","리카르도 이젝손"]},
+  {name:"저스트 퐁테인", country:"🇫🇷 프랑스",     flag:"🇫🇷", emoji:"🎯", diff:4, hints:["1958 월드컵 13골","역대 단일 대회 최다","모로코계 프랑스인","기록은 현재까지 유지"]},
+  {name:"요한 크루이프",  country:"🇳🇱 네덜란드",   flag:"🇳🇱", emoji:"🌀", diff:4, hints:["토털 사커 창시자","크루이프 턴 발명","1974 월드컵 황금공","바르셀로나 철학의 아버지"]},
+  {name:"에우제비우",     country:"🇵🇹 포르투갈",   flag:"🇵🇹", emoji:"🐆", diff:4, hints:["흑표범","1966 월드컵 9골","벤피카 레전드","모잠비크 출신"]},
 ];
 
+const ALL_COUNTRIES = [...new Set(PLAYERS.map(p=>p.country))];
 
-const ALL_COUNTRIES = [...new Set(PLAYERS.map(p => p.country))];
+let score=0, timeLeft=20, streak=0, bestStreak=0, totalQ=0, correctQ=0;
+let timerInterval, currentPlayer=null, answered=false;
+let usedIdx=[], hintLevel=0;
 
-let score = 0, timeLeft = 20, streak = 0, bestStreak = 0;
-let totalQ = 0, correctQ = 0;
-let timerInterval, questionTimeout;
-let usedIndices = [], currentAnswer = '';
-let answered = false;
+function shuffle(a){ const r=[...a]; for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; }
 
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+function getPlayer(){
+  if(usedIdx.length===PLAYERS.length) usedIdx=[];
+  const avail=PLAYERS.map((_,i)=>i).filter(i=>!usedIdx.includes(i));
+  const idx=avail[Math.floor(Math.random()*avail.length)];
+  usedIdx.push(idx); return PLAYERS[idx];
 }
 
-function getPlayer() {
-  if (usedIndices.length === PLAYERS.length) usedIndices = [];
-  const available = PLAYERS.map((_, i) => i).filter(i => !usedIndices.includes(i));
-  const idx = available[Math.floor(Math.random() * available.length)];
-  usedIndices.push(idx);
-  return PLAYERS[idx];
+function getOptions(correct){
+  const wrong=shuffle(ALL_COUNTRIES.filter(c=>c!==correct)).slice(0,3);
+  return shuffle([correct,...wrong]);
 }
 
-function getOptions(correct) {
-  const wrong = shuffle(ALL_COUNTRIES.filter(c => c !== correct)).slice(0, 3);
-  return shuffle([correct, ...wrong]);
+function renderHints(player, level){
+  // Always show hint[0], reveal more over time
+  const row1=document.getElementById('hint-row-1');
+  const row2=document.getElementById('hint-row-2');
+  row1.innerHTML='';
+  row2.innerHTML='';
+  player.hints.forEach((h,i)=>{
+    const chip=document.createElement('span');
+    if(i===0 || i<level+1){
+      chip.className='hint-chip'; chip.textContent=h;
+      (i<2?row1:row2).appendChild(chip);
+    } else {
+      chip.className='hint-locked';
+      chip.textContent='💡 힌트 '+( i+1);
+      chip.title='클릭하면 힌트 공개 (-20점)';
+      chip.onclick=()=>{
+        if(answered) return;
+        score=Math.max(0,score-20);
+        document.getElementById('score-val').textContent=score;
+        hintLevel=Math.max(hintLevel,i);
+        renderHints(player,i);
+      };
+      (i<2?row1:row2).appendChild(chip);
+    }
+  });
 }
 
-function setQuestion() {
-  if (timeLeft <= 0) return;
-  answered = false;
-  startQTimer();
-  const player = getPlayer();
-  currentAnswer = player.country;
+function setQuestion(){
+  if(timeLeft<=0) return;
+  answered=false; hintLevel=0;
+  qStartTime=Date.now();
+  currentPlayer=getPlayer();
   totalQ++;
 
-  document.getElementById('player-emoji').textContent = player.emoji;
-  // Show difficulty
-  const diffEl = document.getElementById('diff-badge');
-  if (diffEl) {
-    const stars = '⭐'.repeat(player.diff || 1);
-    const colors = ['','#22c55e','#f59e0b','#ef4444'];
-    diffEl.textContent = stars;
-    diffEl.style.color = colors[player.diff || 1];
-  }
-  document.getElementById('player-name').textContent = player.name;
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').className = 'feedback';
+  // Diff badge
+  const diffEl=document.getElementById('diff-badge');
+  const stars='⭐'.repeat(currentPlayer.diff);
+  const diffCols={1:'#22c55e',2:'#f59e0b',3:'#ef4444',4:'#a855f7'};
+  diffEl.innerHTML=`<span style="color:${diffCols[currentPlayer.diff]}">${stars}</span>`;
 
-  const hintsEl = document.getElementById('hints');
-  hintsEl.innerHTML = player.hints.map(h => `<span class="hint-chip">${h}</span>`).join('');
+  document.getElementById('player-emoji').textContent=currentPlayer.emoji;
+  document.getElementById('player-name').textContent=currentPlayer.name;
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
 
-  const opts = getOptions(player.country);
-  const optEl = document.getElementById('options');
-  optEl.innerHTML = opts.map(o => `
-    <button class="opt-btn" onclick="answer(this, '${o.replace(/'/g,"\\'")}')">
-      ${o}
-    </button>
-  `).join('');
+  renderHints(currentPlayer, 0);
+
+  // Progressive hint timer — reveal next hint every 5s
+  let autoHintTimer=0;
+  const autoReveal=setInterval(()=>{
+    if(answered||timeLeft<=0){clearInterval(autoReveal);return;}
+    autoHintTimer++;
+    if(autoHintTimer>=1&&hintLevel<currentPlayer.hints.length-1){
+      hintLevel++;
+      renderHints(currentPlayer,hintLevel);
+    }
+  },5000);
+
+  const opts=getOptions(currentPlayer.country);
+  const optEl=document.getElementById('options');
+  optEl.innerHTML=opts.map(o=>{
+    const flagMatch=o.match(/^(\S+)/);
+    const flag=flagMatch?flagMatch[1]:'';
+    const name=o.replace(/^\S+\s*/,'');
+    return `<button class="opt-btn" onclick="answer(this,'${o.replace(/'/g,"\\'")}')">
+      <span class="flag">${flag}</span>${name}
+    </button>`;
+  }).join('');
 }
 
-function answer(btn, selected) {
-  if (answered || timeLeft <= 0) return;
-  answered = true;
-
-  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-
-  const fb = document.getElementById('feedback');
-  if (selected === currentAnswer) {
+function answer(btn, selected){
+  if(answered||timeLeft<=0) return;
+  answered=true;
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('feedback');
+  if(selected===currentPlayer.country){
     streak++;
-    if (streak > bestStreak) bestStreak = streak;
-    const combo = getCombo(streak);
-    const base = Math.round(100 * combo.mult);
-    const speedBonus = getSpeedBonus(base);
-    const pts = base + speedBonus;
-    score += pts;
-    correctQ++;
-    sfxCorrect(); btn.classList.add('correct');
-    fb.className = 'feedback correct'; launchFullConfetti();
-    const cmb = getCombo(streak);
-    if (speedBonus > 0) {
-      const si = document.getElementById('speed-indicator');
-      si.className = 'speed-indicator'; void si.offsetWidth;
-      si.textContent = speedBonus > 30 ? '⚡ SUPER FAST!' : '⚡ FAST!';
-      si.className = 'speed-indicator show';
+    if(streak>bestStreak) bestStreak=streak;
+    const combo=getCombo(streak);
+    const base=Math.round(100*combo.mult*(currentPlayer.diff));
+    const spBonus=getSpeedBonus(base);
+    const pts=base+spBonus;
+    score+=pts; correctQ++;
+    sfxCorrect(); launchFullConfetti();
+    btn.classList.add('correct');
+    fb.className='feedback correct';
+    fb.textContent=combo.label?`${combo.label} +${pts}점`:`✅ 정답! +${pts}점`;
+    if(spBonus>0){
+      const si=document.getElementById('speed-indicator');
+      si.className='speed-indicator'; void si.offsetWidth;
+      si.textContent=spBonus>40?'⚡ SUPER FAST!':'⚡ FAST!';
+      si.className='speed-indicator show';
     }
-    const speedTxt = speedBonus > 0 ? ` ⚡+${speedBonus}` : '';
-    fb.textContent = cmb.label ? `${cmb.label} +${pts}점${speedTxt}` : `✅ 정답! +${pts}점${speedTxt}`;
-    fb.style.color = cmb.color;
+    // Combo banner
+    const cb=document.getElementById('combo-banner');
+    if(combo.label){ cb.textContent=combo.label; cb.style.color=combo.color; }
+    else cb.textContent='';
   } else {
-    streak = 0;
-    sfxWrong(); btn.classList.add('wrong');
-    // highlight correct
-    document.querySelectorAll('.opt-btn').forEach(b => {
-      if (b.textContent.trim() === currentAnswer) b.classList.add('correct');
+    streak=0;
+    sfxWrong();
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt-btn').forEach(b=>{
+      const t=b.textContent.trim();
+      if(t.includes(currentPlayer.country.replace(/^\S+\s*/,''))) b.classList.add('correct');
     });
-    fb.className = 'feedback wrong';
-    fb.textContent = `❌ 오답! 정답: ${currentAnswer}`;
+    fb.className='feedback wrong';
+    fb.textContent=`❌ 오답! 정답: ${currentPlayer.flag} ${currentPlayer.country.replace(/^\S+\s*/,'')}`;
+    document.getElementById('combo-banner').textContent='';
   }
-
-  updateHUD();
-  setTimeout(setQuestion, 900);
+  document.getElementById('score-val').textContent=score;
+  document.getElementById('streak-val').textContent=streak;
+  setTimeout(setQuestion, 950);
 }
 
-function updateHUD() {
-  document.getElementById('score-val').textContent = score;
-  document.getElementById('streak-val').textContent = streak;
-}
-
-function startGame() {
-  score = 0; timeLeft = 20; streak = 0; bestStreak = 0;
-  totalQ = 0; correctQ = 0; usedIndices = [];
-
-  document.getElementById('game-area').style.display = 'flex';
+function startGame(){
+  score=0;timeLeft=20;streak=0;bestStreak=0;totalQ=0;correctQ=0;usedIdx=[];
+  document.getElementById('game-area').style.display='flex';
   document.getElementById('result-screen').classList.remove('show');
-  document.getElementById("timer-val").textContent = 20;
-  document.getElementById('score-val').textContent = 0;
-  document.getElementById('streak-val').textContent = 0;
-
-  const bar = document.getElementById('timer-bar');
-  bar.style.width = '100%';
-  bar.style.background = '#3b82f6';
-
+  document.getElementById('timer-val').textContent=20;
+  document.getElementById('score-val').textContent=0;
+  document.getElementById('streak-val').textContent=0;
+  document.getElementById('combo-banner').textContent='';
+  const bar=document.getElementById('timer-bar');
+  bar.style.width='100%'; bar.style.background='var(--blue)';
   setQuestion();
-
   clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
+  timerInterval=setInterval(()=>{
     timeLeft--;
-    document.getElementById('timer-val').textContent = timeLeft;
-    bar.style.width = (timeLeft / 30 * 100) + '%';
-
-    if (timeLeft <= 10) bar.style.background = '#ef4444';
-    else if (timeLeft <= 20) bar.style.background = '#f59e0b';
-
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      showResult();
-    }
-  }, 1000);
+    document.getElementById('timer-val').textContent=timeLeft;
+    bar.style.width=(timeLeft/20*100)+'%';
+    if(timeLeft<=5) bar.style.background='#ef4444';
+    else if(timeLeft<=10) bar.style.background='#f59e0b';
+    if(timeLeft<=0){ clearInterval(timerInterval); showResult(); }
+  },1000);
 }
 
-function showResult() {
-  document.getElementById('game-area').style.display = 'none';
-  const rs = document.getElementById('result-screen');
-  rs.classList.add('show');
-
-  const pct = totalQ > 0 ? Math.round(correctQ / totalQ * 100) : 0;
-  let trophy = '😅', title = '아직 연습이 필요해요!', msg = '월드컵 선수들을 더 알아보세요!';
-  if (score >= 1500) { trophy = '🏆'; title = '월드컵 전문가!'; msg = '완벽한 축구 지식이에요!'; }
-  else if (score >= 800) { trophy = '🥇'; title = '훌륭해요!'; msg = '대단한 축구 지식이에요!'; }
-  else if (score >= 400) { trophy = '🥈'; title = '잘 했어요!'; msg = '꽤 많은 선수를 알고 있네요!'; }
-  else if (score >= 200) { trophy = '🥉'; title = '나쁘지 않아요!'; msg = '조금 더 연습하면 완벽해요!'; }
-
-  document.getElementById('result-trophy').textContent = trophy;
-  document.getElementById('result-title').textContent = title;
-  document.getElementById('result-score').textContent = score + '점';
-  document.getElementById('result-msg').textContent = msg + ` (정확도 ${pct}%)`;
-  document.getElementById('stat-correct').textContent = correctQ;
-  document.getElementById('stat-total').textContent = totalQ;
-  document.getElementById('stat-best').textContent = bestStreak;
-  // Accuracy
-  const acc = totalQ > 0 ? Math.round(correctQ/totalQ*100) : 0;
-  const accEl = document.getElementById('stat-acc');
-  if (accEl) accEl.textContent = acc + '%';
+function showResult(){
+  document.getElementById('game-area').style.display='none';
+  document.getElementById('result-screen').classList.add('show');
+  const pct=totalQ>0?Math.round(correctQ/totalQ*100):0;
+  const GRADES=[
+    {min:1400,g:'S',c:'#FFD700',t:'🌟 레전드!',        m:'완벽한 축구 지식이에요!'},
+    {min:1000,g:'A',c:'#22c55e',t:'🥇 월드컵 전문가!', m:'훌륭한 실력이에요!'},
+    {min:600, g:'B',c:'#3b82f6',t:'🥈 잘 했어요!',     m:'꽤 많이 알고 있네요!'},
+    {min:300, g:'C',c:'#f59e0b',t:'🥉 나쁘지 않아요!', m:'더 공부해봐요!'},
+    {min:0,   g:'D',c:'#ef4444',t:'😅 더 연습해요!',   m:'월드컵 선수들을 알아보세요!'},
+  ];
+  const gr=GRADES.find(g=>score>=g.min)||GRADES[GRADES.length-1];
+  document.getElementById('result-trophy').textContent=score>=1000?'🏆':score>=600?'🥇':score>=300?'🥈':'😅';
+  document.getElementById('result-grade').innerHTML=`<span style="color:${gr.c}">GRADE ${gr.g}</span>`;
+  document.getElementById('result-title').textContent=gr.t;
+  document.getElementById('result-score').textContent=score.toLocaleString()+'점';
+  document.getElementById('result-msg').textContent=gr.m+` (정확도 ${pct}%)`;
+  document.getElementById('stat-correct').textContent=correctQ;
+  document.getElementById('stat-total').textContent=totalQ;
+  document.getElementById('stat-best').textContent=bestStreak;
+  document.getElementById('stat-acc').textContent=pct+'%';
 }
+
+// Splash
+setTimeout(()=>{ const s=document.getElementById('splash'); s.classList.add('out'); setTimeout(()=>s.remove(),400); },900);
 
 startGame();
-
-  // Remove splash
-  setTimeout(() => {
-    const s = document.getElementById('splash');
-    if(s){ s.classList.add('fade-out'); setTimeout(()=>s.remove(), 400); }
-  }, 900);
-
 </script>
-  <nav class="bottom-nav">
-    <a href="player-country.html" class="nav-item active"><span class="nav-icon">🕵️</span><span>선수퀴즈</span></a>
-<a href="champion-tournament.html" class="nav-item "><span class="nav-icon">🏆</span><span>우승국</span></a>
-<a href="penalty-kick.html" class="nav-item "><span class="nav-icon">🥅</span><span>페널티킥</span></a>
-<a href="uniform-quiz.html" class="nav-item "><span class="nav-icon">👕</span><span>유니폼</span></a>
-<a href="../scoreboard.html" class="nav-item"><span class="nav-icon">🏅</span><span>랭킹</span></a>
-<a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span>허브</span></a>
-  </nav>
 </body>
 </html>
