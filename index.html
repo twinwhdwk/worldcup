@@ -68,7 +68,7 @@
 
     /* GAME GRID — 6 cards */
     .game-grid{position:relative;z-index:5;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:1100px;margin:0 auto;padding:0 24px 60px;}
-    @media(max-width:800px){.game-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:900px){.game-grid{grid-template-columns:repeat(2,1fr);}}
     @media(max-width:520px){.game-grid{grid-template-columns:1fr;}}
 
     .game-card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:22px;padding:26px 22px;text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s;}
@@ -244,6 +244,16 @@
     <div class="card-play">▶ 플레이</div>
   </a>
 
+
+  <a href="games/record-quiz.html" class="game-card c-pink" style="--cg:rgba(236,72,153,.2);">
+    <span class="card-deco">📊</span>
+    <span class="card-icon">📊</span>
+    <div class="card-tag" style="color:#ec4899;">Records Quiz</div>
+    <div class="card-title">월드컵<br>기록 퀴즈</div>
+    <div class="card-desc">득점·우승·특이 기록 25문제, 5초 빠른 정답 보너스, 설명까지!</div>
+    <div class="card-chips"><span class="chip">📋 15문제</span><span class="chip">⚡ 빠른답 보너스</span><span class="chip">💡 해설</span></div>
+    <div class="card-play" style="background:#ec4899;">▶ 플레이</div>
+  </a>
 </div>
 
 <footer>
