@@ -350,6 +350,70 @@
     .shoot-btn { -webkit-tap-highlight-color: transparent; }
     .arrow-btn { min-width: 80px; min-height: 48px; }
 
+    
+    /* Power Gauge */
+    .power-wrap {
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .power-wrap.active { display: block; }
+    .power-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .power-bar-bg {
+      height: 12px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      overflow: hidden;
+      position: relative;
+    }
+    #power-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444);
+      transition: none;
+    }
+    .power-zones {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex;
+    }
+    .pz { flex: 1; border-right: 1px solid rgba(0,0,0,0.3); }
+
+    /* Wind indicator */
+    .wind-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      justify-content: center;
+    }
+    .wind-arrow { font-size: 18px; transition: transform 0.3s; }
+    .wind-strength { color: #3b82f6; font-weight: 700; }
+
+    /* Level indicator */
+    .level-indicator {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 100px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--red);
+    }
+
     </style>
 </head>
 <body>
@@ -426,6 +490,7 @@
       </div>
       <div id="keeper">🧤</div>
       <div id="ball">⚽</div>
+      <div class="level-indicator" id="level-ind">LV.1</div>
       <div class="goal-flash" id="goal-flash"></div>
       <div class="shot-result" id="shot-result"></div>
       <div class="direction-arrows" id="direction-arrows">
@@ -436,6 +501,22 @@
     </div>
   </div>
 
+  
+  <div class="wind-indicator" id="wind-indicator">
+    <span>🌬️ 바람:</span>
+    <span class="wind-arrow" id="wind-arrow">→</span>
+    <span class="wind-strength" id="wind-strength">없음</span>
+  </div>
+  <div class="power-wrap" id="power-wrap">
+    <div class="power-label">
+      <span>⚡ 슛 파워</span>
+      <span id="power-pct">0%</span>
+    </div>
+    <div class="power-bar-bg">
+      <div id="power-fill"></div>
+      <div class="power-zones"><div class="pz"></div><div class="pz"></div><div class="pz"></div><div class="pz"></div></div>
+    </div>
+  </div>
   <div class="controls">
     <button class="shoot-btn" id="shoot-btn" onclick="prepareShoot()">⚽ 슛!</button>
     <div class="instruction" id="instruction">슛 버튼을 눌러 방향을 선택하세요</div>
@@ -601,16 +682,20 @@ function animateKeeper() {
 function prepareShoot() {
   if (awaitingDirection || shooting || kickNum >= MAX_KICKS) return;
   awaitingDirection = true;
+  generateWind();
+  startPowerGauge();
   document.getElementById('direction-arrows').className = 'direction-arrows show';
   document.getElementById('shoot-btn').disabled = true;
-  document.getElementById('instruction').textContent = '방향을 선택하세요!';
+  document.getElementById('instruction').textContent = '방향 선택 후 파워를 결정하세요!';
 }
 
 function shoot(dir) {
   if (!awaitingDirection || shooting) return;
   awaitingDirection = false;
   shooting = true;
+  const shotPower = stopPowerGauge();
   document.getElementById('direction-arrows').className = 'direction-arrows';
+  // Wind affects shot: strong wind can deflect
 
   const kPos = keeperPos; // capture keeper position at moment of shot
 
@@ -690,6 +775,7 @@ function shoot(dir) {
       if (kickNum % 2 === 0) {
         level++;
         keeperSpeed = Math.min(0.4 + (level - 1) * 0.15, 1.2);
+        const li = document.getElementById('level-ind'); if(li) li.textContent = 'LV.' + level;
       }
 
       shooting = false;
