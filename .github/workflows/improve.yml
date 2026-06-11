@@ -2,7 +2,7 @@ name: 🏆 게임 자동 개선 루프
 
 on:
   schedule:
-    - cron: '*/15 * * * *'   # 15분마다
+    - cron: '*/5 * * * *'    # 5분마다 (GitHub Actions 최소 간격)
   workflow_dispatch:           # 수동 실행도 가능
 
 permissions:
