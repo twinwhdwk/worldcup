@@ -381,6 +381,57 @@ function getKeeperDive(dir) {
   return Math.random()<0.5?'left':'right';
 }
 
+
+// ── Crowd Sound ──────────────────────────────────
+function sfxCrowd(type) {
+  // type: 'goal', 'miss', 'crowd_bg'
+  try {
+    const c = getCtx();
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    const distortion = c.createWaveShaper();
+
+    function makeDistortionCurve(amount) {
+      const k = typeof amount === 'number' ? amount : 50;
+      const n_samples = 256;
+      const curve = new Float32Array(n_samples);
+      for (let i = 0; i < n_samples; ++i) {
+        const x = i * 2 / n_samples - 1;
+        curve[i] = (Math.PI + k) * x / (Math.PI + k * Math.abs(x));
+      }
+      return curve;
+    }
+
+    if (type === 'goal') {
+      // Rising crowd roar
+      distortion.curve = makeDistortionCurve(200);
+      osc.connect(distortion); distortion.connect(gain); gain.connect(c.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(120, c.currentTime);
+      osc.frequency.linearRampToValueAtTime(280, c.currentTime + 0.5);
+      gain.gain.setValueAtTime(0.15, c.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 1.2);
+      osc.start(); osc.stop(c.currentTime + 1.2);
+      // Extra high cheer
+      const o2 = c.createOscillator(), g2 = c.createGain();
+      o2.connect(g2); g2.connect(c.destination);
+      o2.type = 'sine'; o2.frequency.value = 800 + Math.random() * 400;
+      g2.gain.setValueAtTime(0.05, c.currentTime + 0.1);
+      g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.8);
+      o2.start(c.currentTime + 0.1); o2.stop(c.currentTime + 0.8);
+    } else if (type === 'miss') {
+      // Crowd groan
+      osc.connect(gain); gain.connect(c.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(220, c.currentTime);
+      osc.frequency.linearRampToValueAtTime(100, c.currentTime + 0.6);
+      gain.gain.setValueAtTime(0.08, c.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.6);
+      osc.start(); osc.stop(c.currentTime + 0.6);
+    }
+  } catch(e) {}
+}
+
 // ── Power Gauge ───────────────────────────────────
 let power=0, powerDir=1, powerAnim=null;
 function startPowerGauge() {
@@ -558,11 +609,11 @@ function shoot(dir) {
 
     if(isGoal) {
       goals++;
-      flash.className='goal-flash goal-anim'; sfxGoal(); launchFullConfetti();
+      flash.className='goal-flash goal-anim'; sfxGoal(); sfxCrowd('goal'); launchFullConfetti();
       sr.className='shot-result goal-text show'; sr.textContent='⚽ GOAL!';
       if(dot){dot.textContent='✅'; dot.classList.add('goal');}
     } else {
-      flash.className='goal-flash miss-anim'; sfxWrong();
+      flash.className='goal-flash miss-anim'; sfxWrong(); sfxCrowd('miss');
       sr.className='shot-result miss-text show'; sr.textContent='🧤 선방!';
       if(dot){dot.textContent='❌'; dot.classList.add('miss');}
     }

@@ -142,6 +142,10 @@
   <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
   <br><br>
   <a href="#" onclick="goToScoreboard(score)" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:100px;padding:12px 24px;text-decoration:none;color:#FFD700;font-weight:700;font-size:14px;">🏆 랭킹에 등록하기</a>
+  
+  <br>
+  <button onclick="shareResult(score, '이 유니폼 어느 팀?')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:10px 22px;color:var(--muted2);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted2)'">📤 결과 공유</button>
+
   <br><br>
   <a href="../index.html" style="color:var(--muted);font-size:13px;">← 다른 게임 하기</a>
 </div>
@@ -455,6 +459,18 @@ function showResult(){
 
 setTimeout(()=>{const s=document.getElementById('splash');s.classList.add('out');setTimeout(()=>s.remove(),400);},900);
 startGame();
+
+function shareResult(s, gameName) {
+  const grades = [[1400,'S'],[1000,'A'],[600,'B'],[300,'C'],[0,'D']];
+  const grade = grades.find(g => s >= g[0])?.[1] || 'D';
+  const text = `⚽ 월드컵 미니게임 — ${gameName}\nGRADE ${grade} · ${s.toLocaleString()}점\nhttps://twinwhdwk.github.io/worldcup_minigame/`;
+  if (navigator.share) {
+    navigator.share({ title: '월드컵 미니게임 결과', text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => alert('결과가 클립보드에 복사됐어요!')).catch(() => {});
+  }
+}
+
 </script>
 
 <nav class="bottom-nav">
