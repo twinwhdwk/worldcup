@@ -31,435 +31,195 @@
       user-select: none;
     }
 
-    .back { align-self: flex-start; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 20px; }
-
+    .back { align-self: flex-start; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 16px; }
     h1 {
       font-family: 'Black Han Sans', sans-serif;
-      font-size: clamp(28px, 5vw, 48px);
+      font-size: clamp(26px, 5vw, 44px);
       text-align: center;
       background: linear-gradient(135deg, #fff, var(--red));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 8px;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 6px;
     }
+    .subtitle { color: var(--muted); font-size: 13px; text-align: center; margin-bottom: 18px; }
 
-    .subtitle { color: var(--muted); font-size: 14px; text-align: center; margin-bottom: 24px; }
-
-    /* KICK SCORE */
+    /* KICK DOTS */
     .kick-score {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
+      display: flex; gap: 10px; margin-bottom: 18px; align-items: center; flex-wrap: wrap; justify-content: center;
     }
     .kick-dot {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.08);
-      border: 2px solid rgba(255,255,255,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
       transition: all 0.3s;
     }
     .kick-dot.goal { background: rgba(34,197,94,0.2); border-color: var(--goal); }
     .kick-dot.miss { background: rgba(239,68,68,0.2); border-color: var(--miss); }
+    .sd-label { color: #ef4444; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+
+    /* WIND */
+    .wind-indicator {
+      display: flex; align-items: center; gap: 8px; font-size: 13px;
+      color: var(--muted); margin-bottom: 8px; justify-content: center;
+    }
+    .wind-strength { font-weight: 700; }
+
+    /* POWER GAUGE */
+    .power-wrap { width: 100%; max-width: 540px; margin-bottom: 10px; display: none; }
+    .power-wrap.active { display: block; }
+    .power-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .power-bar-bg { height: 14px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; position: relative; }
+    #power-fill { height: 100%; width: 0%; border-radius: 100px; background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); }
+    .power-zones { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; }
+    .pz { flex: 1; border-right: 1px solid rgba(0,0,0,0.2); }
 
     /* STADIUM */
-    .stadium-wrap {
-      width: 100%;
-      max-width: 560px;
-      position: relative;
-      margin-bottom: 20px;
-    }
-
+    .stadium-wrap { width: 100%; max-width: 540px; position: relative; margin-bottom: 16px; }
     .stadium {
-      width: 100%;
-      background: linear-gradient(180deg, #1a1a2e 0%, #1a1a2e 50%, var(--green-pitch) 50%, #145228 100%);
-      border-radius: 20px;
-      overflow: hidden;
-      position: relative;
-      aspect-ratio: 16/10;
-      border: 2px solid rgba(255,255,255,0.1);
+      width: 100%; background: linear-gradient(180deg, #1a1a2e 0%, #1a1a2e 48%, var(--green-pitch) 48%, #145228 100%);
+      border-radius: 20px; overflow: hidden; position: relative; aspect-ratio: 16/10;
+      border: 2px solid rgba(255,255,255,0.08);
     }
 
-    /* Pitch markings */
-    .pitch-marking {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 50%;
-    }
-
-    /* GOAL NET */
-    .goal {
-      position: absolute;
-      top: 8%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 70%;
-      height: 38%;
-    }
-
-    .goal-frame {
-      width: 100%;
-      height: 100%;
-      border: 4px solid #fff;
-      border-bottom: none;
-      border-radius: 4px 4px 0 0;
-      position: relative;
-      box-sizing: border-box;
-    }
-
-    /* Net grid lines */
+    /* GOAL */
+    .goal { position: absolute; top: 7%; left: 50%; transform: translateX(-50%); width: 68%; height: 38%; }
+    .goal-frame { width: 100%; height: 100%; border: 4px solid #fff; border-bottom: none; border-radius: 4px 4px 0 0; position: relative; }
     .goal-frame::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        repeating-linear-gradient(90deg, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 1px, transparent 1px, transparent 12.5%),
-        repeating-linear-gradient(0deg, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 1px, transparent 1px, transparent 25%);
+      content: '';  position: absolute; inset: 0;
+      background: repeating-linear-gradient(90deg, rgba(255,255,255,0.12) 0, rgba(255,255,255,0.12) 1px, transparent 1px, transparent 12.5%),
+                  repeating-linear-gradient(0deg,  rgba(255,255,255,0.12) 0, rgba(255,255,255,0.12) 1px, transparent 1px, transparent 25%);
     }
 
-    /* Goal zones */
-    .goal-zones {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      gap: 2px;
-    }
+    /* ZONES (click targets) */
+    .goal-zones { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    .zone { border: 1px solid transparent; border-radius: 2px; cursor: pointer; transition: background 0.15s; }
+    .zone:hover { background: rgba(255,255,255,0.08); }
+    .zone.highlight-left { background: rgba(59,130,246,0.2); }
+    .zone.highlight-center { background: rgba(59,130,246,0.2); }
+    .zone.highlight-right { background: rgba(59,130,246,0.2); }
 
-    .zone {
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 2px;
-      transition: background 0.2s;
-    }
+    /* KEEPER */
+    #keeper { position: absolute; bottom: 4px; font-size: clamp(28px, 5vw, 42px); transition: left 0.05s linear; transform: translateX(-50%); z-index: 10; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
+    #ball { position: absolute; font-size: clamp(16px, 3vw, 24px); bottom: -30px; left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: none; }
 
-    /* GOALKEEPER */
-    #keeper {
-      position: absolute;
-      bottom: 4px;
-      font-size: clamp(28px, 5vw, 44px);
-      transition: left 0.05s linear;
-      transform: translateX(-50%);
-      z-index: 10;
-      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
-    }
-
-    /* BALL */
-    #ball {
-      position: absolute;
-      font-size: clamp(18px, 3vw, 26px);
-      bottom: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 20;
-      transition: none;
-      pointer-events: none;
-    }
-
-    /* DIRECTION INDICATOR */
-    .direction-arrows {
-      position: absolute;
-      bottom: 55%;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 12px;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .direction-arrows.show { opacity: 1; }
+    /* DIRECTION ARROWS */
+    .direction-arrows { position: absolute; bottom: 52%; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .direction-arrows.show { opacity: 1; pointer-events: all; }
     .arrow-btn {
-      background: rgba(255,255,255,0.1);
-      border: 2px solid rgba(255,255,255,0.2);
-      border-radius: 12px;
-      padding: 8px 16px;
-      font-size: 22px;
-      cursor: pointer;
-      transition: all 0.15s;
-      color: #fff;
+      background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.3); border-radius: 12px;
+      padding: 8px 14px; font-size: 18px; cursor: pointer; color: #fff;
+      transition: all 0.15s; min-width: 76px; min-height: 44px; text-align: center;
+      -webkit-tap-highlight-color: transparent;
     }
-    .arrow-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+    .arrow-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.08); }
 
-    /* GOAL FLASH */
-    .goal-flash {
-      position: absolute;
-      inset: 0;
-      border-radius: 18px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
+    /* FLASH / RESULT */
+    .goal-flash { position: absolute; inset: 0; border-radius: 18px; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
     .goal-flash.goal-anim { background: rgba(34,197,94,0.3); opacity: 1; }
     .goal-flash.miss-anim { background: rgba(239,68,68,0.3); opacity: 1; }
-
-    /* RESULT TEXT OVERLAY */
     .shot-result {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      font-family: 'Black Han Sans', sans-serif;
-      font-size: clamp(32px, 7vw, 60px);
-      text-shadow: 0 0 20px currentColor;
-      z-index: 30;
-      pointer-events: none;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
-      opacity: 0;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+      font-family: 'Black Han Sans', sans-serif; font-size: clamp(28px, 6vw, 52px);
+      text-shadow: 0 0 20px currentColor; z-index: 30; pointer-events: none;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s; opacity: 0;
     }
     .shot-result.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     .shot-result.goal-text { color: var(--goal); }
     .shot-result.miss-text { color: var(--miss); }
 
-    /* CONTROLS */
-    .controls {
-      width: 100%;
-      max-width: 560px;
-      text-align: center;
-      margin-bottom: 16px;
-    }
+    /* Level badge */
+    .level-indicator { position: absolute; top: 10px; right: 10px; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); border-radius: 100px; padding: 3px 10px; font-size: 11px; font-weight: 700; color: var(--red); }
 
+    /* CONTROLS */
+    .controls { width: 100%; max-width: 540px; text-align: center; margin-bottom: 12px; }
     .shoot-btn {
-      background: var(--red);
-      color: #fff;
-      border: none;
-      border-radius: 100px;
-      padding: 20px 60px;
-      font-size: 22px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: 'Black Han Sans', sans-serif;
-      letter-spacing: 1px;
-      box-shadow: 0 4px 24px rgba(239,68,68,0.3);
+      background: var(--red); color: #fff; border: none; border-radius: 100px;
+      padding: 18px 56px; font-size: 20px; font-weight: 700; cursor: pointer;
+      font-family: 'Black Han Sans', sans-serif; letter-spacing: 1px;
+      box-shadow: 0 4px 24px rgba(239,68,68,0.3); transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
     }
     .shoot-btn:active { transform: scale(0.95); }
-    .shoot-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .shoot-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .instruction { color: var(--muted); font-size: 13px; margin-top: 10px; min-height: 20px; }
 
-    .instruction {
-      color: var(--muted);
-      font-size: 14px;
-      margin-top: 12px;
-    }
-
-    /* LEVEL HUD */
-    .level-hud {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 16px;
-      font-size: 13px;
-    }
-    .level-badge {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 10px;
-      padding: 8px 16px;
-      color: var(--muted);
-    }
+    /* HUD */
+    .level-hud { display: flex; gap: 14px; margin-bottom: 14px; font-size: 13px; flex-wrap: wrap; justify-content: center; }
+    .level-badge { background: var(--card); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 7px 14px; color: var(--muted); }
     .level-badge span { color: var(--text); font-weight: 700; }
 
-    /* START / RESULT SCREENS */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 24px;
-      text-align: center;
-    }
+    /* OVERLAYS */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 24px; text-align: center; }
     .overlay.hidden { display: none; }
-    .overlay-emoji { font-size: 80px; margin-bottom: 16px; }
-    .overlay-title { font-family: 'Black Han Sans', sans-serif; font-size: 40px; margin-bottom: 12px; }
-    .overlay-sub { color: var(--muted); font-size: 15px; margin-bottom: 8px; }
-    .overlay-rules {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 16px;
-      padding: 20px 28px;
-      margin: 16px 0 28px;
-      text-align: left;
-    }
-    .overlay-rules li {
-      color: #aaa;
-      font-size: 14px;
-      margin-bottom: 8px;
-      list-style: none;
-      padding-left: 4px;
-    }
+    .overlay-emoji { font-size: 72px; margin-bottom: 14px; }
+    .overlay-title { font-family: 'Black Han Sans', sans-serif; font-size: 36px; margin-bottom: 10px; }
+    .overlay-sub { color: var(--muted); font-size: 14px; margin-bottom: 6px; }
+    .overlay-rules { background: var(--card); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 18px 24px; margin: 14px 0 24px; text-align: left; max-width: 380px; width: 100%; }
+    .overlay-rules li { color: #aaa; font-size: 13px; margin-bottom: 7px; list-style: none; }
     .overlay-rules li::before { content: '⚡ '; }
-    .start-btn {
-      background: var(--red);
-      color: #fff;
-      border: none;
-      border-radius: 100px;
-      padding: 18px 56px;
-      font-size: 20px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'Black Han Sans', sans-serif;
-      box-shadow: 0 4px 24px rgba(239,68,68,0.3);
-      transition: transform 0.15s, opacity 0.2s;
-    }
+    .start-btn { background: var(--red); color: #fff; border: none; border-radius: 100px; padding: 16px 52px; font-size: 19px; font-weight: 700; cursor: pointer; font-family: 'Black Han Sans', sans-serif; box-shadow: 0 4px 24px rgba(239,68,68,0.3); transition: transform 0.15s, opacity 0.2s; }
     .start-btn:hover { opacity: 0.85; transform: scale(1.03); }
 
-    .series-display {
-      display: flex;
-      gap: 8px;
-      margin: 16px 0;
-    }
-    .series-box {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 10px;
-      padding: 12px 20px;
-      font-family: 'Black Han Sans', sans-serif;
-      font-size: 24px;
-    }
+    .series-display { display: flex; gap: 12px; margin: 14px 0; }
+    .series-box { background: var(--card); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 12px 20px; font-family: 'Black Han Sans', sans-serif; font-size: 22px; }
     .series-box.you { color: var(--goal); }
     .series-box.ai { color: var(--miss); }
-  
-    /* ── Mobile Optimization ── */
+
+    /* Mobile */
     @media (max-width: 480px) {
       body { padding: 12px; }
-      .options { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .opt-btn { padding: 14px 8px; font-size: 14px; min-height: 64px; }
-      .question-card, .q-card, .jersey-card { padding: 24px 16px; }
-      .hud { gap: 8px; }
-      .hud-box { padding: 10px 6px; }
-      .hud-value { font-size: 22px; }
-      .player-emoji, .jersey-display { font-size: 56px; }
-      .hints, .clues, .hint-row { gap: 6px; }
-      .hint-chip, .clue-chip { font-size: 11px; padding: 4px 10px; }
+      .arrow-btn { padding: 8px 10px; font-size: 15px; min-width: 64px; }
       .shoot-btn { padding: 16px 40px; font-size: 18px; }
-      h1 { font-size: 28px; }
-    }
-    /* Larger touch targets */
-    .opt-btn { min-height: 56px; -webkit-tap-highlight-color: transparent; }
-    .shoot-btn { -webkit-tap-highlight-color: transparent; }
-    .arrow-btn { min-width: 80px; min-height: 48px; }
-
-    
-    /* Power Gauge */
-    .power-wrap {
-      width: 100%;
-      max-width: 560px;
-      margin-bottom: 12px;
-      display: none;
-    }
-    .power-wrap.active { display: block; }
-    .power-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    .power-bar-bg {
-      height: 12px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 100px;
-      overflow: hidden;
-      position: relative;
-    }
-    #power-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 100px;
-      background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444);
-      transition: none;
-    }
-    .power-zones {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      display: flex;
-    }
-    .pz { flex: 1; border-right: 1px solid rgba(0,0,0,0.3); }
-
-    /* Wind indicator */
-    .wind-indicator {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 8px;
-      justify-content: center;
-    }
-    .wind-arrow { font-size: 18px; transition: transform 0.3s; }
-    .wind-strength { color: #3b82f6; font-weight: 700; }
-
-    /* Level indicator */
-    .level-indicator {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(239,68,68,0.15);
-      border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 100px;
-      padding: 4px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--red);
     }
 
-    </style>
+    /* Confetti */
+    @keyframes scorePop { 0%{transform:scale(0) translateY(0);opacity:1} 60%{transform:scale(1.3) translateY(-30px);opacity:1} 100%{transform:scale(1) translateY(-60px);opacity:0} }
+
+    /* Speed indicator */
+    .speed-indicator { position: fixed; top: 20px; right: 20px; font-family: 'Black Han Sans', sans-serif; font-size: 20px; color: #f59e0b; pointer-events: none; z-index: 999; opacity: 0; }
+    @keyframes speedPop { 0%{opacity:1;transform:translateY(0) scale(1.2)} 100%{opacity:0;transform:translateY(-40px) scale(0.8)} }
+    .speed-indicator.show { animation: speedPop 0.8s ease forwards; }
+  </style>
 </head>
 <body>
   <a href="../index.html" class="back">← 허브로 돌아가기</a>
   <h1>🥅 페널티킥 결승전</h1>
-  <p class="subtitle">골키퍼가 없는 반대편으로 슛하세요!</p>
+  <p class="subtitle">파워게이지 타이밍 + 방향을 맞춰 골을 넣으세요!</p>
 
-  <!-- START OVERLAY -->
+  <!-- START -->
   <div class="overlay" id="start-overlay">
     <div class="overlay-emoji">⚽</div>
     <div class="overlay-title">페널티킥 결승전</div>
     <div class="overlay-sub">5번의 기회, 월드컵 우승을 향해!</div>
     <div class="overlay-rules">
-      <li>골키퍼가 좌 ↔ 우로 움직입니다</li>
-      <li>골키퍼가 없는 방향으로 슈팅!</li>
-      <li>슛 버튼을 누르면 방향을 선택하세요</li>
-      <li>레벨이 오를수록 골키퍼가 빨라집니다</li>
+      <li>슛 버튼 → 파워게이지 + 방향 선택</li>
+      <li>파워가 높을수록 강한 슛</li>
+      <li>🌬️ 바람 방향에 주의하세요</li>
+      <li>골키퍼 AI가 당신의 패턴을 학습해요</li>
+      <li>2-2 동점이면 ⚡ 서든데스!</li>
       <li>5번 중 3골 이상이면 우승!</li>
     </div>
     <button class="start-btn" onclick="startGame()">🥅 킥오프!</button>
   </div>
 
-  <!-- RESULT OVERLAY -->
+  <!-- RESULT -->
   <div class="overlay hidden" id="result-overlay">
     <div class="overlay-emoji" id="res-emoji">🏆</div>
     <div class="overlay-title" id="res-title">우승!</div>
     <div class="series-display">
       <div class="series-box you" id="res-goals">? 골</div>
-      <div style="align-self:center;color:var(--muted);font-size:20px;">vs</div>
+      <div style="align-self:center;color:var(--muted);font-size:18px;">vs</div>
       <div class="series-box ai" id="res-saves">? 선방</div>
     </div>
     <div class="overlay-sub" id="res-msg"></div>
     <br>
     <button class="start-btn" onclick="restartGame()">🔄 다시 도전</button>
     <br><br>
-    <a href="../index.html" style="color:var(--muted);font-size:14px;">
-    <br>
-    <a href="#" onclick="goToScoreboard(score)" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:100px;padding:12px 24px;text-decoration:none;color:#FFD700;font-weight:700;font-size:15px;margin-top:8px;">
-      🏆 내 점수 랭킹에 등록하기
-    </a>
-
-    <br><a href="../index.html" style="color:var(--muted);font-size:14px;">← 다른 게임 하기</a>
-    <a</a>
+    <a href="#" onclick="goToScoreboard(goals * 200)" style="display:inline-block;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:100px;padding:10px 22px;text-decoration:none;color:#FFD700;font-weight:700;font-size:14px;margin-top:8px;">🏆 랭킹에 등록하기</a>
+    <br><br>
+    <a href="../index.html" style="color:var(--muted);font-size:13px;">← 다른 게임 하기</a>
   </div>
 
-  <!-- GAME -->
+  <!-- GAME UI -->
   <div class="level-hud">
     <div class="level-badge">레벨: <span id="level-val">1</span></div>
     <div class="level-badge">킥: <span id="kick-val">0</span>/5</div>
@@ -474,39 +234,12 @@
     <div class="kick-dot" id="dot-4">⚽</div>
   </div>
 
-  <div class="stadium-wrap">
-    <div class="stadium" id="stadium">
-      <div class="goal">
-        <div class="goal-frame">
-          <div class="goal-zones">
-            <div class="zone" id="zone-0"></div>
-            <div class="zone" id="zone-1"></div>
-            <div class="zone" id="zone-2"></div>
-            <div class="zone" id="zone-3"></div>
-            <div class="zone" id="zone-4"></div>
-            <div class="zone" id="zone-5"></div>
-          </div>
-        </div>
-      </div>
-      <div id="keeper">🧤</div>
-      <div id="ball">⚽</div>
-      <div class="level-indicator" id="level-ind">LV.1</div>
-      <div class="goal-flash" id="goal-flash"></div>
-      <div class="shot-result" id="shot-result"></div>
-      <div class="direction-arrows" id="direction-arrows">
-        <button class="arrow-btn" onclick="shoot('left')">← 왼쪽</button>
-        <button class="arrow-btn" onclick="shoot('center')">↑ 가운데</button>
-        <button class="arrow-btn" onclick="shoot('right')">오른쪽 →</button>
-      </div>
-    </div>
-  </div>
-
-  
   <div class="wind-indicator" id="wind-indicator">
     <span>🌬️ 바람:</span>
-    <span class="wind-arrow" id="wind-arrow">→</span>
+    <span id="wind-arrow" style="font-size:16px;">→</span>
     <span class="wind-strength" id="wind-strength">없음</span>
   </div>
+
   <div class="power-wrap" id="power-wrap">
     <div class="power-label">
       <span>⚡ 슛 파워</span>
@@ -517,48 +250,145 @@
       <div class="power-zones"><div class="pz"></div><div class="pz"></div><div class="pz"></div><div class="pz"></div></div>
     </div>
   </div>
+
+  <div class="stadium-wrap">
+    <div class="stadium" id="stadium">
+      <div class="goal">
+        <div class="goal-frame">
+          <div class="goal-zones">
+            <div class="zone" onclick="shoot('left')"  id="zone-TL"></div>
+            <div class="zone" onclick="shoot('center')" id="zone-TC"></div>
+            <div class="zone" onclick="shoot('right')"  id="zone-TR"></div>
+            <div class="zone" onclick="shoot('left')"  id="zone-BL"></div>
+            <div class="zone" onclick="shoot('center')" id="zone-BC"></div>
+            <div class="zone" onclick="shoot('right')"  id="zone-BR"></div>
+          </div>
+        </div>
+      </div>
+      <div id="keeper">🧤</div>
+      <div id="ball">⚽</div>
+      <div class="goal-flash" id="goal-flash"></div>
+      <div class="shot-result" id="shot-result"></div>
+      <div class="level-indicator" id="level-ind">LV.1</div>
+      <div class="direction-arrows" id="direction-arrows">
+        <button class="arrow-btn" onclick="shoot('left')">← 왼쪽</button>
+        <button class="arrow-btn" onclick="shoot('center')">↑ 중앙</button>
+        <button class="arrow-btn" onclick="shoot('right')">오른쪽 →</button>
+      </div>
+    </div>
+  </div>
+
   <div class="controls">
     <button class="shoot-btn" id="shoot-btn" onclick="prepareShoot()">⚽ 슛!</button>
-    <div class="instruction" id="instruction">슛 버튼을 눌러 방향을 선택하세요</div>
+    <div class="instruction" id="instruction">슛 버튼을 눌러 파워게이지를 시작하세요</div>
   </div>
 
 <script>
-
+// ── Name helper ──────────────────────────────────
 function goToScoreboard(score) {
   const name = localStorage.getItem('wc_player_name') || '';
-  const url = '../scoreboard.html' + (name ? `?prefill=${encodeURIComponent(name)}&score=${score}` : '');
-  window.location.href = url;
+  window.location.href = '../scoreboard.html' + (name ? `?prefill=${encodeURIComponent(name)}&score=${score}` : '');
 }
 
+// ── Web Audio ────────────────────────────────────
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _ctx = null;
+function getCtx() { if (!_ctx) _ctx = new AudioCtx(); if (_ctx.state==='suspended') _ctx.resume(); return _ctx; }
+function playTone(freq,type,dur,vol=0.3) {
+  try { const c=getCtx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination);
+    o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur); o.start(); o.stop(c.currentTime+dur); } catch(e){}
+}
+function sfxGoal() { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',0.22,0.4),i*70)); }
+function sfxWrong() { playTone(220,'sawtooth',0.25,0.25); setTimeout(()=>playTone(180,'sawtooth',0.2,0.2),120); }
+function sfxClick() { playTone(440,'sine',0.06,0.15); }
 
-// ── Sudden Death Overtime ───────────────────────
-let isSuddenDeath = false;
-let sdRound = 0;
-const MAX_SD = 3; // max 3 sudden death rounds
+// ── Confetti ─────────────────────────────────────
+function launchConfetti(x,y,count=18) {
+  const colors=['#FFD700','#00843D','#ef4444','#3b82f6','#a855f7','#fff'];
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div');
+    el.style.cssText=`position:fixed;width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};left:${x}px;top:${y}px;pointer-events:none;z-index:9999;`;
+    document.body.appendChild(el);
+    const angle=Math.random()*360*Math.PI/180, speed=80+Math.random()*120;
+    let px=x,py=y,vy=Math.sin(angle)*speed-60,vx=Math.cos(angle)*speed,t=0;
+    const tick=()=>{t+=0.016;px+=vx*0.016;vy+=200*0.016;py+=vy*0.016;el.style.left=px+'px';el.style.top=py+'px';el.style.opacity=Math.max(0,1-t*1.5);el.style.transform=`rotate(${t*200}deg)`;if(t<0.8)requestAnimationFrame(tick);else el.remove();};
+    requestAnimationFrame(tick);
+  }
+}
+function launchFullConfetti(){for(let i=0;i<4;i++)setTimeout(()=>launchConfetti(Math.random()*window.innerWidth,-10,12),i*150);}
 
+// ── AI Pattern ───────────────────────────────────
+const playerHistory = { left:0, center:0, right:0 };
+function recordShot(dir) { playerHistory[dir]++; }
+function getKeeperDive(dir) {
+  const total = playerHistory.left+playerHistory.center+playerHistory.right;
+  if (total >= 3) {
+    const most = Object.entries(playerHistory).sort((a,b)=>b[1]-a[1])[0][0];
+    if (Math.random() < 0.4) return most;
+  }
+  if (dir==='left')   return Math.random()<0.55?'left':'right';
+  if (dir==='right')  return Math.random()<0.55?'right':'left';
+  return Math.random()<0.5?'left':'right';
+}
+
+// ── Power Gauge ───────────────────────────────────
+let power=0, powerDir=1, powerAnim=null;
+function startPowerGauge() {
+  power=0; powerDir=1;
+  document.getElementById('power-wrap').classList.add('active');
+  cancelAnimationFrame(powerAnim);
+  const speed = 1.2 + (level-1)*0.18;
+  function tick() {
+    power+=powerDir*speed;
+    if(power>=100){power=100;powerDir=-1;}
+    if(power<=0){power=0;powerDir=1;}
+    document.getElementById('power-fill').style.width=power+'%';
+    document.getElementById('power-pct').textContent=Math.round(power)+'%';
+    powerAnim=requestAnimationFrame(tick);
+  }
+  powerAnim=requestAnimationFrame(tick);
+}
+function stopPowerGauge() {
+  cancelAnimationFrame(powerAnim);
+  document.getElementById('power-wrap').classList.remove('active');
+  return Math.round(power);
+}
+
+// ── Wind ─────────────────────────────────────────
+let windDir=0, windStrength=0;
+function generateWind() {
+  const r=Math.random();
+  if(r<0.35){windDir=0;windStrength=0;}
+  else if(r<0.675){windDir=-1;windStrength=Math.floor(Math.random()*3)+1;}
+  else{windDir=1;windStrength=Math.floor(Math.random()*3)+1;}
+  const arrow=document.getElementById('wind-arrow');
+  const str=document.getElementById('wind-strength');
+  if(windDir===0){str.textContent='없음';str.style.color='#aaa';arrow.style.opacity='0.3';}
+  else{
+    arrow.style.opacity='1'; arrow.textContent=windDir===-1?'←':'→';
+    const labels=['','약함','보통','강함'];
+    str.textContent=labels[windStrength];
+    str.style.color=windStrength===3?'#ef4444':windStrength===2?'#f59e0b':'#3b82f6';
+  }
+}
+
+// ── Sudden Death ──────────────────────────────────
+let isSuddenDeath=false, sdRound=0;
+const MAX_SD=3;
 function checkSuddenDeath() {
-  const saves = MAX_KICKS - goals;
-  // If 2-2 or 3-3 after 5 kicks → sudden death
-  if (goals === saves && goals >= 2) {
-    isSuddenDeath = true;
-    sdRound = 0;
-    document.getElementById('instruction').textContent = '⚡ 연장전! 서든데스 시작!';
-    // Flash overlay
-    const flash = document.createElement('div');
-    flash.style.cssText = 'position:fixed;inset:0;background:rgba(239,68,68,0.15);z-index:50;pointer-events:none;';
-    document.body.appendChild(flash);
-    setTimeout(() => flash.remove(), 600);
-    // Add extra dots
-    const ks = document.getElementById('kick-score');
-    const sep = document.createElement('div');
-    sep.style.cssText = 'color:#ef4444;font-size:12px;font-weight:700;align-self:center;';
-    sep.textContent = '⚡SD';
+  const saves=MAX_KICKS-goals;
+  if(goals===saves && goals>=2) {
+    isSuddenDeath=true; sdRound=0;
+    document.getElementById('instruction').textContent='⚡ 연장전! 서든데스 시작!';
+    const f=document.createElement('div');
+    f.style.cssText='position:fixed;inset:0;background:rgba(239,68,68,0.15);z-index:50;pointer-events:none;';
+    document.body.appendChild(f); setTimeout(()=>f.remove(),600);
+    const ks=document.getElementById('kick-score');
+    const sep=document.createElement('div'); sep.className='sd-label'; sep.textContent='⚡SD';
     ks.appendChild(sep);
-    for (let i = 0; i < MAX_SD; i++) {
-      const d = document.createElement('div');
-      d.className = 'kick-dot';
-      d.id = 'dot-sd-' + i;
-      d.textContent = '⚽';
+    for(let i=0;i<MAX_SD;i++){
+      const d=document.createElement('div'); d.className='kick-dot'; d.id='dot-sd-'+i; d.textContent='⚽';
       ks.appendChild(d);
     }
     return true;
@@ -566,322 +396,179 @@ function checkSuddenDeath() {
   return false;
 }
 
-function recordSuddenDeath(isGoal) {
-  const dot = document.getElementById('dot-sd-' + sdRound);
-  if (dot) {
-    dot.textContent = isGoal ? '✅' : '❌';
-    dot.classList.add(isGoal ? 'goal' : 'miss');
-  }
-  sdRound++;
-  if (isGoal) {
-    goals++;
-    setTimeout(showResult, 1200);
-    return true;
-  }
-  if (sdRound >= MAX_SD) {
-    setTimeout(showResult, 1200);
-    return true;
-  }
-  return false;
-}
-// ────────────────────────────────────────────────
+// ── State ─────────────────────────────────────────
+let kickNum=0, goals=0, level=1, keeperSpeed=0.4;
+let keeperPos=50, keeperDir=1, animFrame;
+let awaitingDirection=false, shooting=false;
+const MAX_KICKS=5;
 
-
-function shareResult(score, gameName) {
-  const text = `⚽ 월드컵 미니게임\n🎮 ${gameName}\n🏆 ${score.toLocaleString()}점 달성!\n\nhttps://twinwhdwk.github.io/worldcup_minigame`;
-  if (navigator.share) {
-    navigator.share({ title: '월드컵 미니게임', text });
-  } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => alert('클립보드에 복사됐어요!'));
-  }
-}
-
-
-// ── Confetti System ─────────────────────────────
-function launchConfetti(x, y, count=18) {
-  const colors = ['#FFD700','#00843D','#ef4444','#3b82f6','#a855f7','#fff'];
-  for (let i = 0; i < count; i++) {
-    const el = document.createElement('div');
-    el.style.cssText = `
-      position:fixed; width:${6+Math.random()*6}px; height:${6+Math.random()*6}px;
-      background:${colors[Math.floor(Math.random()*colors.length)]};
-      border-radius:${Math.random()>0.5?'50%':'2px'};
-      left:${x}px; top:${y}px; pointer-events:none; z-index:9999;
-      transform:rotate(${Math.random()*360}deg);
-    `;
-    document.body.appendChild(el);
-    const angle = (Math.random() * 360) * Math.PI / 180;
-    const speed = 80 + Math.random() * 120;
-    const vx = Math.cos(angle) * speed;
-    const vy = Math.sin(angle) * speed - 60;
-    let px = x, py = y, vy2 = vy, t = 0;
-    const tick = () => {
-      t += 0.016; px += vx * 0.016; vy2 += 200 * 0.016; py += vy2 * 0.016;
-      el.style.left = px + 'px'; el.style.top = py + 'px';
-      el.style.opacity = Math.max(0, 1 - t * 1.5);
-      el.style.transform = `rotate(${t*200}deg)`;
-      if (t < 0.8) requestAnimationFrame(tick); else el.remove();
-    };
-    requestAnimationFrame(tick);
-  }
-}
-function launchFullConfetti() {
-  for (let i = 0; i < 4; i++) setTimeout(() => launchConfetti(Math.random()*window.innerWidth, -10, 12), i*150);
-}
-// ────────────────────────────────────────────────
-
-
-// AI Pattern Learning
-const playerHistory = { left: 0, center: 0, right: 0 };
-function recordShot(dir) { playerHistory[dir]++; }
-function getKeeperDive(dir) {
-  const total = playerHistory.left + playerHistory.center + playerHistory.right;
-  // After 3+ shots, AI starts learning
-  if (total >= 3) {
-    const mostUsed = Object.entries(playerHistory).sort((a,b)=>b[1]-a[1])[0][0];
-    // 40% chance to dive toward most-used direction
-    if (Math.random() < 0.4) return mostUsed;
-  }
-  // Default: biased toward shot direction
-  if (dir === 'left') return Math.random() < 0.55 ? 'left' : 'right';
-  if (dir === 'right') return Math.random() < 0.55 ? 'right' : 'left';
-  return Math.random() < 0.5 ? 'left' : 'right';
-}
-
-
-// ── Web Audio Sound System ──────────────────────────────
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let _ctx = null;
-function getCtx() {
-  if (!_ctx) _ctx = new AudioCtx();
-  if (_ctx.state === 'suspended') _ctx.resume();
-  return _ctx;
-}
-function playTone(freq, type, duration, vol=0.3, decay=0.8) {
-  try {
-    const ctx = getCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = type; osc.frequency.value = freq;
-    gain.gain.setValueAtTime(vol, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-    osc.start(); osc.stop(ctx.currentTime + duration);
-  } catch(e) {}
-}
-function sfxCorrect() {
-  playTone(523, 'sine', 0.12, 0.35);
-  setTimeout(() => playTone(659, 'sine', 0.12, 0.35), 80);
-  setTimeout(() => playTone(784, 'sine', 0.18, 0.35), 160);
-}
-function sfxWrong() {
-  playTone(220, 'sawtooth', 0.25, 0.25);
-  setTimeout(() => playTone(180, 'sawtooth', 0.2, 0.2), 120);
-}
-function sfxGoal() {
-  [523,659,784,1047].forEach((f,i) => setTimeout(()=>playTone(f,'sine',0.22,0.4),i*70));
-}
-function sfxClick() { playTone(440, 'sine', 0.06, 0.15); }
-// ────────────────────────────────────────────────────────
-
-let kickNum = 0, goals = 0, level = 1;
-let keeperPos = 50; // % from left
-let keeperDir = 1;
-let keeperSpeed = 0.4;
-let animFrame;
-let awaitingDirection = false;
-let shooting = false;
-const MAX_KICKS = 5;
-
-function startGame() {
-  document.getElementById('start-overlay').classList.add('hidden');
-  resetGame();
-  animateKeeper();
-}
-
-function restartGame() {
-  document.getElementById('result-overlay').classList.add('hidden');
-  resetGame();
-  animateKeeper();
-}
+function startGame() { document.getElementById('start-overlay').classList.add('hidden'); resetGame(); animateKeeper(); }
+function restartGame() { document.getElementById('result-overlay').classList.add('hidden'); resetGame(); animateKeeper(); }
 
 function resetGame() {
-  kickNum = 0; goals = 0; level = 1; keeperSpeed = 0.4; isSuddenDeath = false; sdRound = 0;
-  keeperPos = 50; keeperDir = 1; awaitingDirection = false; shooting = false;
+  kickNum=0; goals=0; level=1; keeperSpeed=0.4; isSuddenDeath=false; sdRound=0;
+  keeperPos=50; keeperDir=1; awaitingDirection=false; shooting=false;
+  playerHistory.left=0; playerHistory.center=0; playerHistory.right=0;
   updateHUD();
-  for (let i = 0; i < 5; i++) {
-    const d = document.getElementById('dot-' + i);
-    d.textContent = '⚽';
-    d.className = 'kick-dot';
+  // Reset dots
+  const ks=document.getElementById('kick-score');
+  ks.innerHTML='';
+  for(let i=0;i<5;i++){
+    const d=document.createElement('div'); d.className='kick-dot'; d.id='dot-'+i; d.textContent='⚽';
+    ks.appendChild(d);
   }
-  document.getElementById('keeper').style.left = '50%';
-  document.getElementById('ball').style.bottom = '-30px';
-  document.getElementById('shot-result').className = 'shot-result';
-  document.getElementById('goal-flash').className = 'goal-flash';
-  document.getElementById('direction-arrows').className = 'direction-arrows';
-  document.getElementById('shoot-btn').disabled = false;
-  document.getElementById('instruction').textContent = '슛 버튼을 눌러 방향을 선택하세요';
+  const keeper=document.getElementById('keeper');
+  keeper.style.transition='none'; keeper.style.left='50%';
+  const ball=document.getElementById('ball');
+  ball.style.transition='none'; ball.style.bottom='-30px'; ball.style.left='50%'; ball.style.transform='translateX(-50%)';
+  document.getElementById('shot-result').className='shot-result';
+  document.getElementById('goal-flash').className='goal-flash';
+  document.getElementById('direction-arrows').className='direction-arrows';
+  document.getElementById('shoot-btn').disabled=false;
+  document.getElementById('instruction').textContent='슛 버튼을 눌러 파워게이지를 시작하세요';
+  document.getElementById('level-ind').textContent='LV.1';
+  generateWind();
 }
 
 function updateHUD() {
-  document.getElementById('level-val').textContent = level;
-  document.getElementById('kick-val').textContent = kickNum;
-  document.getElementById('goal-val').textContent = goals;
+  document.getElementById('level-val').textContent=level;
+  document.getElementById('kick-val').textContent=kickNum;
+  document.getElementById('goal-val').textContent=goals;
 }
 
 function animateKeeper() {
   cancelAnimationFrame(animFrame);
   function step() {
-    if (shooting) { animFrame = requestAnimationFrame(step); return; }
-    keeperPos += keeperDir * keeperSpeed;
-    if (keeperPos >= 90) { keeperPos = 90; keeperDir = -1; }
-    if (keeperPos <= 10) { keeperPos = 10; keeperDir = 1; }
-    document.getElementById('keeper').style.left = keeperPos + '%';
-    animFrame = requestAnimationFrame(step);
+    if(shooting){animFrame=requestAnimationFrame(step);return;}
+    keeperPos+=keeperDir*keeperSpeed;
+    if(keeperPos>=90){keeperPos=90;keeperDir=-1;}
+    if(keeperPos<=10){keeperPos=10;keeperDir=1;}
+    document.getElementById('keeper').style.left=keeperPos+'%';
+    animFrame=requestAnimationFrame(step);
   }
-  animFrame = requestAnimationFrame(step);
+  animFrame=requestAnimationFrame(step);
 }
 
 function prepareShoot() {
-  if (awaitingDirection || shooting || kickNum >= MAX_KICKS) return;
-  awaitingDirection = true;
+  if(awaitingDirection||shooting) return;
+  if(!isSuddenDeath && kickNum>=MAX_KICKS) return;
+  if(isSuddenDeath && sdRound>=MAX_SD) return;
+  awaitingDirection=true;
   generateWind();
   startPowerGauge();
-  document.getElementById('direction-arrows').className = 'direction-arrows show';
-  document.getElementById('shoot-btn').disabled = true;
-  document.getElementById('instruction').textContent = '방향 선택 후 파워를 결정하세요!';
+  document.getElementById('direction-arrows').className='direction-arrows show';
+  document.getElementById('shoot-btn').disabled=true;
+  document.getElementById('instruction').textContent='방향을 선택하세요!';
 }
 
 function shoot(dir) {
-  if (!awaitingDirection || shooting) return;
-  awaitingDirection = false;
-  shooting = true;
-  const shotPower = stopPowerGauge();
-  document.getElementById('direction-arrows').className = 'direction-arrows';
-  // Wind affects shot: strong wind can deflect
+  if(!awaitingDirection||shooting) return;
+  awaitingDirection=false; shooting=true;
+  const shotPower=stopPowerGauge();
+  document.getElementById('direction-arrows').className='direction-arrows';
 
-  const kPos = keeperPos; // capture keeper position at moment of shot
-
-  // Keeper dives: randomly to a side (biased toward ball direction)
   recordShot(dir);
-  const keeperDive = getKeeperDive(dir);
+  const keeperDive=getKeeperDive(dir);
 
-  // Animate ball
-  const ball = document.getElementById('ball');
-  const stadium = document.getElementById('stadium');
-  const sRect = stadium.getBoundingClientRect();
+  // Ball target
+  let ballTarget = dir==='left'?20 : dir==='right'?80 : 50;
+  // Wind deflection
+  if(windDir!==0) ballTarget+=windDir*windStrength*3;
+  ballTarget=Math.max(10,Math.min(90,ballTarget));
 
-  let ballTarget;
-  if (dir === 'left') ballTarget = 20;
-  else if (dir === 'right') ballTarget = 80;
-  else ballTarget = 50;
+  const ball=document.getElementById('ball');
+  ball.style.transition='all 0.32s cubic-bezier(0.25,0.46,0.45,0.94)';
+  ball.style.bottom='82%'; ball.style.left=ballTarget+'%'; ball.style.transform='translateX(-50%) scale(0.35)';
 
-  ball.style.transition = 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-  ball.style.bottom = '80%';
-  ball.style.left = ballTarget + '%';
-  ball.style.transform = 'translateX(-50%) scale(0.4)';
+  const keeper=document.getElementById('keeper');
+  const diveTarget=keeperDive==='left'?'12%':'88%';
+  keeper.style.transition='left 0.28s cubic-bezier(0.25,0.46,0.45,0.94)';
+  keeper.style.left=diveTarget;
 
-  // Keeper dive animation
-  const keeper = document.getElementById('keeper');
-  const diveTarget = keeperDive === 'left' ? '15%' : '85%';
-  keeper.style.transition = 'left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-  keeper.style.left = diveTarget;
+  // Goal logic: power affects probability
+  let isGoal=false;
+  const powerFactor = shotPower/100; // 0~1
+  if(dir==='left'  && keeperDive==='right') isGoal=Math.random()<(0.75+powerFactor*0.2);
+  else if(dir==='right' && keeperDive==='left')  isGoal=Math.random()<(0.75+powerFactor*0.2);
+  else if(dir==='center' && keeperDive!=='center') isGoal=Math.random()<(0.55+powerFactor*0.15);
+  else isGoal=Math.random()<(0.1+powerFactor*0.15); // keeper correct side
 
-  // Determine goal
-  let isGoal = false;
-  if (dir === 'left' && keeperDive === 'right') isGoal = true;
-  else if (dir === 'right' && keeperDive === 'left') isGoal = true;
-  else if (dir === 'center' && keeperDive !== 'center') {
-    // center: 60% chance goal
-    isGoal = Math.random() < 0.6;
-  } else if (dir === keeperDive) {
-    // Keeper guessed right: 20% chance to still score (edge of net)
-    isGoal = Math.random() < 0.2;
+  // Wind miss: if wind strong and shooting into wind
+  if(windStrength===3 && windDir!==0) {
+    const shootingIntoWind=(dir==='left'&&windDir===1)||(dir==='right'&&windDir===-1);
+    if(shootingIntoWind && Math.random()<0.25) isGoal=false;
   }
 
-  setTimeout(() => {
-    const flash = document.getElementById('goal-flash');
-    const shotResult = document.getElementById('shot-result');
+  setTimeout(()=>{
+    const flash=document.getElementById('goal-flash');
+    const sr=document.getElementById('shot-result');
 
-    if (isGoal) {
-      if (!isSuddenDeath) goals++;
-      flash.className = 'goal-flash goal-anim'; sfxGoal(); launchFullConfetti();
-      shotResult.className = 'shot-result goal-text show';
-      shotResult.textContent = '⚽ GOAL!';
-      document.getElementById('dot-' + kickNum).textContent = '✅';
-      document.getElementById('dot-' + kickNum).classList.add('goal');
+    // Update dot
+    const dotId=isSuddenDeath?'dot-sd-'+sdRound:'dot-'+kickNum;
+    const dot=document.getElementById(dotId);
+
+    if(isGoal) {
+      goals++;
+      flash.className='goal-flash goal-anim'; sfxGoal(); launchFullConfetti();
+      sr.className='shot-result goal-text show'; sr.textContent='⚽ GOAL!';
+      if(dot){dot.textContent='✅'; dot.classList.add('goal');}
     } else {
-      flash.className = 'goal-flash miss-anim'; sfxWrong();
-      shotResult.className = 'shot-result miss-text show';
-      shotResult.textContent = '🧤 선방!';
-      document.getElementById('dot-' + kickNum).textContent = '❌';
-      document.getElementById('dot-' + kickNum).classList.add('miss');
+      flash.className='goal-flash miss-anim'; sfxWrong();
+      sr.className='shot-result miss-text show'; sr.textContent='🧤 선방!';
+      if(dot){dot.textContent='❌'; dot.classList.add('miss');}
     }
 
-    kickNum++;
+    if(isSuddenDeath) sdRound++;
+    else kickNum++;
     updateHUD();
 
-    setTimeout(() => {
-      flash.className = 'goal-flash';
-      shotResult.className = 'shot-result';
+    setTimeout(()=>{
+      flash.className='goal-flash'; sr.className='shot-result';
+      ball.style.transition='none'; ball.style.bottom='-30px'; ball.style.left='50%'; ball.style.transform='translateX(-50%)';
+      keeper.style.transition='none'; keeperPos=50; keeper.style.left='50%';
 
-      // Reset ball and keeper
-      ball.style.transition = 'none';
-      ball.style.bottom = '-30px';
-      ball.style.left = '50%';
-      ball.style.transform = 'translateX(-50%)';
-      keeper.style.transition = 'none';
-      keeperPos = 50;
-      keeper.style.left = '50%';
-
-      // Increase level every 2 kicks
-      if (kickNum % 2 === 0) {
-        level++;
-        keeperSpeed = Math.min(0.4 + (level - 1) * 0.15, 1.2);
-        const li = document.getElementById('level-ind'); if(li) li.textContent = 'LV.' + level;
+      if(!isSuddenDeath && kickNum%2===0 && kickNum>0) {
+        level++; keeperSpeed=Math.min(0.4+(level-1)*0.15,1.3);
+        document.getElementById('level-ind').textContent='LV.'+level;
       }
+      shooting=false;
 
-      shooting = false;
-
-      if (kickNum >= MAX_KICKS) {
-        if (isSuddenDeath) {
-          // continue sudden death
-          document.getElementById('shoot-btn').disabled = false;
-          document.getElementById('instruction').textContent = '⚡ 서든데스! 슛 버튼을 누르세요';
-        } else if (checkSuddenDeath()) {
-          setTimeout(() => {
-            document.getElementById('shoot-btn').disabled = false;
-          }, 800);
+      // Decide next state
+      if(isSuddenDeath) {
+        if(isGoal || sdRound>=MAX_SD) { setTimeout(showResult,300); return; }
+        document.getElementById('shoot-btn').disabled=false;
+        document.getElementById('instruction').textContent='⚡ 서든데스 '+sdRound+'/'+MAX_SD+' — 슛!';
+      } else if(kickNum>=MAX_KICKS) {
+        if(checkSuddenDeath()) {
+          setTimeout(()=>{document.getElementById('shoot-btn').disabled=false;},800);
         } else {
-          setTimeout(showResult, 300);
+          setTimeout(showResult,300);
         }
       } else {
-        document.getElementById('shoot-btn').disabled = false;
-        document.getElementById('instruction').textContent = '슛 버튼을 눌러 방향을 선택하세요';
+        document.getElementById('shoot-btn').disabled=false;
+        document.getElementById('instruction').textContent='슛 버튼을 눌러 파워게이지를 시작하세요';
       }
-    }, 900);
-  }, 400);
+    },900);
+  },380);
 }
 
 function showResult() {
   cancelAnimationFrame(animFrame);
-  const overlay = document.getElementById('result-overlay');
+  const overlay=document.getElementById('result-overlay');
   overlay.classList.remove('hidden');
-
-  const saves = MAX_KICKS - goals;
-  document.getElementById('res-goals').textContent = `${goals} 골`;
-  document.getElementById('res-saves').textContent = `${saves} 선방`;
-
-  let emoji, title, msg;
-  if (goals >= 5) { emoji = '🏆'; title = '퍼펙트 우승!'; msg = '골키퍼를 완전히 압도했어요!'; }
-  else if (goals >= 4) { emoji = '🥇'; title = '우승!'; msg = '월드컵 챔피언이에요!'; }
-  else if (goals >= 3) { emoji = '🥈'; title = '아슬아슬 우승!'; msg = '진땀 나는 승부였어요!'; }
-  else if (goals === 2) { emoji = '😤'; title = '패배...'; msg = '조금만 더 연습하면 돼요!'; }
-  else { emoji = '😭'; title = '완패...'; msg = '골키퍼에게 압도당했어요!'; }
-
-  document.getElementById('res-emoji').textContent = emoji;
-  document.getElementById('res-title').textContent = title;
-  document.getElementById('res-msg').textContent = msg + (isSuddenDeath ? ' (서든데스 포함)' : '');
+  const saves=(MAX_KICKS+sdRound)-goals;
+  document.getElementById('res-goals').textContent=goals+' 골';
+  document.getElementById('res-saves').textContent=saves+' 선방';
+  let emoji,title,msg;
+  if(goals>=5)      {emoji='🏆';title='퍼펙트 우승!';msg='골키퍼를 완전히 압도했어요!';}
+  else if(goals>=4) {emoji='🥇';title='우승!';msg='월드컵 챔피언이에요!';}
+  else if(goals>=3) {emoji='🥈';title='아슬아슬 우승!';msg='진땀 나는 승부였어요!';}
+  else if(goals===2){emoji='😤';title='패배...';msg='조금만 더 연습하면 돼요!';}
+  else              {emoji='😭';title='완패...';msg='골키퍼에게 압도당했어요!';}
+  if(isSuddenDeath) msg+=' (서든데스)';
+  document.getElementById('res-emoji').textContent=emoji;
+  document.getElementById('res-title').textContent=title;
+  document.getElementById('res-msg').textContent=msg;
 }
 </script>
 </body>
