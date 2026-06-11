@@ -414,6 +414,15 @@
     }
     .prize-row:last-child { border-bottom: none; }
 
+  
+    @media (max-width: 600px) {
+      body { flex-direction: column; }
+      .board-panel { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 20px 16px; max-height: 55vh; overflow-y: auto; }
+      .input-panel { width: 100%; padding: 20px 16px; }
+      .tabs { gap: 4px; }
+      .tab-btn { padding: 6px 10px; font-size: 11px; }
+    }
+
   </style>
 </head>
 <body>
@@ -498,6 +507,7 @@
   <div class="recent-title">최근 입력 기록</div>
   <div class="recent-list" id="recent-list"></div>
 
+  <div id="qr-container" style="background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:12px;"></div>
   <div class="ctrl-row">
     <button class="ctrl-btn export" onclick="exportCSV()">📥 CSV 내보내기</button>
     <button class="ctrl-btn" onclick="resetAll()">🗑 전체 초기화</button>
@@ -521,6 +531,7 @@ function setTab(tab) {
     prizeSection.style.display = 'none';
   }
   render(loadData());
+  generateQR();
 }
 
 function renderPrize() {
@@ -723,6 +734,22 @@ function exportCSV() {
   showToast('📥 CSV 다운로드 완료!');
 }
 
+
+// ── QR Code Generator ─────────────────────────────
+function generateQR() {
+  const url = 'https://twinwhdwk.github.io/worldcup_minigame/';
+  const qrEl = document.getElementById('qr-container');
+  if (!qrEl) return;
+  qrEl.innerHTML = `<div style='text-align:center;padding:10px;'>
+    <img src='https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(url)}&chs=160x160&chld=L|0'
+         style='border-radius:8px;width:130px;height:130px;' alt='QR'>
+    <div style='font-size:11px;color:var(--muted);margin-top:6px;'>스캔 → 게임 접속</div>
+  </div>`;
+}
+// ── Auto Refresh every 10s ────────────────────────
+setInterval(() => { render(loadData());
+  generateQR(); if(currentTab==='all') renderPrize(); }, 10000);
+
 // ── Toast ─────────────────────────────────────────
 function showToast(msg, isErr = false) {
   const t = document.getElementById('toast');
@@ -758,6 +785,7 @@ document.addEventListener('keydown', e => {
   const savedName = getSavedName();
   if (savedName) document.getElementById('player-name').value = savedName;
 render(loadData());
+  generateQR();
 </script>
 </body>
 </html>
