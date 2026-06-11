@@ -575,6 +575,18 @@ function saveName(name) {
 }
 // ────────────────────────────────────────────────
 
+
+// ── Today Stats ─────────────────────────────────
+function getTodayStats(data) {
+  const today = new Date().toLocaleDateString('ko-KR');
+  const todayLog = data.log.filter(e => e.time && data.log.indexOf(e) < 20); // recent 20
+  return {
+    count: data.log.length,
+    players: data.players.length,
+    topScore: data.players.length ? Math.max(...data.players.map(p=>p.bestScore)) : 0,
+  };
+}
+
 // ── Add Score ─────────────────────────────────────
 function addScore() {
   const nameEl = document.getElementById('player-name');

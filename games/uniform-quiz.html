@@ -740,11 +740,12 @@ function setQuestion() {
   cluesEl.innerHTML = currentTeam.clues.map(c => `<span class="clue-chip">${c}</span>`).join('');
 
   // Options
-  const opts = shuffle([currentTeam.name, ...currentTeam.decoy]).slice(0, 4);
-  if (!opts.includes(currentTeam.name)) { opts[0] = currentTeam.name; shuffle(opts); }
+  // Always include correct answer + 3 unique wrong answers
+  const wrongPool = shuffle(currentTeam.decoy.filter(d => d !== currentTeam.name));
+  const opts = shuffle([currentTeam.name, ...wrongPool.slice(0,3)]);
 
   const optEl = document.getElementById('options');
-  optEl.innerHTML = shuffle([currentTeam.name, ...currentTeam.decoy].slice(0,4)).map(o => `
+  optEl.innerHTML = opts.map(o => `
     <button class="opt-btn" onclick="answer(this, '${o.replace(/'/g, "\\'")}')">
       ${o}
     </button>`).join('');
