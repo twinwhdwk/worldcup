@@ -197,9 +197,12 @@
     .result-msg { color: var(--muted); font-size: 15px; margin-bottom: 32px; }
 
     .result-stats {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+      width: 100%;
+      max-width: 400px;
     }
     .stat-box {
       background: var(--card);
@@ -281,9 +284,32 @@
       100% { opacity: 0; transform: translateY(-40px) scale(0.8); }
     }
 
+    
+    /* ── Loading Splash ── */
+    .splash {
+      position: fixed; inset: 0; background: #0a0a0f;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9999; transition: opacity 0.4s ease;
+    }
+    .splash.fade-out { opacity: 0; pointer-events: none; }
+    .splash-ball { font-size: 64px; animation: bounceBall 0.6s ease infinite alternate; }
+    @keyframes bounceBall { from { transform: translateY(0) rotate(0deg); } to { transform: translateY(-20px) rotate(20deg); } }
+    .splash-title { font-family: 'Black Han Sans', sans-serif; font-size: 22px; margin-top: 20px; color: #fff; }
+    .splash-sub { font-size: 13px; color: #555; margin-top: 8px; }
+    .splash-bar-wrap { width: 200px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin-top: 20px; overflow: hidden; }
+    .splash-bar { height: 100%; background: #00843D; border-radius: 100px; animation: loadBar 0.8s ease forwards; }
+    @keyframes loadBar { from { width: 0%; } to { width: 100%; } }
+
     </style>
 </head>
 <body>
+  <div class="splash" id="splash">
+    <div class="splash-ball">⚽</div>
+    <div class="splash-title">로딩 중...</div>
+    <div class="splash-sub">월드컵 미니게임</div>
+    <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+  </div>
+
   <div class="speed-indicator" id="speed-indicator">⚡ FAST!</div>
   <a href="../index.html" class="back">← 허브로 돌아가기</a>
   <h1>🕵️ 이 선수 어느 나라?</h1>
@@ -337,6 +363,10 @@
       <div class="stat-box">
         <div class="stat-val" id="stat-best">0</div>
         <div class="stat-label">최고 연속</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="stat-acc">0%</div>
+        <div class="stat-label">정확도</div>
       </div>
     </div>
     
@@ -692,9 +722,20 @@ function showResult() {
   document.getElementById('stat-correct').textContent = correctQ;
   document.getElementById('stat-total').textContent = totalQ;
   document.getElementById('stat-best').textContent = bestStreak;
+  // Accuracy
+  const acc = totalQ > 0 ? Math.round(correctQ/totalQ*100) : 0;
+  const accEl = document.getElementById('stat-acc');
+  if (accEl) accEl.textContent = acc + '%';
 }
 
 startGame();
+
+  // Remove splash
+  setTimeout(() => {
+    const s = document.getElementById('splash');
+    if(s){ s.classList.add('fade-out'); setTimeout(()=>s.remove(), 400); }
+  }, 900);
+
 </script>
 </body>
 </html>
