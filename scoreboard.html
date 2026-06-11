@@ -554,6 +554,16 @@ function loadData() {
 }
 function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
 
+
+// ── Name Memory ─────────────────────────────────
+function getSavedName() {
+  return localStorage.getItem('wc_player_name') || '';
+}
+function saveName(name) {
+  if (name) localStorage.setItem('wc_player_name', name);
+}
+// ────────────────────────────────────────────────
+
 // ── Add Score ─────────────────────────────────────
 function addScore() {
   const nameEl = document.getElementById('player-name');
@@ -592,6 +602,7 @@ function addScore() {
   nameEl.value = '';
   scoreEl.value = '';
   nameEl.focus();
+  saveName(name);
   showToast(`✅ ${name} — ${score.toLocaleString()}점 등록!`);
 }
 
@@ -730,6 +741,22 @@ document.addEventListener('keydown', e => {
 });
 
 // ── Init ──────────────────────────────────────────
+
+  // Auto-fill from URL params (coming from game result)
+  const urlParams = new URLSearchParams(window.location.search);
+  const prefillName = urlParams.get('prefill');
+  const prefillScore = urlParams.get('score');
+  if (prefillName) {
+    document.getElementById('player-name').value = prefillName;
+    saveName(prefillName);
+  }
+  if (prefillScore) {
+    document.getElementById('player-score').value = prefillScore;
+    // Highlight the score input
+    setTimeout(() => document.getElementById('player-score').focus(), 300);
+  }
+  const savedName = getSavedName();
+  if (savedName) document.getElementById('player-name').value = savedName;
 render(loadData());
 </script>
 </body>
