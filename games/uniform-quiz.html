@@ -249,12 +249,76 @@
     <div class="result-title" id="res-title">게임 종료!</div>
     <div class="result-score" id="res-score">0점</div>
     <div class="result-msg" id="res-msg"></div>
+    
+    <div id="highscore-box" style="width:100%;max-width:600px;background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;margin-bottom:20px;"></div>
     <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
     <br><br>
     <a href="../index.html" style="color:var(--muted);font-size:14px;">← 다른 게임 하기</a>
   </div>
 
 <script>
+
+// ── High Score System ───────────────────────────────────
+function getHighScores(game) {
+  try { return JSON.parse(localStorage.getItem('wc_hs_' + game) || '[]'); } catch { return []; }
+}
+function saveHighScore(game, score) {
+  const scores = getHighScores(game);
+  scores.push({ score, date: new Date().toLocaleDateString('ko-KR') });
+  scores.sort((a,b) => b.score - a.score);
+  const top5 = scores.slice(0, 5);
+  localStorage.setItem('wc_hs_' + game, JSON.stringify(top5));
+  return top5;
+}
+function renderHighScores(game, containerId) {
+  const scores = getHighScores(game);
+  const el = document.getElementById(containerId);
+  if (!el || scores.length === 0) return;
+  el.innerHTML = '<div style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">🏅 역대 최고점</div>' +
+    scores.map((s,i) => `<div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <span style="color:${i===0?'#FFD700':i===1?'#aaa':i===2?'#cd7f32':'var(--muted)'}">${['🥇','🥈','🥉','4위','5위'][i]}</span>
+      <span style="font-weight:700">${s.score.toLocaleString()}점</span>
+      <span style="color:var(--muted)">${s.date}</span>
+    </div>`).join('');
+}
+// ────────────────────────────────────────────────────────
+
+
+// ── Web Audio Sound System ──────────────────────────────
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _ctx = null;
+function getCtx() {
+  if (!_ctx) _ctx = new AudioCtx();
+  if (_ctx.state === 'suspended') _ctx.resume();
+  return _ctx;
+}
+function playTone(freq, type, duration, vol=0.3, decay=0.8) {
+  try {
+    const ctx = getCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(); osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+function sfxCorrect() {
+  playTone(523, 'sine', 0.12, 0.35);
+  setTimeout(() => playTone(659, 'sine', 0.12, 0.35), 80);
+  setTimeout(() => playTone(784, 'sine', 0.18, 0.35), 160);
+}
+function sfxWrong() {
+  playTone(220, 'sawtooth', 0.25, 0.25);
+  setTimeout(() => playTone(180, 'sawtooth', 0.2, 0.2), 120);
+}
+function sfxGoal() {
+  [523,659,784,1047].forEach((f,i) => setTimeout(()=>playTone(f,'sine',0.22,0.4),i*70));
+}
+function sfxClick() { playTone(440, 'sine', 0.06, 0.15); }
+// ────────────────────────────────────────────────────────
+
 // Jersey SVG generator
 function jerseyPath(colors, pattern = 'solid', number = '10') {
   const [main, secondary, stripe] = colors;
@@ -362,6 +426,31 @@ const TEAMS = [
     clues: ["검은 사선", "빨강+검정", "붉은 악마"],
     decoy: ["🇩🇪 독일","🇧🇫 부르키나파소","🇦🇱 알바니아"],
   },
+
+  {
+    name: "🇸🇳 세네갈", flag: "🇸🇳",
+    home: { colors: ["#ffffff","#00853F","#FDEF42"], pattern: "sash", label: "홈 유니폼" },
+    clues: ["흰색 + 초록 사선", "아프리카 사자", "마네의 나라"],
+    decoy: ["🇮🇪 아일랜드","🇸🇦 사우디아라비아","🇯🇲 자메이카"],
+  },
+  {
+    name: "🇳🇬 나이지리아", flag: "🇳🇬",
+    home: { colors: ["#008751","#ffffff","#008751"], pattern: "stripes", label: "홈 유니폼" },
+    clues: ["초록+흰 세로줄", "슈퍼 이글스", "나이키 특별 에디션"],
+    decoy: ["🇲🇽 멕시코","🇧🇦 보스니아","🇸🇦 사우디아라비아"],
+  },
+  {
+    name: "🇩🇰 덴마크", flag: "🇩🇰",
+    home: { colors: ["#C60C30","#ffffff","#C60C30"], pattern: "collar-stripe", label: "홈 유니폼" },
+    clues: ["빨간색 단색", "덴마크의 역동성", "에릭센의 나라"],
+    decoy: ["🇨🇭 스위스","🇹🇳 튀니지","🇧🇾 벨라루스"],
+  },
+  {
+    name: "🇺🇾 우루과이", flag: "🇺🇾",
+    home: { colors: ["#5EB6E4","#ffffff","#5EB6E4"], pattern: "solid", label: "홈 유니폼" },
+    clues: ["연한 하늘색", "하늘색 단색", "첫 번째 챔피언"],
+    decoy: ["🇦🇷 아르헨티나","🇸🇻 엘살바도르","🇫🇮 핀란드"],
+  },
   {
     name: "🇲🇽 멕시코", flag: "🇲🇽",
     home: { colors: ["#006847","#006847","#ffffff"], pattern: "collar-stripe", label: "홈 유니폼" },
@@ -437,11 +526,11 @@ function answer(btn, selected) {
     const pts = 100;
     score += pts;
     correctQ++;
-    btn.classList.add('correct');
+    sfxCorrect(); btn.classList.add('correct');
     fb.className = 'feedback correct';
     fb.textContent = `✅ 정답! +${pts}점`;
   } else {
-    btn.classList.add('wrong');
+    sfxWrong(); btn.classList.add('wrong');
     document.querySelectorAll('.opt-btn').forEach(b => {
       if (b.textContent.trim() === currentTeam.name) b.classList.add('correct');
     });
@@ -480,7 +569,9 @@ function startGame() {
 
 function showResult() {
   document.getElementById('game-area').style.display = 'none';
+  saveHighScore('uniform', score);
   document.getElementById('result-screen').classList.add('show');
+  renderHighScores('uniform', 'highscore-box');
 
   const pct = totalQ > 0 ? Math.round(correctQ / totalQ * 100) : 0;
   let trophy = '😅', title = '더 공부가 필요해요!', msg = '유니폼을 더 연구해보세요!';

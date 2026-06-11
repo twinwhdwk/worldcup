@@ -281,12 +281,76 @@
         <div class="stat-label">최고 연속</div>
       </div>
     </div>
+    
+    <div id="highscore-box" style="width:100%;max-width:600px;background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;margin-bottom:20px;"></div>
     <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
     <br><br>
     <a href="../index.html" style="color: var(--muted); font-size:14px;">← 다른 게임 하기</a>
   </div>
 
 <script>
+
+// ── High Score System ───────────────────────────────────
+function getHighScores(game) {
+  try { return JSON.parse(localStorage.getItem('wc_hs_' + game) || '[]'); } catch { return []; }
+}
+function saveHighScore(game, score) {
+  const scores = getHighScores(game);
+  scores.push({ score, date: new Date().toLocaleDateString('ko-KR') });
+  scores.sort((a,b) => b.score - a.score);
+  const top5 = scores.slice(0, 5);
+  localStorage.setItem('wc_hs_' + game, JSON.stringify(top5));
+  return top5;
+}
+function renderHighScores(game, containerId) {
+  const scores = getHighScores(game);
+  const el = document.getElementById(containerId);
+  if (!el || scores.length === 0) return;
+  el.innerHTML = '<div style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">🏅 역대 최고점</div>' +
+    scores.map((s,i) => `<div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <span style="color:${i===0?'#FFD700':i===1?'#aaa':i===2?'#cd7f32':'var(--muted)'}">${['🥇','🥈','🥉','4위','5위'][i]}</span>
+      <span style="font-weight:700">${s.score.toLocaleString()}점</span>
+      <span style="color:var(--muted)">${s.date}</span>
+    </div>`).join('');
+}
+// ────────────────────────────────────────────────────────
+
+
+// ── Web Audio Sound System ──────────────────────────────
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _ctx = null;
+function getCtx() {
+  if (!_ctx) _ctx = new AudioCtx();
+  if (_ctx.state === 'suspended') _ctx.resume();
+  return _ctx;
+}
+function playTone(freq, type, duration, vol=0.3, decay=0.8) {
+  try {
+    const ctx = getCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(); osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+function sfxCorrect() {
+  playTone(523, 'sine', 0.12, 0.35);
+  setTimeout(() => playTone(659, 'sine', 0.12, 0.35), 80);
+  setTimeout(() => playTone(784, 'sine', 0.18, 0.35), 160);
+}
+function sfxWrong() {
+  playTone(220, 'sawtooth', 0.25, 0.25);
+  setTimeout(() => playTone(180, 'sawtooth', 0.2, 0.2), 120);
+}
+function sfxGoal() {
+  [523,659,784,1047].forEach((f,i) => setTimeout(()=>playTone(f,'sine',0.22,0.4),i*70));
+}
+function sfxClick() { playTone(440, 'sine', 0.06, 0.15); }
+// ────────────────────────────────────────────────────────
+
 const PLAYERS = [
   { name: "리오넬 메시", country: "🇦🇷 아르헨티나", emoji: "🐐", hints: ["발롱도르 8회", "PSG, 바르셀로나", "왼발잡이"] },
   { name: "크리스티아누 호날두", country: "🇵🇹 포르투갈", emoji: "💪", hints: ["발롱도르 5회", "맨유, 레알, 유벤투스", "CR7"] },
@@ -307,6 +371,27 @@ const PLAYERS = [
   { name: "부카요 사카", country: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드", emoji: "🚀", hints: ["아스날 에이스", "멀티 포지션", "어린 스타"] },
   { name: "페드리", country: "🇪🇸 스페인", emoji: "🎭", hints: ["바르셀로나 미드필더", "어린 천재", "2020 올림픽"] },
   { name: "빈스프레임 음바이오", country: "🇨🇲 카메룬", emoji: "🦁", hints: ["아프리카 강호", "불굴의 사자", "노란 유니폼"] },
+
+  { name: "가레스 베일", country: "🏴󠁧󠁢󠁷󠁬󠁳󠁿 웨일스", emoji: "🦅", hints: ["레알 마드리드", "골프 애호가", "드래곤 나라"] },
+  { name: "티에리 앙리", country: "🇫🇷 프랑스", emoji: "👑", hints: ["아스날 레전드", "2006 월드컵", "손 핸드볼 논란"] },
+  { name: "지네딘 지단", country: "🇫🇷 프랑스", emoji: "💫", hints: ["1998 결승 헤딩 2골", "이탈리아전 박치기", "세계 최고 감독"] },
+  { name: "펠레", country: "🇧🇷 브라질", emoji: "🌟", hints: ["월드컵 3회 우승", "17세 첫 우승", "축구 황제"] },
+  { name: "디에고 마라도나", country: "🇦🇷 아르헨티나", emoji: "🤌", hints: ["신의 손", "세기의 골", "나폴리 레전드"] },
+  { name: "호나우두", country: "🇧🇷 브라질", emoji: "👾", hints: ["2002 월드컵 8골", "이빨 헤어스타일", "진짜 호나우두"] },
+  { name: "로나우지뉴", country: "🇧🇷 브라질", emoji: "😁", hints: ["바르셀로나 마술사", "화려한 드리블", "웃는 천재"] },
+  { name: "올리버 지루", country: "🇫🇷 프랑스", emoji: "🎯", hints: ["골 못 넣어도 공헌", "잘생긴 스트라이커", "2018 우승"] },
+  { name: "다비드 베컴", country: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드", emoji: "💇", hints: ["프리킥 마스터", "패션 아이콘", "빅토리아 남편"] },
+  { name: "카카", country: "🇧🇷 브라질", emoji: "✝️", hints: ["AC 밀란 레전드", "2007 발롱도르", "빠른 공격형 미드"] },
+  { name: "잔루이지 부폰", country: "🇮🇹 이탈리아", emoji: "🧤", hints: ["이탈리아 GK 레전드", "2006 우승", "유벤투스 수호신"] },
+  { name: "카림 벤제마", country: "🇫🇷 프랑스", emoji: "🔥", hints: ["2022 발롱도르", "레알 마드리드", "메시 없는 사이 최고"] },
+  { name: "엔조 페르난데스", country: "🇦🇷 아르헨티나", emoji: "💎", hints: ["2022 월드컵 영플레이어", "첼시 미드필더", "엔조 프란체스콜리 이름"] },
+  { name: "크리스티안 에릭센", country: "🇩🇰 덴마크", emoji: "💪", hints: ["심장마비 생존", "맨유 미드필더", "유로 2020 사고"] },
+  { name: "알바로 모라타", country: "🇪🇸 스페인", emoji: "😤", hints: ["스페인 스트라이커", "비판 많이 받음", "유로 우승"] },
+  { name: "도미니크 칼버트-르윈", country: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드", emoji: "📸", hints: ["에버턴 스트라이커", "패션 모델 부업", "헤딩 능력자"] },
+  { name: "마르코스 아센시오", country: "🇪🇸 스페인", emoji: "⚡", hints: ["레알 마드리드 출신", "PSG 이적", "미드필더 겸 윙어"] },
+  { name: "오렐리앙 추아메니", country: "🇫🇷 프랑스", emoji: "🛡️", hints: ["레알 마드리드 수비형", "21세기 비에이라", "2022 결승 출전"] },
+  { name: "가비", country: "🇪🇸 스페인", emoji: "🎭", hints: ["바르셀로나 미드필더", "부상으로 오래 결장", "어린 레전드 후보"] },
+  { name: "비니시우스 주니오르", country: "🇧🇷 브라질", emoji: "💃", hints: ["레알 마드리드 윙어", "춤 세리머니 논란", "2022 UCL 결승골"] },
   { name: "이강인", country: "🇰🇷 대한민국", emoji: "⚽", hints: ["PSG 미드필더", "2019 U-20 황금공", "마요르카 출신"] },
 ];
 
@@ -378,12 +463,12 @@ function answer(btn, selected) {
     const pts = 100 + bonus * 50;
     score += pts;
     correctQ++;
-    btn.classList.add('correct');
+    sfxCorrect(); btn.classList.add('correct');
     fb.className = 'feedback correct';
     fb.textContent = streak >= 3 ? `🔥 정답! +${pts}점 (콤보!)` : `✅ 정답! +${pts}점`;
   } else {
     streak = 0;
-    btn.classList.add('wrong');
+    sfxWrong(); btn.classList.add('wrong');
     // highlight correct
     document.querySelectorAll('.opt-btn').forEach(b => {
       if (b.textContent.trim() === currentAnswer) b.classList.add('correct');
