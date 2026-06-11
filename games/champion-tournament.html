@@ -349,6 +349,44 @@
     .splash-bar { height: 100%; background: #00843D; border-radius: 100px; animation: loadBar 0.8s ease forwards; }
     @keyframes loadBar { from { width: 0%; } to { width: 100%; } }
 
+    
+    .result-grade {
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .history-item .year-tag { min-width: 56px; }
+    .history-correct { color: var(--correct); font-size: 13px; }
+    .history-wrong { color: #555; font-size: 13px; text-decoration: line-through; }
+
+    
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(10,10,15,0.95);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 8px;
+      z-index: 500;
+      backdrop-filter: blur(10px);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center;
+      text-decoration: none; color: var(--muted);
+      font-size: 10px; gap: 3px; flex: 1;
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-item.active { color: #FFD700; }
+    .nav-item:hover { color: #fff; }
+    .nav-icon { font-size: 20px; }
+    /* push content above nav */
+    body { padding-bottom: 72px; }
+
     </style>
 </head>
 <body>
@@ -406,6 +444,7 @@
   </div>
 
   <div class="result-screen" id="result-screen">
+    <div class="result-grade" id="result-grade"></div>
     <div class="result-trophy" id="result-trophy">🏆</div>
     <div class="result-title" id="result-title">완주!</div>
     <div class="result-score" id="result-score">0점</div>
@@ -786,6 +825,11 @@ function showResult() {
   else if (correctCount >= 5) { trophy = '🥈'; title = '준수한 실력!'; msg = '조금만 더 공부하면 완벽해요!'; }
   else if (correctCount >= 3) { trophy = '🥉'; title = '아직 배울 게 많아요!'; msg = '계속 도전해보세요!'; }
 
+  // Grade
+  const grades = [[9,'S','#FFD700'],[7,'A','#22c55e'],[5,'B','#3b82f6'],[3,'C','#f59e0b'],[0,'D','#ef4444']];
+  const grade = grades.find(g => correctCount >= g[0]);
+  const gradeEl = document.getElementById('result-grade');
+  if (gradeEl) { gradeEl.textContent = `GRADE  ${grade[1]}`; gradeEl.style.color = grade[2]; }
   document.getElementById('result-trophy').textContent = trophy;
   document.getElementById('result-title').textContent = title;
   document.getElementById('result-score').textContent = score + '점';
@@ -810,5 +854,13 @@ startGame();
   }, 900);
 
 </script>
+  <nav class="bottom-nav">
+    <a href="player-country.html" class="nav-item "><span class="nav-icon">🕵️</span><span>선수퀴즈</span></a>
+<a href="champion-tournament.html" class="nav-item active"><span class="nav-icon">🏆</span><span>우승국</span></a>
+<a href="penalty-kick.html" class="nav-item "><span class="nav-icon">🥅</span><span>페널티킥</span></a>
+<a href="uniform-quiz.html" class="nav-item "><span class="nav-icon">👕</span><span>유니폼</span></a>
+<a href="../scoreboard.html" class="nav-item"><span class="nav-icon">🏅</span><span>랭킹</span></a>
+<a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span>허브</span></a>
+  </nav>
 </body>
 </html>
