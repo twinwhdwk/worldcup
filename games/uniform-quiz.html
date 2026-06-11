@@ -242,6 +242,16 @@
     .shoot-btn { -webkit-tap-highlight-color: transparent; }
     .arrow-btn { min-width: 80px; min-height: 48px; }
 
+    
+    .streak-bar {
+      text-align: center;
+      font-size: 13px;
+      color: #f97316;
+      min-height: 20px;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
     </style>
 </head>
 <body>
@@ -265,6 +275,7 @@
       </div>
     </div>
 
+    <div class="streak-bar" id="streak-bar"></div>
     <div class="timer-bar-wrap">
       <div id="timer-bar" style="width:100%"></div>
     </div>
@@ -299,6 +310,15 @@
   </div>
 
 <script>
+
+let showAway = false;
+function toggleJersey() {
+  showAway = !showAway;
+  const btn = document.getElementById('toggle-jersey-btn');
+  if (btn) btn.textContent = showAway ? '🔄 홈 유니폼 보기' : '🔄 원정 유니폼 보기';
+  setQuestion();
+}
+
 
 function shareResult(score, gameName) {
   const text = `⚽ 월드컵 미니게임\n🎮 ${gameName}\n🏆 ${score.toLocaleString()}점 달성!\n\nhttps://twinwhdwk.github.io/worldcup_minigame`;
@@ -460,24 +480,28 @@ function jerseyPath(colors, pattern = 'solid', number = '10') {
 const TEAMS = [
   {
     name: "🇧🇷 브라질", flag: "🇧🇷",
+    away: { colors: ["#003087","#003087","#FFD700"], pattern: "solid", label: "원정 유니폼" },
     home: { colors: ["#FFD700","#009c3b","#009c3b"], pattern: "solid", label: "홈 유니폼" },
     clues: ["노란 상의", "파란 반바지", "삼바의 나라"],
     decoy: ["🇨🇴 콜롬비아","🇸🇪 스웨덴","🇺🇦 우크라이나"],
   },
   {
     name: "🇩🇪 독일", flag: "🇩🇪",
+    away: { colors: ["#000000","#ffffff","#cc0000"], pattern: "solid", label: "원정 유니폼" },
     home: { colors: ["#ffffff","#000000","#cc0000"], pattern: "collar-stripe", label: "홈 유니폼" },
     clues: ["흰색 상의", "검은 반바지", "독수리 엠블럼"],
     decoy: ["🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드","🇵🇱 폴란드","🇺🇾 우루과이"],
   },
   {
     name: "🇦🇷 아르헨티나", flag: "🇦🇷",
+    away: { colors: ["#003189","#74ACDF","#003189"], pattern: "solid", label: "원정 유니폼" },
     home: { colors: ["#74ACDF","#ffffff","#74ACDF"], pattern: "stripes", label: "홈 유니폼" },
     clues: ["하늘색 + 흰색 세로줄", "남미 강국", "메시의 나라"],
     decoy: ["🇺🇾 우루과이","🇸🇻 엘살바도르","🇬🇷 그리스"],
   },
   {
     name: "🇫🇷 프랑스", flag: "🇫🇷",
+    away: { colors: ["#ffffff","#003189","#ffffff"], pattern: "collar-stripe", label: "원정 유니폼" },
     home: { colors: ["#003189","#ff0000","#ffffff"], pattern: "solid", label: "홈 유니폼" },
     clues: ["진한 파란색", "수탉 엠블럼", "레 블뢰"],
     decoy: ["🇮🇹 이탈리아","🇸🇪 스웨덴","🇧🇦 보스니아"],
@@ -508,6 +532,7 @@ const TEAMS = [
   },
   {
     name: "🇰🇷 대한민국", flag: "🇰🇷",
+    away: { colors: ["#ffffff","#C60C30","#003478"], pattern: "collar-stripe", label: "원정 유니폼" },
     home: { colors: ["#C60C30","#003478","#ffffff"], pattern: "solid", label: "홈 유니폼" },
     clues: ["빨간 악마", "태극 문양", "붉은 유니폼"],
     decoy: ["🇩🇰 덴마크","🇨🇭 스위스","🇹🇷 터키"],
@@ -557,7 +582,7 @@ const TEAMS = [
   },
 ];
 
-let score = 0, timeLeft = 30, qNum = 0, totalQ = 0, correctQ = 0;
+let score = 0, timeLeft = 30, qNum = 0, totalQ = 0, correctQ = 0, streak = 0;
 let timerInterval;
 let usedIdx = [], answered = false;
 
@@ -629,7 +654,8 @@ function answer(btn, selected) {
     fb.textContent = `✅ 정답! +${pts}점`;
   } else {
     sfxWrong(); btn.classList.add('wrong'); wrongStreak++; checkAutoHint();
-    document.querySelectorAll('.opt-btn').forEach(b => {
+    streak = 0;
+  document.querySelectorAll('.opt-btn').forEach(b => {
       if (b.textContent.trim() === currentTeam.name) b.classList.add('correct');
     });
     fb.className = 'feedback wrong';
@@ -637,6 +663,8 @@ function answer(btn, selected) {
   }
 
   document.getElementById('score-val').textContent = score;
+  const sb = document.getElementById('streak-bar');
+  if (sb) { sb.textContent = streak >= 3 ? '🔥 ' + streak + '연속 정답!' : ''; }
   setTimeout(setQuestion, 900);
 }
 
