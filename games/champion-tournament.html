@@ -153,14 +153,7 @@
   <a href="../index.html" style="color:var(--muted);font-size:13px;">← 다른 게임 하기</a>
 </div>
 
-<nav class="bottom-nav">
-  <a href="player-country.html" class="nav-item"><span class="nav-icon">🕵️</span><span>선수퀴즈</span></a>
-  <a href="champion-tournament.html" class="nav-item active"><span class="nav-icon">🏆</span><span>우승국</span></a>
-  <a href="penalty-kick.html" class="nav-item"><span class="nav-icon">🥅</span><span>페널티킥</span></a>
-  <a href="uniform-quiz.html" class="nav-item"><span class="nav-icon">👕</span><span>유니폼</span></a>
-  <a href="../scoreboard.html" class="nav-item"><span class="nav-icon">🏅</span><span>랭킹</span></a>
-  <a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span>허브</span></a>
-</nav>
+
 
 <script>
 function goToScoreboard(s){ const name=localStorage.getItem('wc_player_name')||''; window.location.href='../scoreboard.html'+(name?`?prefill=${encodeURIComponent(name)}&score=${s}`:''); }
@@ -368,5 +361,14 @@ function showResult(){
 setTimeout(()=>{const s=document.getElementById('splash');s.classList.add('out');setTimeout(()=>s.remove(),400);},900);
 startGame();
 </script>
+<nav class="bottom-nav">
+  <a href="player-country.html" class="nav-item "><span class="nav-icon">🕵️</span><span>선수</span></a>
+  <a href="champion-tournament.html" class="nav-item active"><span class="nav-icon">🏆</span><span>우승국</span></a>
+  <a href="penalty-kick.html" class="nav-item "><span class="nav-icon">🥅</span><span>페널티</span></a>
+  <a href="uniform-quiz.html" class="nav-item "><span class="nav-icon">👕</span><span>유니폼</span></a>
+  <a href="flag-quiz.html" class="nav-item "><span class="nav-icon">🚩</span><span>국기</span></a>
+  <a href="wins-quiz.html" class="nav-item "><span class="nav-icon">⚡</span><span>횟수</span></a>
+  <a href="../scoreboard.html" class="nav-item"><span class="nav-icon">🏅</span><span>랭킹</span></a>
+</nav>
 </body>
 </html>
