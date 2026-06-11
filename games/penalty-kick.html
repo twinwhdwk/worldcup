@@ -329,7 +329,28 @@
     }
     .series-box.you { color: var(--goal); }
     .series-box.ai { color: var(--miss); }
-  </style>
+  
+    /* ── Mobile Optimization ── */
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .options { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .opt-btn { padding: 14px 8px; font-size: 14px; min-height: 64px; }
+      .question-card, .q-card, .jersey-card { padding: 24px 16px; }
+      .hud { gap: 8px; }
+      .hud-box { padding: 10px 6px; }
+      .hud-value { font-size: 22px; }
+      .player-emoji, .jersey-display { font-size: 56px; }
+      .hints, .clues, .hint-row { gap: 6px; }
+      .hint-chip, .clue-chip { font-size: 11px; padding: 4px 10px; }
+      .shoot-btn { padding: 16px 40px; font-size: 18px; }
+      h1 { font-size: 28px; }
+    }
+    /* Larger touch targets */
+    .opt-btn { min-height: 56px; -webkit-tap-highlight-color: transparent; }
+    .shoot-btn { -webkit-tap-highlight-color: transparent; }
+    .arrow-btn { min-width: 80px; min-height: 48px; }
+
+    </style>
 </head>
 <body>
   <a href="../index.html" class="back">← 허브로 돌아가기</a>
@@ -364,7 +385,14 @@
     <br>
     <button class="start-btn" onclick="restartGame()">🔄 다시 도전</button>
     <br><br>
-    <a href="../index.html" style="color:var(--muted);font-size:14px;">← 다른 게임 하기</a>
+    <a href="../index.html" style="color:var(--muted);font-size:14px;">
+    <br>
+    <a href="../scoreboard.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:100px;padding:12px 24px;text-decoration:none;color:#FFD700;font-weight:700;font-size:15px;margin-top:8px;">
+      🏆 내 점수 랭킹에 등록하기
+    </a>
+
+    <br><a href="../index.html" style="color:var(--muted);font-size:14px;">← 다른 게임 하기</a>
+    <a</a>
   </div>
 
   <!-- GAME -->
@@ -414,6 +442,50 @@
   </div>
 
 <script>
+
+function shareResult(score, gameName) {
+  const text = `⚽ 월드컵 미니게임\n🎮 ${gameName}\n🏆 ${score.toLocaleString()}점 달성!\n\nhttps://twinwhdwk.github.io/worldcup_minigame`;
+  if (navigator.share) {
+    navigator.share({ title: '월드컵 미니게임', text });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => alert('클립보드에 복사됐어요!'));
+  }
+}
+
+
+// ── Confetti System ─────────────────────────────
+function launchConfetti(x, y, count=18) {
+  const colors = ['#FFD700','#00843D','#ef4444','#3b82f6','#a855f7','#fff'];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position:fixed; width:${6+Math.random()*6}px; height:${6+Math.random()*6}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      left:${x}px; top:${y}px; pointer-events:none; z-index:9999;
+      transform:rotate(${Math.random()*360}deg);
+    `;
+    document.body.appendChild(el);
+    const angle = (Math.random() * 360) * Math.PI / 180;
+    const speed = 80 + Math.random() * 120;
+    const vx = Math.cos(angle) * speed;
+    const vy = Math.sin(angle) * speed - 60;
+    let px = x, py = y, vy2 = vy, t = 0;
+    const tick = () => {
+      t += 0.016; px += vx * 0.016; vy2 += 200 * 0.016; py += vy2 * 0.016;
+      el.style.left = px + 'px'; el.style.top = py + 'px';
+      el.style.opacity = Math.max(0, 1 - t * 1.5);
+      el.style.transform = `rotate(${t*200}deg)`;
+      if (t < 0.8) requestAnimationFrame(tick); else el.remove();
+    };
+    requestAnimationFrame(tick);
+  }
+}
+function launchFullConfetti() {
+  for (let i = 0; i < 4; i++) setTimeout(() => launchConfetti(Math.random()*window.innerWidth, -10, 12), i*150);
+}
+// ────────────────────────────────────────────────
+
 
 // AI Pattern Learning
 const playerHistory = { left: 0, center: 0, right: 0 };
@@ -585,7 +657,7 @@ function shoot(dir) {
 
     if (isGoal) {
       goals++;
-      flash.className = 'goal-flash goal-anim'; sfxGoal();
+      flash.className = 'goal-flash goal-anim'; sfxGoal(); launchFullConfetti();
       shotResult.className = 'shot-result goal-text show';
       shotResult.textContent = '⚽ GOAL!';
       document.getElementById('dot-' + kickNum).textContent = '✅';

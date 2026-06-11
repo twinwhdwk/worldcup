@@ -208,7 +208,41 @@
       transition: opacity 0.2s, transform 0.15s;
     }
     .btn-restart:hover { opacity: 0.85; transform: scale(1.03); }
-  </style>
+  
+    @keyframes scorePop {
+      0% { transform: scale(0) translateY(0); opacity: 1; }
+      60% { transform: scale(1.3) translateY(-30px); opacity: 1; }
+      100% { transform: scale(1) translateY(-60px); opacity: 0; }
+    }
+    .score-pop {
+      position: fixed; font-family: 'Black Han Sans', sans-serif;
+      font-size: 28px; font-weight: 900; pointer-events: none; z-index: 9998;
+      animation: scorePop 0.7s ease forwards;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    
+    /* ── Mobile Optimization ── */
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .options { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .opt-btn { padding: 14px 8px; font-size: 14px; min-height: 64px; }
+      .question-card, .q-card, .jersey-card { padding: 24px 16px; }
+      .hud { gap: 8px; }
+      .hud-box { padding: 10px 6px; }
+      .hud-value { font-size: 22px; }
+      .player-emoji, .jersey-display { font-size: 56px; }
+      .hints, .clues, .hint-row { gap: 6px; }
+      .hint-chip, .clue-chip { font-size: 11px; padding: 4px 10px; }
+      .shoot-btn { padding: 16px 40px; font-size: 18px; }
+      h1 { font-size: 28px; }
+    }
+    /* Larger touch targets */
+    .opt-btn { min-height: 56px; -webkit-tap-highlight-color: transparent; }
+    .shoot-btn { -webkit-tap-highlight-color: transparent; }
+    .arrow-btn { min-width: 80px; min-height: 48px; }
+
+    </style>
 </head>
 <body>
   <a href="../index.html" class="back">← 허브로 돌아가기</a>
@@ -238,6 +272,7 @@
     <div class="jersey-card">
       <div class="jersey-display" id="jersey-display"></div>
       <div class="clues" id="clues"></div>
+      <div id="auto-hint" style="display:none;font-size:13px;color:#f97316;margin-bottom:8px;"></div>
       <div class="feedback" id="feedback"></div>
     </div>
 
@@ -253,10 +288,73 @@
     <div id="highscore-box" style="width:100%;max-width:600px;background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;margin-bottom:20px;"></div>
     <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
     <br><br>
-    <a href="../index.html" style="color:var(--muted);font-size:14px;">← 다른 게임 하기</a>
+    <a href="../index.html" style="color:var(--muted);font-size:14px;">
+    <br>
+    <a href="../scoreboard.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:100px;padding:12px 24px;text-decoration:none;color:#FFD700;font-weight:700;font-size:15px;margin-top:8px;">
+      🏆 내 점수 랭킹에 등록하기
+    </a>
+
+    <br><a href="../index.html" style="color:var(--muted);font-size:14px;">← 다른 게임 하기</a>
+    <a</a>
   </div>
 
 <script>
+
+function shareResult(score, gameName) {
+  const text = `⚽ 월드컵 미니게임\n🎮 ${gameName}\n🏆 ${score.toLocaleString()}점 달성!\n\nhttps://twinwhdwk.github.io/worldcup_minigame`;
+  if (navigator.share) {
+    navigator.share({ title: '월드컵 미니게임', text });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => alert('클립보드에 복사됐어요!'));
+  }
+}
+
+
+let wrongStreak = 0;
+function checkAutoHint() {
+  if (wrongStreak >= 2) {
+    const hintEl = document.getElementById('auto-hint');
+    if (hintEl && currentTeam) {
+      hintEl.textContent = '💡 자동 힌트: ' + currentTeam.clues[0];
+      hintEl.style.display = 'block';
+    }
+  }
+}
+
+
+// ── Confetti System ─────────────────────────────
+function launchConfetti(x, y, count=18) {
+  const colors = ['#FFD700','#00843D','#ef4444','#3b82f6','#a855f7','#fff'];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position:fixed; width:${6+Math.random()*6}px; height:${6+Math.random()*6}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      left:${x}px; top:${y}px; pointer-events:none; z-index:9999;
+      transform:rotate(${Math.random()*360}deg);
+    `;
+    document.body.appendChild(el);
+    const angle = (Math.random() * 360) * Math.PI / 180;
+    const speed = 80 + Math.random() * 120;
+    const vx = Math.cos(angle) * speed;
+    const vy = Math.sin(angle) * speed - 60;
+    let px = x, py = y, vy2 = vy, t = 0;
+    const tick = () => {
+      t += 0.016; px += vx * 0.016; vy2 += 200 * 0.016; py += vy2 * 0.016;
+      el.style.left = px + 'px'; el.style.top = py + 'px';
+      el.style.opacity = Math.max(0, 1 - t * 1.5);
+      el.style.transform = `rotate(${t*200}deg)`;
+      if (t < 0.8) requestAnimationFrame(tick); else el.remove();
+    };
+    requestAnimationFrame(tick);
+  }
+}
+function launchFullConfetti() {
+  for (let i = 0; i < 4; i++) setTimeout(() => launchConfetti(Math.random()*window.innerWidth, -10, 12), i*150);
+}
+// ────────────────────────────────────────────────
+
 
 // ── High Score System ───────────────────────────────────
 function getHighScores(game) {
@@ -526,11 +624,11 @@ function answer(btn, selected) {
     const pts = 100;
     score += pts;
     correctQ++;
-    sfxCorrect(); btn.classList.add('correct');
-    fb.className = 'feedback correct';
+    sfxCorrect(); btn.classList.add('correct'); wrongStreak = 0; document.getElementById('auto-hint') && (document.getElementById('auto-hint').style.display='none');
+    fb.className = 'feedback correct'; launchFullConfetti();
     fb.textContent = `✅ 정답! +${pts}점`;
   } else {
-    sfxWrong(); btn.classList.add('wrong');
+    sfxWrong(); btn.classList.add('wrong'); wrongStreak++; checkAutoHint();
     document.querySelectorAll('.opt-btn').forEach(b => {
       if (b.textContent.trim() === currentTeam.name) b.classList.add('correct');
     });
