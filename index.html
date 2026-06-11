@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚽ 월드컵 미니게임 허브</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00843D;
+      --gold: #FFD700;
+      --dark: #0a0a0f;
+      --card-bg: #13141f;
+      --accent: #e8ff47;
+      --text: #f0f0f0;
+      --muted: #888;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grass texture background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg, rgba(0,132,61,0.04) 0px, transparent 1px, transparent 60px, rgba(0,132,61,0.04) 61px),
+        repeating-linear-gradient(0deg, rgba(0,132,61,0.04) 0px, transparent 1px, transparent 60px, rgba(0,132,61,0.04) 61px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 60px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--green);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: clamp(48px, 8vw, 96px);
+      line-height: 0.95;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, #fff 30%, var(--gold) 70%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span {
+      display: block;
+      font-size: 0.55em;
+      background: linear-gradient(135deg, var(--accent), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 4px;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      font-size: 16px;
+      margin-top: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    /* BALL animation */
+    .ball {
+      font-size: 56px;
+      display: inline-block;
+      animation: spin 6s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* GAME GRID */
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      padding: 20px 0 80px;
+    }
+
+    .game-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 32px 28px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--card-accent, var(--green)) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .game-card:hover::before { opacity: 0.08; }
+
+    .game-card .icon {
+      font-size: 52px;
+      margin-bottom: 20px;
+      display: block;
+      position: relative;
+    }
+
+    .game-card .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--card-accent, var(--green));
+      margin-bottom: 10px;
+    }
+
+    .game-card h2 {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 22px;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .game-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .game-card .play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 24px;
+      background: var(--card-accent, var(--green));
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 100px;
+      transition: opacity 0.2s;
+    }
+
+    .game-card:hover .play-btn { opacity: 0.85; }
+
+    /* card colors */
+    .card-c { --card-accent: #3b82f6; }
+    .card-d { --card-accent: #FFD700; }
+    .card-e { --card-accent: #ef4444; }
+    .card-f { --card-accent: #a855f7; }
+
+    .card-d .play-btn { color: #000; }
+    .card-d .tag { color: #FFD700; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="ball">⚽</div>
+    <div class="hero-badge">World Cup Mini Games</div>
+    <h1>월드컵<span>미니게임</span></h1>
+    <p class="hero-sub">잠깐의 여유, 최고의 축구 감각을 확인하세요</p>
+  </div>
+
+  <div class="container">
+    <div class="game-grid">
+
+      <a href="games/player-country.html" class="game-card card-c">
+        <span class="icon">🕵️</span>
+        <div class="tag">Speed Quiz</div>
+        <h2>이 선수<br>어느 나라?</h2>
+        <p>힌트를 보고 30초 안에 최대한 많은 선수의 국적을 맞춰보세요!</p>
+        <div class="play-btn">▶ 플레이</div>
+      </a>
+
+      <a href="games/champion-tournament.html" class="game-card card-d">
+        <span class="icon">🏆</span>
+        <div class="tag">Tournament</div>
+        <h2>월드컵<br>우승국 퀴즈</h2>
+        <p>연도 힌트를 보고 그 해 월드컵 우승국을 토너먼트 방식으로 맞추세요!</p>
+        <div class="play-btn">▶ 플레이</div>
+      </a>
+
+      <a href="games/penalty-kick.html" class="game-card card-e">
+        <span class="icon">🥅</span>
+        <div class="tag">Timing Game</div>
+        <h2>페널티킥<br>결승전</h2>
+        <p>움직이는 골키퍼의 반대편으로 타이밍에 맞춰 슛! 5골 넣으면 우승!</p>
+        <div class="play-btn">▶ 플레이</div>
+      </a>
+
+      <a href="games/uniform-quiz.html" class="game-card card-f">
+        <span class="icon">👕</span>
+        <div class="tag">Visual Quiz</div>
+        <h2>이 유니폼<br>어느 팀?</h2>
+        <p>유니폼 색상과 패턴을 보고 어느 나라인지 맞추는 시각적 퀴즈!</p>
+        <div class="play-btn">▶ 플레이</div>
+      </a>
+
+    </div>
+  </div>
+
+  <footer>⚽ World Cup Mini Games &nbsp;|&nbsp; 2026 FIFA World Cup Edition</footer>
+</body>
+</html>

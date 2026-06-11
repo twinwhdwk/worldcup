@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏆 월드컵 우승국 퀴즈</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #FFD700;
+      --gold2: #b8860b;
+      --dark: #0a0a0f;
+      --card: #13141f;
+      --text: #f0f0f0;
+      --muted: #666;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .back { align-self: flex-start; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 20px; }
+
+    h1 {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: clamp(28px, 5vw, 48px);
+      text-align: center;
+      background: linear-gradient(135deg, #fff, var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .subtitle { color: var(--muted); font-size: 14px; text-align: center; margin-bottom: 30px; }
+
+    /* PROGRESS */
+    .progress-wrap {
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 24px;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .progress-bar-bg {
+      height: 8px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    #progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold2), var(--gold));
+      border-radius: 100px;
+      transition: width 0.4s ease;
+    }
+
+    /* BRACKET */
+    .rounds {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .round-pill {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted);
+      background: var(--card);
+    }
+    .round-pill.active {
+      background: var(--gold);
+      color: #000;
+      border-color: var(--gold);
+    }
+    .round-pill.done {
+      background: rgba(34,197,94,0.15);
+      border-color: var(--correct);
+      color: var(--correct);
+    }
+
+    /* QUESTION CARD */
+    .q-card {
+      background: var(--card);
+      border: 1px solid rgba(255,215,0,0.15);
+      border-radius: 24px;
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 640px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .q-card::before {
+      content: '🏆';
+      position: absolute;
+      font-size: 200px;
+      opacity: 0.03;
+      top: -40px;
+      right: -40px;
+    }
+
+    .year-badge {
+      display: inline-block;
+      background: var(--gold);
+      color: #000;
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 48px;
+      padding: 8px 32px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+
+    .host-info {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .hint-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin: 16px 0;
+    }
+    .hint-chip {
+      background: rgba(255,215,0,0.1);
+      border: 1px solid rgba(255,215,0,0.2);
+      color: var(--gold);
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 100px;
+    }
+
+    .reveal-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--muted);
+      font-size: 13px;
+      padding: 8px 20px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+    .reveal-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    .extra-hint {
+      font-size: 13px;
+      color: #aaa;
+      min-height: 20px;
+      margin-bottom: 4px;
+    }
+
+    .feedback-area {
+      font-size: 22px;
+      font-weight: 700;
+      height: 32px;
+    }
+    .feedback-area.correct { color: var(--correct); }
+    .feedback-area.wrong { color: var(--wrong); }
+
+    /* OPTIONS */
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .opt-btn {
+      background: var(--card);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px 16px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .opt-btn .flag { font-size: 28px; display: block; margin-bottom: 6px; }
+    .opt-btn:hover:not(:disabled) {
+      border-color: var(--gold);
+      background: rgba(255,215,0,0.08);
+      transform: scale(1.03);
+    }
+    .opt-btn.correct { border-color: var(--correct); background: rgba(34,197,94,0.15); }
+    .opt-btn.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.15); }
+    .opt-btn:disabled { cursor: not-allowed; }
+
+    /* SCORE HUD */
+    .hud {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 16px;
+    }
+    .hud-box {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .hud-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .hud-value { font-family: 'Black Han Sans', sans-serif; font-size: 26px; margin-top: 2px; color: var(--gold); }
+
+    /* RESULT */
+    .result-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      max-width: 640px;
+    }
+    .result-screen.show { display: flex; }
+    .result-trophy { font-size: 80px; margin-bottom: 16px; }
+    .result-title { font-family: 'Black Han Sans', sans-serif; font-size: 36px; margin-bottom: 8px; }
+    .result-score { font-size: 60px; font-family: 'Black Han Sans', sans-serif; color: var(--gold); margin: 12px 0; }
+    .result-msg { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
+    .result-history {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    .result-history h3 { font-size: 14px; color: var(--muted); margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase; }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 14px;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-item .year-tag { color: var(--gold); font-weight: 700; }
+    .history-item .result-tag { font-size: 18px; }
+    .btn-restart {
+      background: var(--gold);
+      color: #000;
+      border: none;
+      border-radius: 100px;
+      padding: 16px 48px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-restart:hover { opacity: 0.85; transform: scale(1.03); }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back">← 허브로 돌아가기</a>
+  <h1>🏆 월드컵 우승국 퀴즈</h1>
+  <p class="subtitle">이 해의 월드컵 우승국은 어디일까요?</p>
+
+  <div id="game-area" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+    <div class="hud">
+      <div class="hud-box">
+        <div class="hud-label">🏅 점수</div>
+        <div class="hud-value" id="score-val">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">✅ 정답</div>
+        <div class="hud-value" id="correct-val">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">📋 남은</div>
+        <div class="hud-value" id="remain-val">10</div>
+      </div>
+    </div>
+
+    <div class="rounds" id="rounds"></div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="progress-text">0 / 10</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="year-badge" id="year-badge">????</div>
+      <div class="host-info" id="host-info">개최국: ?</div>
+      <div class="hint-row" id="hint-row"></div>
+      <button class="reveal-btn" id="reveal-btn" onclick="revealHint()">💡 추가 힌트 보기</button>
+      <div class="extra-hint" id="extra-hint"></div>
+      <div class="feedback-area" id="feedback"></div>
+    </div>
+
+    <div class="options" id="options"></div>
+  </div>
+
+  <div class="result-screen" id="result-screen">
+    <div class="result-trophy" id="result-trophy">🏆</div>
+    <div class="result-title" id="result-title">완주!</div>
+    <div class="result-score" id="result-score">0점</div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="result-history" id="result-history">
+      <h3>📋 내 기록</h3>
+      <div id="history-list"></div>
+    </div>
+    <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
+    <br><br>
+    <a href="../index.html" style="color:var(--muted);font-size:14px;">← 다른 게임 하기</a>
+  </div>
+
+<script>
+const WORLD_CUPS = [
+  { year: 1930, host: "우루과이", winner: "🇺🇾 우루과이", flag: "🇺🇾", hints: ["첫 번째 월드컵", "남미 개최", "우루과이 vs 아르헨티나 결승"], extra: "13개국만 참가한 역대 최소 규모" },
+  { year: 1950, host: "브라질", winner: "🇺🇾 우루과이", flag: "🇺🇾", hints: ["브라질 개최", "마라카낭의 비극", "결승전 형식 아닌 리그전"], extra: "브라질이 우승 직전 충격적 패배" },
+  { year: 1954, host: "스위스", winner: "🇩🇪 서독", flag: "🇩🇪", hints: ["스위스 개최", "베른의 기적", "헝가리 꺾음"], extra: "당시 헝가리는 4년간 무패행진 중이었음" },
+  { year: 1958, host: "스웨덴", winner: "🇧🇷 브라질", flag: "🇧🇷", hints: ["스웨덴 개최", "17세 펠레 데뷔", "브라질의 첫 우승"], extra: "펠레가 역사상 최연소 월드컵 우승자" },
+  { year: 1966, host: "잉글랜드", winner: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", hints: ["웸블리 결승", "잉글랜드 유일 우승", "바비 무어 주장"], extra: "3-2로 서독을 꺾고 유일한 우승" },
+  { year: 1970, host: "멕시코", winner: "🇧🇷 브라질", flag: "🇧🇷", hints: ["멕시코 개최", "펠레의 마지막 월드컵", "화려한 공격 축구"], extra: "브라질이 트로피를 영구 소장함 (3회 우승)" },
+  { year: 1974, host: "서독", winner: "🇩🇪 서독", flag: "🇩🇪", hints: ["서독 개최", "요한 크루이프의 네덜란드", "토털 사커 대결"], extra: "요한 크루이프는 무릎을 꿇지 않겠다며 불참" },
+  { year: 1978, host: "아르헨티나", winner: "🇦🇷 아르헨티나", flag: "🇦🇷", hints: ["아르헨티나 개최", "마리오 켐페스", "홈 우승"], extra: "아르헨티나의 첫 번째 월드컵 우승" },
+  { year: 1982, host: "스페인", winner: "🇮🇹 이탈리아", flag: "🇮🇹", hints: ["스페인 개최", "파올로 로시 6골", "카테나치오"], extra: "이탈리아가 조별리그 부진에서 우승까지" },
+  { year: 1986, host: "멕시코", winner: "🇦🇷 아르헨티나", flag: "🇦🇷", hints: ["멕시코 개최", "마라도나의 대회", "신의 손 & 세기의 골"], extra: "마라도나 혼자 아르헨티나를 우승으로 이끔" },
+  { year: 1990, host: "이탈리아", winner: "🇩🇪 서독", flag: "🇩🇪", hints: ["이탈리아 개최", "역대 최저 득점 대회", "독일의 3번째 우승"], extra: "평균 득점 2.21골로 역대 최저" },
+  { year: 1994, host: "미국", winner: "🇧🇷 브라질", flag: "🇧🇷", hints: ["미국 개최", "로마리오 & 베베토", "승부차기 결승"], extra: "이탈리아와의 결승전은 승부차기로 결정" },
+  { year: 1998, host: "프랑스", winner: "🇫🇷 프랑스", flag: "🇫🇷", hints: ["프랑스 개최", "지단의 결승 헤딩 2골", "홈 우승"], extra: "지단이 결승에서 헤딩골 2개를 넣음" },
+  { year: 2002, host: "한국·일본", winner: "🇧🇷 브라질", flag: "🇧🇷", hints: ["아시아 공동 개최", "한국 4강 신화", "호나우두 8골"], extra: "한국이 4강에 오른 역대 최고 성적" },
+  { year: 2006, host: "독일", winner: "🇮🇹 이탈리아", flag: "🇮🇹", hints: ["독일 개최", "지단의 박치기", "이탈리아 4번째 우승"], extra: "지단의 머리박기 퇴장으로 유명한 대회" },
+  { year: 2010, host: "남아프리카공화국", winner: "🇪🇸 스페인", flag: "🇪🇸", hints: ["아프리카 첫 개최", "부부젤라", "스페인 첫 우승"], extra: "부부젤라 소리로 기억되는 대회" },
+  { year: 2014, host: "브라질", winner: "🇩🇪 독일", flag: "🇩🇪", hints: ["브라질 개최", "미네이랑의 비극 7-1", "독일 4번째 우승"], extra: "브라질이 준결승에서 독일에 1-7로 대패" },
+  { year: 2018, host: "러시아", winner: "🇫🇷 프랑스", flag: "🇫🇷", hints: ["러시아 개최", "음바페 19살 우승", "프랑스 2번째 우승"], extra: "음바페가 역대 2번째로 어린 결승골 선수" },
+  { year: 2022, host: "카타르", winner: "🇦🇷 아르헨티나", flag: "🇦🇷", hints: ["중동 첫 개최", "메시의 꿈 실현", "프랑스와 승부차기"], extra: "메시가 마침내 월드컵 트로피를 들어올림" },
+];
+
+const ALL_COUNTRIES = [
+  { name: "🇺🇾 우루과이", flag: "🇺🇾" },
+  { name: "🇧🇷 브라질", flag: "🇧🇷" },
+  { name: "🇩🇪 서독", flag: "🇩🇪" },
+  { name: "🇩🇪 독일", flag: "🇩🇪" },
+  { name: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+  { name: "🇦🇷 아르헨티나", flag: "🇦🇷" },
+  { name: "🇮🇹 이탈리아", flag: "🇮🇹" },
+  { name: "🇫🇷 프랑스", flag: "🇫🇷" },
+  { name: "🇪🇸 스페인", flag: "🇪🇸" },
+  { name: "🇳🇱 네덜란드", flag: "🇳🇱" },
+  { name: "🇵🇹 포르투갈", flag: "🇵🇹" },
+  { name: "🇭🇷 크로아티아", flag: "🇭🇷" },
+];
+
+let score = 0, correctCount = 0, currentQ = 0;
+let questions = [], history = [], hintRevealed = false;
+const TOTAL = 10;
+const ROUND_NAMES = ["32강", "16강", "8강", "준준결", "준결", "4강", "8강", "준결", "결승", "챔피언"];
+const ACTUAL_ROUNDS = ["1라운드", "2라운드", "3라운드", "4라운드", "5라운드", "6라운드", "7라운드", "8라운드", "9라운드", "파이널"];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  score = 0; correctCount = 0; currentQ = 0; history = [];
+  questions = shuffle(WORLD_CUPS).slice(0, TOTAL);
+  document.getElementById('game-area').style.display = 'flex';
+  document.getElementById('result-screen').classList.remove('show');
+  renderRounds();
+  updateHUD();
+  setQuestion();
+}
+
+function renderRounds() {
+  const el = document.getElementById('rounds');
+  el.innerHTML = ACTUAL_ROUNDS.map((r, i) => `
+    <div class="round-pill ${i === currentQ ? 'active' : i < currentQ ? 'done' : ''}" id="round-${i}">${r}</div>
+  `).join('');
+}
+
+function updateHUD() {
+  document.getElementById('score-val').textContent = score;
+  document.getElementById('correct-val').textContent = correctCount;
+  document.getElementById('remain-val').textContent = TOTAL - currentQ;
+  const pct = Math.round(currentQ / TOTAL * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${currentQ} / ${TOTAL}`;
+  document.getElementById('progress-pct').textContent = pct + '%';
+}
+
+function setQuestion() {
+  if (currentQ >= TOTAL) { showResult(); return; }
+
+  hintRevealed = false;
+  const q = questions[currentQ];
+
+  document.getElementById('year-badge').textContent = q.year;
+  document.getElementById('host-info').textContent = `🌍 개최국: ${q.host}`;
+  document.getElementById('extra-hint').textContent = '';
+  document.getElementById('reveal-btn').style.display = 'inline-block';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback-area';
+
+  const hintRow = document.getElementById('hint-row');
+  hintRow.innerHTML = q.hints.map(h => `<span class="hint-chip">${h}</span>`).join('');
+
+  // get options
+  const wrongPool = ALL_COUNTRIES.filter(c => c.name !== q.winner);
+  const wrongs = shuffle(wrongPool).slice(0, 3);
+  const opts = shuffle([{ name: q.winner, flag: q.flag }, ...wrongs]);
+
+  const optEl = document.getElementById('options');
+  optEl.innerHTML = opts.map(o => `
+    <button class="opt-btn" onclick="answer(this, \`${o.name}\`)">
+      <span class="flag">${o.flag}</span>
+      ${o.name.replace(/^.+? /, '')}
+    </button>
+  `).join('');
+
+  renderRounds();
+}
+
+function revealHint() {
+  if (hintRevealed) return;
+  hintRevealed = true;
+  document.getElementById('extra-hint').textContent = '💡 ' + questions[currentQ].extra;
+  document.getElementById('reveal-btn').style.display = 'none';
+}
+
+function answer(btn, selected) {
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  const q = questions[currentQ];
+  const correct = selected === q.winner;
+  const fb = document.getElementById('feedback');
+
+  if (correct) {
+    const pts = hintRevealed ? 50 : 100;
+    score += pts;
+    correctCount++;
+    btn.classList.add('correct');
+    fb.className = 'feedback-area correct';
+    fb.textContent = hintRevealed ? `✅ 정답! +${pts}점 (힌트 사용)` : `✅ 정답! +${pts}점`;
+    history.push({ year: q.year, winner: q.winner, correct: true });
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt-btn').forEach(b => {
+      if (b.textContent.includes(q.winner.replace(/^.+? /, ''))) b.classList.add('correct');
+    });
+    fb.className = 'feedback-area wrong';
+    fb.textContent = `❌ 오답! 정답: ${q.winner}`;
+    history.push({ year: q.year, winner: q.winner, correct: false });
+  }
+
+  currentQ++;
+  updateHUD();
+
+  setTimeout(() => {
+    if (currentQ >= TOTAL) showResult();
+    else setQuestion();
+  }, 1200);
+}
+
+function showResult() {
+  document.getElementById('game-area').style.display = 'none';
+  const rs = document.getElementById('result-screen');
+  rs.classList.add('show');
+
+  let trophy = '😅', title = '더 공부가 필요해요', msg = '월드컵 역사를 더 알아보세요!';
+  if (correctCount >= 9) { trophy = '🏆'; title = '월드컵 역사 박사!'; msg = '완벽한 역사 지식이에요!'; }
+  else if (correctCount >= 7) { trophy = '🥇'; title = '역사 마니아!'; msg = '훌륭해요!'; }
+  else if (correctCount >= 5) { trophy = '🥈'; title = '준수한 실력!'; msg = '조금만 더 공부하면 완벽해요!'; }
+  else if (correctCount >= 3) { trophy = '🥉'; title = '아직 배울 게 많아요!'; msg = '계속 도전해보세요!'; }
+
+  document.getElementById('result-trophy').textContent = trophy;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-score').textContent = score + '점';
+  document.getElementById('result-msg').textContent = msg + ` (${correctCount}/${TOTAL} 정답)`;
+
+  const list = document.getElementById('history-list');
+  list.innerHTML = history.map(h => `
+    <div class="history-item">
+      <span class="year-tag">${h.year}년</span>
+      <span>${h.winner}</span>
+      <span class="result-tag">${h.correct ? '✅' : '❌'}</span>
+    </div>
+  `).join('');
+}
+
+startGame();
+</script>
+</body>
+</html>

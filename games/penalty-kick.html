@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🥅 페널티킥 결승전</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #ef4444;
+      --dark: #0a0a0f;
+      --green-pitch: #166534;
+      --card: #13141f;
+      --text: #f0f0f0;
+      --muted: #666;
+      --goal: #22c55e;
+      --miss: #ef4444;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      user-select: none;
+    }
+
+    .back { align-self: flex-start; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 20px; }
+
+    h1 {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: clamp(28px, 5vw, 48px);
+      text-align: center;
+      background: linear-gradient(135deg, #fff, var(--red));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .subtitle { color: var(--muted); font-size: 14px; text-align: center; margin-bottom: 24px; }
+
+    /* KICK SCORE */
+    .kick-score {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .kick-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.3s;
+    }
+    .kick-dot.goal { background: rgba(34,197,94,0.2); border-color: var(--goal); }
+    .kick-dot.miss { background: rgba(239,68,68,0.2); border-color: var(--miss); }
+
+    /* STADIUM */
+    .stadium-wrap {
+      width: 100%;
+      max-width: 560px;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .stadium {
+      width: 100%;
+      background: linear-gradient(180deg, #1a1a2e 0%, #1a1a2e 50%, var(--green-pitch) 50%, #145228 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16/10;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+
+    /* Pitch markings */
+    .pitch-marking {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+    }
+
+    /* GOAL NET */
+    .goal {
+      position: absolute;
+      top: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 38%;
+    }
+
+    .goal-frame {
+      width: 100%;
+      height: 100%;
+      border: 4px solid #fff;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    /* Net grid lines */
+    .goal-frame::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 1px, transparent 1px, transparent 12.5%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 1px, transparent 1px, transparent 25%);
+    }
+
+    /* Goal zones */
+    .goal-zones {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 2px;
+    }
+
+    .zone {
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 2px;
+      transition: background 0.2s;
+    }
+
+    /* GOALKEEPER */
+    #keeper {
+      position: absolute;
+      bottom: 4px;
+      font-size: clamp(28px, 5vw, 44px);
+      transition: left 0.05s linear;
+      transform: translateX(-50%);
+      z-index: 10;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+    }
+
+    /* BALL */
+    #ball {
+      position: absolute;
+      font-size: clamp(18px, 3vw, 26px);
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      transition: none;
+      pointer-events: none;
+    }
+
+    /* DIRECTION INDICATOR */
+    .direction-arrows {
+      position: absolute;
+      bottom: 55%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .direction-arrows.show { opacity: 1; }
+    .arrow-btn {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-size: 22px;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: #fff;
+    }
+    .arrow-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+
+    /* GOAL FLASH */
+    .goal-flash {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .goal-flash.goal-anim { background: rgba(34,197,94,0.3); opacity: 1; }
+    .goal-flash.miss-anim { background: rgba(239,68,68,0.3); opacity: 1; }
+
+    /* RESULT TEXT OVERLAY */
+    .shot-result {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: clamp(32px, 7vw, 60px);
+      text-shadow: 0 0 20px currentColor;
+      z-index: 30;
+      pointer-events: none;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+      opacity: 0;
+    }
+    .shot-result.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    .shot-result.goal-text { color: var(--goal); }
+    .shot-result.miss-text { color: var(--miss); }
+
+    /* CONTROLS */
+    .controls {
+      width: 100%;
+      max-width: 560px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .shoot-btn {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      padding: 20px 60px;
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Black Han Sans', sans-serif;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 24px rgba(239,68,68,0.3);
+    }
+    .shoot-btn:active { transform: scale(0.95); }
+    .shoot-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .instruction {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 12px;
+    }
+
+    /* LEVEL HUD */
+    .level-hud {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+    .level-badge {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 8px 16px;
+      color: var(--muted);
+    }
+    .level-badge span { color: var(--text); font-weight: 700; }
+
+    /* START / RESULT SCREENS */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 24px;
+      text-align: center;
+    }
+    .overlay.hidden { display: none; }
+    .overlay-emoji { font-size: 80px; margin-bottom: 16px; }
+    .overlay-title { font-family: 'Black Han Sans', sans-serif; font-size: 40px; margin-bottom: 12px; }
+    .overlay-sub { color: var(--muted); font-size: 15px; margin-bottom: 8px; }
+    .overlay-rules {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 20px 28px;
+      margin: 16px 0 28px;
+      text-align: left;
+    }
+    .overlay-rules li {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 8px;
+      list-style: none;
+      padding-left: 4px;
+    }
+    .overlay-rules li::before { content: '⚡ '; }
+    .start-btn {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      padding: 18px 56px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Black Han Sans', sans-serif;
+      box-shadow: 0 4px 24px rgba(239,68,68,0.3);
+      transition: transform 0.15s, opacity 0.2s;
+    }
+    .start-btn:hover { opacity: 0.85; transform: scale(1.03); }
+
+    .series-display {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .series-box {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 24px;
+    }
+    .series-box.you { color: var(--goal); }
+    .series-box.ai { color: var(--miss); }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back">← 허브로 돌아가기</a>
+  <h1>🥅 페널티킥 결승전</h1>
+  <p class="subtitle">골키퍼가 없는 반대편으로 슛하세요!</p>
+
+  <!-- START OVERLAY -->
+  <div class="overlay" id="start-overlay">
+    <div class="overlay-emoji">⚽</div>
+    <div class="overlay-title">페널티킥 결승전</div>
+    <div class="overlay-sub">5번의 기회, 월드컵 우승을 향해!</div>
+    <div class="overlay-rules">
+      <li>골키퍼가 좌 ↔ 우로 움직입니다</li>
+      <li>골키퍼가 없는 방향으로 슈팅!</li>
+      <li>슛 버튼을 누르면 방향을 선택하세요</li>
+      <li>레벨이 오를수록 골키퍼가 빨라집니다</li>
+      <li>5번 중 3골 이상이면 우승!</li>
+    </div>
+    <button class="start-btn" onclick="startGame()">🥅 킥오프!</button>
+  </div>
+
+  <!-- RESULT OVERLAY -->
+  <div class="overlay hidden" id="result-overlay">
+    <div class="overlay-emoji" id="res-emoji">🏆</div>
+    <div class="overlay-title" id="res-title">우승!</div>
+    <div class="series-display">
+      <div class="series-box you" id="res-goals">? 골</div>
+      <div style="align-self:center;color:var(--muted);font-size:20px;">vs</div>
+      <div class="series-box ai" id="res-saves">? 선방</div>
+    </div>
+    <div class="overlay-sub" id="res-msg"></div>
+    <br>
+    <button class="start-btn" onclick="restartGame()">🔄 다시 도전</button>
+    <br><br>
+    <a href="../index.html" style="color:var(--muted);font-size:14px;">← 다른 게임 하기</a>
+  </div>
+
+  <!-- GAME -->
+  <div class="level-hud">
+    <div class="level-badge">레벨: <span id="level-val">1</span></div>
+    <div class="level-badge">킥: <span id="kick-val">0</span>/5</div>
+    <div class="level-badge">골: <span id="goal-val">0</span></div>
+  </div>
+
+  <div class="kick-score" id="kick-score">
+    <div class="kick-dot" id="dot-0">⚽</div>
+    <div class="kick-dot" id="dot-1">⚽</div>
+    <div class="kick-dot" id="dot-2">⚽</div>
+    <div class="kick-dot" id="dot-3">⚽</div>
+    <div class="kick-dot" id="dot-4">⚽</div>
+  </div>
+
+  <div class="stadium-wrap">
+    <div class="stadium" id="stadium">
+      <div class="goal">
+        <div class="goal-frame">
+          <div class="goal-zones">
+            <div class="zone" id="zone-0"></div>
+            <div class="zone" id="zone-1"></div>
+            <div class="zone" id="zone-2"></div>
+            <div class="zone" id="zone-3"></div>
+            <div class="zone" id="zone-4"></div>
+            <div class="zone" id="zone-5"></div>
+          </div>
+        </div>
+      </div>
+      <div id="keeper">🧤</div>
+      <div id="ball">⚽</div>
+      <div class="goal-flash" id="goal-flash"></div>
+      <div class="shot-result" id="shot-result"></div>
+      <div class="direction-arrows" id="direction-arrows">
+        <button class="arrow-btn" onclick="shoot('left')">← 왼쪽</button>
+        <button class="arrow-btn" onclick="shoot('center')">↑ 가운데</button>
+        <button class="arrow-btn" onclick="shoot('right')">오른쪽 →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="shoot-btn" id="shoot-btn" onclick="prepareShoot()">⚽ 슛!</button>
+    <div class="instruction" id="instruction">슛 버튼을 눌러 방향을 선택하세요</div>
+  </div>
+
+<script>
+let kickNum = 0, goals = 0, level = 1;
+let keeperPos = 50; // % from left
+let keeperDir = 1;
+let keeperSpeed = 0.4;
+let animFrame;
+let awaitingDirection = false;
+let shooting = false;
+const MAX_KICKS = 5;
+
+function startGame() {
+  document.getElementById('start-overlay').classList.add('hidden');
+  resetGame();
+  animateKeeper();
+}
+
+function restartGame() {
+  document.getElementById('result-overlay').classList.add('hidden');
+  resetGame();
+  animateKeeper();
+}
+
+function resetGame() {
+  kickNum = 0; goals = 0; level = 1; keeperSpeed = 0.4;
+  keeperPos = 50; keeperDir = 1; awaitingDirection = false; shooting = false;
+  updateHUD();
+  for (let i = 0; i < 5; i++) {
+    const d = document.getElementById('dot-' + i);
+    d.textContent = '⚽';
+    d.className = 'kick-dot';
+  }
+  document.getElementById('keeper').style.left = '50%';
+  document.getElementById('ball').style.bottom = '-30px';
+  document.getElementById('shot-result').className = 'shot-result';
+  document.getElementById('goal-flash').className = 'goal-flash';
+  document.getElementById('direction-arrows').className = 'direction-arrows';
+  document.getElementById('shoot-btn').disabled = false;
+  document.getElementById('instruction').textContent = '슛 버튼을 눌러 방향을 선택하세요';
+}
+
+function updateHUD() {
+  document.getElementById('level-val').textContent = level;
+  document.getElementById('kick-val').textContent = kickNum;
+  document.getElementById('goal-val').textContent = goals;
+}
+
+function animateKeeper() {
+  cancelAnimationFrame(animFrame);
+  function step() {
+    if (shooting) { animFrame = requestAnimationFrame(step); return; }
+    keeperPos += keeperDir * keeperSpeed;
+    if (keeperPos >= 90) { keeperPos = 90; keeperDir = -1; }
+    if (keeperPos <= 10) { keeperPos = 10; keeperDir = 1; }
+    document.getElementById('keeper').style.left = keeperPos + '%';
+    animFrame = requestAnimationFrame(step);
+  }
+  animFrame = requestAnimationFrame(step);
+}
+
+function prepareShoot() {
+  if (awaitingDirection || shooting || kickNum >= MAX_KICKS) return;
+  awaitingDirection = true;
+  document.getElementById('direction-arrows').className = 'direction-arrows show';
+  document.getElementById('shoot-btn').disabled = true;
+  document.getElementById('instruction').textContent = '방향을 선택하세요!';
+}
+
+function shoot(dir) {
+  if (!awaitingDirection || shooting) return;
+  awaitingDirection = false;
+  shooting = true;
+  document.getElementById('direction-arrows').className = 'direction-arrows';
+
+  const kPos = keeperPos; // capture keeper position at moment of shot
+
+  // Keeper dives: randomly to a side (biased toward ball direction)
+  let keeperDive;
+  if (dir === 'left') {
+    keeperDive = Math.random() < 0.55 ? 'left' : 'right';
+  } else if (dir === 'right') {
+    keeperDive = Math.random() < 0.55 ? 'right' : 'left';
+  } else {
+    keeperDive = Math.random() < 0.5 ? 'left' : 'right';
+  }
+
+  // Animate ball
+  const ball = document.getElementById('ball');
+  const stadium = document.getElementById('stadium');
+  const sRect = stadium.getBoundingClientRect();
+
+  let ballTarget;
+  if (dir === 'left') ballTarget = 20;
+  else if (dir === 'right') ballTarget = 80;
+  else ballTarget = 50;
+
+  ball.style.transition = 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  ball.style.bottom = '80%';
+  ball.style.left = ballTarget + '%';
+  ball.style.transform = 'translateX(-50%) scale(0.4)';
+
+  // Keeper dive animation
+  const keeper = document.getElementById('keeper');
+  const diveTarget = keeperDive === 'left' ? '15%' : '85%';
+  keeper.style.transition = 'left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  keeper.style.left = diveTarget;
+
+  // Determine goal
+  let isGoal = false;
+  if (dir === 'left' && keeperDive === 'right') isGoal = true;
+  else if (dir === 'right' && keeperDive === 'left') isGoal = true;
+  else if (dir === 'center' && keeperDive !== 'center') {
+    // center: 60% chance goal
+    isGoal = Math.random() < 0.6;
+  } else if (dir === keeperDive) {
+    // Keeper guessed right: 20% chance to still score (edge of net)
+    isGoal = Math.random() < 0.2;
+  }
+
+  setTimeout(() => {
+    const flash = document.getElementById('goal-flash');
+    const shotResult = document.getElementById('shot-result');
+
+    if (isGoal) {
+      goals++;
+      flash.className = 'goal-flash goal-anim';
+      shotResult.className = 'shot-result goal-text show';
+      shotResult.textContent = '⚽ GOAL!';
+      document.getElementById('dot-' + kickNum).textContent = '✅';
+      document.getElementById('dot-' + kickNum).classList.add('goal');
+    } else {
+      flash.className = 'goal-flash miss-anim';
+      shotResult.className = 'shot-result miss-text show';
+      shotResult.textContent = '🧤 선방!';
+      document.getElementById('dot-' + kickNum).textContent = '❌';
+      document.getElementById('dot-' + kickNum).classList.add('miss');
+    }
+
+    kickNum++;
+    updateHUD();
+
+    setTimeout(() => {
+      flash.className = 'goal-flash';
+      shotResult.className = 'shot-result';
+
+      // Reset ball and keeper
+      ball.style.transition = 'none';
+      ball.style.bottom = '-30px';
+      ball.style.left = '50%';
+      ball.style.transform = 'translateX(-50%)';
+      keeper.style.transition = 'none';
+      keeperPos = 50;
+      keeper.style.left = '50%';
+
+      // Increase level every 2 kicks
+      if (kickNum % 2 === 0) {
+        level++;
+        keeperSpeed = Math.min(0.4 + (level - 1) * 0.15, 1.2);
+      }
+
+      shooting = false;
+
+      if (kickNum >= MAX_KICKS) {
+        setTimeout(showResult, 300);
+      } else {
+        document.getElementById('shoot-btn').disabled = false;
+        document.getElementById('instruction').textContent = '슛 버튼을 눌러 방향을 선택하세요';
+      }
+    }, 900);
+  }, 400);
+}
+
+function showResult() {
+  cancelAnimationFrame(animFrame);
+  const overlay = document.getElementById('result-overlay');
+  overlay.classList.remove('hidden');
+
+  const saves = MAX_KICKS - goals;
+  document.getElementById('res-goals').textContent = `${goals} 골`;
+  document.getElementById('res-saves').textContent = `${saves} 선방`;
+
+  let emoji, title, msg;
+  if (goals >= 5) { emoji = '🏆'; title = '퍼펙트 우승!'; msg = '골키퍼를 완전히 압도했어요!'; }
+  else if (goals >= 4) { emoji = '🥇'; title = '우승!'; msg = '월드컵 챔피언이에요!'; }
+  else if (goals >= 3) { emoji = '🥈'; title = '아슬아슬 우승!'; msg = '진땀 나는 승부였어요!'; }
+  else if (goals === 2) { emoji = '😤'; title = '패배...'; msg = '조금만 더 연습하면 돼요!'; }
+  else { emoji = '😭'; title = '완패...'; msg = '골키퍼에게 압도당했어요!'; }
+
+  document.getElementById('res-emoji').textContent = emoji;
+  document.getElementById('res-title').textContent = title;
+  document.getElementById('res-msg').textContent = msg;
+}
+</script>
+</body>
+</html>
