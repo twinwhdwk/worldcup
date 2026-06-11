@@ -130,7 +130,28 @@
       .tabs{gap:4px;}
       .tab-btn{padding:6px 10px;font-size:11px;}
     }
-  </style>
+  
+    /* Score Distribution Chart */
+    .chart-section { margin-bottom: 14px; }
+    .chart-title { font-size: 11px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+    .chart-bars { display: flex; flex-direction: column; gap: 6px; }
+    .chart-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .chart-label { width: 72px; color: var(--muted2); text-align: right; flex-shrink: 0; font-size: 11px; }
+    .chart-bar-bg { flex: 1; height: 20px; background: rgba(255,255,255,.04); border-radius: 6px; overflow: hidden; }
+    .chart-bar-fill { height: 100%; border-radius: 6px; transition: width 0.8s ease; display: flex; align-items: center; padding-left: 6px; }
+    .chart-bar-val { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.8); }
+
+    /* Game breakdown */
+    .game-breakdown { background: var(--card); border: 1px solid rgba(255,255,255,.05); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+    .gb-hdr { font-size: 11px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+    .gb-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; }
+    .gb-icon { width: 20px; text-align: center; }
+    .gb-name { flex: 1; color: var(--muted2); }
+    .gb-count { color: var(--text); font-weight: 700; margin-right: 8px; min-width: 30px; text-align: right; }
+    .gb-bar-bg { width: 80px; height: 6px; background: rgba(255,255,255,.06); border-radius: 100px; overflow: hidden; }
+    .gb-bar { height: 100%; border-radius: 100px; transition: width .6s ease; }
+
+    </style>
 </head>
 <body>
 
@@ -146,6 +167,19 @@
     <div class="sm-box"><div class="sm-val" id="sm-games">0</div><div class="sm-lbl">총 게임</div></div>
     <div class="sm-box"><div class="sm-val" id="sm-top">0</div><div class="sm-lbl">최고점</div></div>
     <div class="sm-box"><div class="sm-val" id="sm-avg">0</div><div class="sm-lbl">평균점</div></div>
+  </div>
+
+  
+  <!-- Game Breakdown -->
+  <div class="game-breakdown" id="game-breakdown">
+    <div class="gb-hdr">📊 게임별 참여</div>
+    <div id="gb-rows"></div>
+  </div>
+
+  <!-- Score Distribution Chart -->
+  <div class="chart-section">
+    <div class="chart-title">📈 점수 분포</div>
+    <div class="chart-bars" id="chart-bars"></div>
   </div>
 
   <div class="tabs" id="tabs">
@@ -279,6 +313,7 @@ function render(data){
   document.getElementById('sm-games').textContent=data.log.length;
   document.getElementById('sm-top').textContent=top>=1000?(top/1000).toFixed(1)+'k':top;
   document.getElementById('sm-avg').textContent=avg>=1000?(avg/1000).toFixed(1)+'k':avg;
+  renderChart(data);
   document.getElementById('last-update').textContent='업데이트 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
   // Filter by tab
@@ -359,6 +394,60 @@ function exportCSV(){
 function showToast(msg,err=false){
   const t=document.getElementById('toast'); t.textContent=msg; t.style.background=err?'#ef4444':'var(--green)';
   t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+
+function renderChart(data) {
+  // Score distribution: 0-199, 200-499, 500-799, 800-1199, 1200+
+  const buckets = [
+    {label:'0-199',   min:0,    max:199  },
+    {label:'200-499', min:200,  max:499  },
+    {label:'500-799', min:500,  max:799  },
+    {label:'800-1199',min:800,  max:1199 },
+    {label:'1200+',   min:1200, max:99999},
+  ];
+  const counts = buckets.map(b => data.log.filter(e => e.score >= b.min && e.score <= b.max).length);
+  const maxC = Math.max(...counts, 1);
+  const colors = ['#6b7280','#3b82f6','#22c55e','#f59e0b','#ef4444'];
+
+  document.getElementById('chart-bars').innerHTML = buckets.map((b, i) => {
+    const w = Math.round(counts[i] / maxC * 100);
+    return `<div class="chart-row">
+      <div class="chart-label">${b.label}</div>
+      <div class="chart-bar-bg">
+        <div class="chart-bar-fill" style="width:${w}%;background:${colors[i]}">
+          ${counts[i] > 0 ? `<span class="chart-bar-val">${counts[i]}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Game breakdown
+  const GAME_INFO = {
+    '선수퀴즈':    {icon:'🕵️', color:'#3b82f6'},
+    '우승국퀴즈':  {icon:'🏆', color:'#FFD700'},
+    '페널티킥':    {icon:'🥅', color:'#ef4444'},
+    '유니폼퀴즈':  {icon:'👕', color:'#a855f7'},
+    '국기퀴즈':    {icon:'🚩', color:'#06b6d4'},
+    '우승횟수퀴즈':{icon:'⚡', color:'#f97316'},
+    '기록퀴즈':    {icon:'📊', color:'#ec4899'},
+  };
+  const gameCounts = {};
+  data.log.forEach(e => { gameCounts[e.game] = (gameCounts[e.game] || 0) + 1; });
+  const maxGC = Math.max(...Object.values(gameCounts), 1);
+  const gbEl = document.getElementById('gb-rows');
+  if (gbEl) {
+    gbEl.innerHTML = Object.entries(gameCounts).sort((a,b)=>b[1]-a[1]).slice(0,7).map(([g,c]) => {
+      const info = GAME_INFO[g] || {icon:'🎮', color:'#888'};
+      const w = Math.round(c / maxGC * 100);
+      return `<div class="gb-row">
+        <div class="gb-icon">${info.icon}</div>
+        <div class="gb-name">${g}</div>
+        <div class="gb-count">${c}회</div>
+        <div class="gb-bar-bg"><div class="gb-bar" style="width:${w}%;background:${info.color}"></div></div>
+      </div>`;
+    }).join('') || '<div style="color:var(--muted);font-size:12px;text-align:center;">기록 없음</div>';
+  }
 }
 
 // ── QR ───────────────────────────────────────────
