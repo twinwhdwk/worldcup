@@ -4,389 +4,243 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>⚽ 월드컵 미니게임 2026</title>
-  <meta name="description" content="2026 FIFA 월드컵 기념 미니게임 4종! 선수 퀴즈, 우승국 퀴즈, 페널티킥, 유니폼 퀴즈">
+  <meta name="description" content="2026 FIFA 월드컵 기념 미니게임 6종! 선수퀴즈, 우승국, 페널티킥, 유니폼, 국기, 우승횟수">
+  <meta property="og:title" content="⚽ 월드컵 미니게임 2026">
+  <meta property="og:description" content="6종의 월드컵 미니게임에 도전하세요!">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap');
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{--green:#00843D;--gold:#FFD700;--dark:#080810;--card:#10111e;--text:#f0f0f0;--muted:#555;--muted2:#888;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;overflow-x:hidden;}
 
-    :root {
-      --green: #00843D;
-      --green2: #005a29;
-      --gold: #FFD700;
-      --dark: #080810;
-      --card: #10111e;
-      --card2: #181926;
-      --text: #f0f0f0;
-      --muted: #555;
-      --muted2: #888;
-    }
+    /* BG */
+    .bg-pitch{position:fixed;inset:0;z-index:0;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,rgba(0,132,61,.08) 0%,transparent 60%);}
+    .bg-lines{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(0,132,61,.03) 0,transparent 1px,transparent 80px,rgba(0,132,61,.03) 81px),repeating-linear-gradient(0deg,rgba(0,132,61,.03) 0,transparent 1px,transparent 80px,rgba(0,132,61,.03) 81px);}
+    .fb{position:absolute;font-size:40px;opacity:.04;animation:floatBall linear infinite;}
+    @keyframes floatBall{0%{transform:translateY(100vh) rotate(0)}100%{transform:translateY(-120px) rotate(720deg)}}
 
-    html { scroll-behavior: smooth; }
+    /* HEADER */
+    header{position:relative;z-index:10;padding:20px 24px 0;display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:0 auto;}
+    .logo{font-family:'Black Han Sans',sans-serif;font-size:20px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .header-right{display:flex;gap:12px;align-items:center;}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:lp 1.5s infinite;}
+    @keyframes lp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+    .live-text{font-size:12px;color:#ef4444;font-weight:700;letter-spacing:1px;}
+    .sb-btn{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.25);border-radius:100px;padding:8px 18px;text-decoration:none;color:var(--gold);font-size:13px;font-weight:700;transition:all .2s;}
+    .sb-btn:hover{background:rgba(255,215,0,.2);}
 
-    body {
-      background: var(--dark);
-      color: var(--text);
-      font-family: 'Noto Sans KR', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    /* HERO */
+    .hero{position:relative;z-index:5;text-align:center;padding:48px 24px 32px;}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:6px 18px;border-radius:100px;margin-bottom:20px;}
+    .hero h1{font-family:'Black Han Sans',sans-serif;font-size:clamp(48px,10vw,100px);line-height:.9;letter-spacing:-3px;background:linear-gradient(160deg,#fff 20%,rgba(255,255,255,.6) 60%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px;}
+    .hero h1 em{display:block;font-style:normal;font-size:.45em;letter-spacing:8px;background:linear-gradient(135deg,var(--gold),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .hero-sub{color:var(--muted2);font-size:15px;margin-bottom:28px;}
+    .hero-ball{font-size:64px;display:inline-block;animation:hSpin 8s linear infinite;filter:drop-shadow(0 0 30px rgba(0,132,61,.4));margin-bottom:16px;}
+    @keyframes hSpin{to{transform:rotate(360deg)}}
 
-    /* ── ANIMATED BG ── */
-    .bg-pitch {
-      position: fixed; inset: 0; z-index: 0; overflow: hidden;
-      background: radial-gradient(ellipse at 50% 0%, rgba(0,132,61,0.08) 0%, transparent 60%);
-    }
-    .bg-lines {
-      position: absolute; inset: 0;
-      background:
-        repeating-linear-gradient(90deg, rgba(0,132,61,0.035) 0, transparent 1px, transparent 80px, rgba(0,132,61,0.035) 81px),
-        repeating-linear-gradient(0deg,  rgba(0,132,61,0.035) 0, transparent 1px, transparent 80px, rgba(0,132,61,0.035) 81px);
-    }
-    .floating-ball {
-      position: absolute; font-size: 40px; opacity: 0.04;
-      animation: floatBall linear infinite;
-    }
-    @keyframes floatBall {
-      0%   { transform: translateY(100vh) rotate(0deg); }
-      100% { transform: translateY(-120px) rotate(720deg); }
-    }
+    /* STATS */
+    .stats-bar{position:relative;z-index:5;max-width:800px;margin:0 auto 40px;padding:0 24px;}
+    .stats-inner{background:var(--card);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:20px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+    .si{text-align:center;}
+    .si-num{font-family:'Black Han Sans',sans-serif;font-size:30px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .si-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
 
-    /* ── HEADER ── */
-    header {
-      position: relative; z-index: 10;
-      padding: 20px 24px 0;
-      display: flex; justify-content: space-between; align-items: center;
-      max-width: 1100px; margin: 0 auto;
-    }
-    .logo {
-      font-family: 'Black Han Sans', sans-serif;
-      font-size: 20px;
-      background: linear-gradient(135deg, #fff, var(--gold));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .header-right { display: flex; gap: 12px; align-items: center; }
-    .live-dot {
-      width: 8px; height: 8px; border-radius: 50%; background: #ef4444;
-      animation: livePulse 1.5s infinite;
-    }
-    @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
-    .live-text { font-size: 12px; color: #ef4444; font-weight: 700; letter-spacing: 1px; }
-    .scoreboard-btn {
-      background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.25);
-      border-radius: 100px; padding: 8px 18px; text-decoration: none;
-      color: var(--gold); font-size: 13px; font-weight: 700;
-      transition: all 0.2s;
-    }
-    .scoreboard-btn:hover { background: rgba(255,215,0,0.2); }
+    /* RANK PREVIEW */
+    .rank-preview{position:relative;z-index:5;max-width:800px;margin:0 auto 40px;padding:0 24px;}
+    .rp-inner{background:var(--card);border:1px solid rgba(255,215,0,.12);border-radius:20px;padding:22px 24px;}
+    .rp-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+    .rp-title{font-family:'Black Han Sans',sans-serif;font-size:18px;display:flex;align-items:center;gap:10px;}
+    .live-pill{background:#ef4444;color:#fff;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 8px;border-radius:100px;animation:lp 1.5s infinite;-webkit-text-fill-color:#fff;}
+    .rp-list{display:flex;flex-direction:column;gap:8px;}
+    .rp-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.04);}
+    .rp-medal{font-size:16px;width:24px;text-align:center;}
+    .rp-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#000;}
+    .rp-info{flex:1;min-width:0;}
+    .rp-name{font-weight:700;font-size:14px;}
+    .rp-sub{font-size:11px;color:var(--muted);}
+    .rp-bw{width:100%;height:3px;background:rgba(255,255,255,.05);border-radius:100px;margin-top:4px;}
+    .rp-b{height:100%;border-radius:100px;transition:width .8s ease;}
+    .rp-score{font-family:'Black Han Sans',sans-serif;font-size:20px;color:var(--gold);}
 
-    /* ── HERO ── */
-    .hero {
-      position: relative; z-index: 5;
-      text-align: center; padding: 60px 24px 40px;
-    }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--green); color: #fff;
-      font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
-      padding: 6px 18px; border-radius: 100px; margin-bottom: 24px;
-    }
-    .hero h1 {
-      font-family: 'Black Han Sans', sans-serif;
-      font-size: clamp(52px, 10vw, 110px);
-      line-height: 0.9; letter-spacing: -3px;
-      background: linear-gradient(160deg, #fff 20%, rgba(255,255,255,0.6) 60%, var(--gold) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      margin-bottom: 16px;
-    }
-    .hero h1 em {
-      display: block; font-style: normal;
-      font-size: 0.45em; letter-spacing: 8px;
-      background: linear-gradient(135deg, var(--gold), #fff);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .hero-sub { color: var(--muted2); font-size: 15px; margin-bottom: 32px; }
+    /* SECTION */
+    .section-label{position:relative;z-index:5;max-width:1100px;margin:0 auto 16px;padding:0 24px;font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;}
 
-    /* Spinning ball hero */
-    .hero-ball {
-      font-size: 72px; display: inline-block;
-      animation: heroSpin 8s linear infinite;
-      filter: drop-shadow(0 0 30px rgba(0,132,61,0.4));
-      margin-bottom: 20px;
-    }
-    @keyframes heroSpin { to { transform: rotate(360deg); } }
+    /* GAME GRID — 6 cards */
+    .game-grid{position:relative;z-index:5;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:1100px;margin:0 auto;padding:0 24px 60px;}
+    @media(max-width:800px){.game-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:520px){.game-grid{grid-template-columns:1fr;}}
 
-    /* ── LIVE STATS BAR ── */
-    .stats-bar {
-      position: relative; z-index: 5;
-      max-width: 800px; margin: 0 auto 48px; padding: 0 24px;
-    }
-    .stats-bar-inner {
-      background: var(--card); border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 20px; padding: 20px 28px;
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
-    }
-    .stat-item { text-align: center; }
-    .stat-num {
-      font-family: 'Black Han Sans', sans-serif; font-size: 32px;
-      background: linear-gradient(135deg, #fff, var(--gold));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+    .game-card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:22px;padding:26px 22px;text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s;}
+    .game-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,var(--cg,rgba(0,132,61,.15)),transparent 60%);opacity:0;transition:opacity .3s;}
+    .game-card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.14);box-shadow:0 20px 50px rgba(0,0,0,.5);}
+    .game-card:hover::before{opacity:1;}
 
-    /* ── MINI RANK PREVIEW ── */
-    .rank-preview {
-      position: relative; z-index: 5;
-      max-width: 800px; margin: 0 auto 48px; padding: 0 24px;
-    }
-    .rank-preview-inner {
-      background: var(--card); border: 1px solid rgba(255,215,0,0.12);
-      border-radius: 20px; padding: 24px 28px;
-    }
-    .rank-preview-header {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
-    }
-    .rank-preview-title {
-      font-family: 'Black Han Sans', sans-serif; font-size: 18px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .rank-preview-list { display: flex; flex-direction: column; gap: 10px; }
-    .rank-preview-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 14px; background: rgba(255,255,255,0.03);
-      border-radius: 12px; border: 1px solid rgba(255,255,255,0.04);
-    }
-    .rp-num { font-family: 'Black Han Sans', sans-serif; font-size: 18px; width: 28px; text-align: center; }
-    .rp-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 700; color: #000; flex-shrink: 0;
-    }
-    .rp-name { flex: 1; font-weight: 700; font-size: 15px; }
-    .rp-game { font-size: 11px; color: var(--muted); }
-    .rp-score { font-family: 'Black Han Sans', sans-serif; font-size: 20px; color: var(--gold); }
-    .rp-bar-wrap { width: 100%; height: 3px; background: rgba(255,255,255,0.05); border-radius: 100px; margin-top: 4px; }
-    .rp-bar { height: 100%; border-radius: 100px; transition: width 0.8s ease; }
+    .c-blue  {--cg:rgba(59,130,246,.2);}
+    .c-gold  {--cg:rgba(255,215,0,.15);}
+    .c-red   {--cg:rgba(239,68,68,.2);}
+    .c-purple{--cg:rgba(168,85,247,.2);}
+    .c-teal  {--cg:rgba(6,182,212,.2);}
+    .c-orange{--cg:rgba(249,115,22,.2);}
 
-    /* ── GAMES SECTION ── */
-    .section-label {
-      position: relative; z-index: 5;
-      max-width: 1100px; margin: 0 auto 20px; padding: 0 24px;
-      font-size: 11px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase;
-    }
-    .game-grid {
-      position: relative; z-index: 5;
-      display: grid; grid-template-columns: repeat(2, 1fr);
-      gap: 16px; max-width: 1100px; margin: 0 auto; padding: 0 24px 60px;
-    }
-    @media (max-width: 600px) { .game-grid { grid-template-columns: 1fr; } }
+    .card-deco{position:absolute;top:-10px;right:-6px;font-size:100px;opacity:.03;pointer-events:none;line-height:1;}
+    .card-icon{font-size:48px;margin-bottom:12px;display:block;}
+    .card-tag{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+    .c-blue   .card-tag{color:#3b82f6;}
+    .c-gold   .card-tag{color:var(--gold);}
+    .c-red    .card-tag{color:#ef4444;}
+    .c-purple .card-tag{color:#a855f7;}
+    .c-teal   .card-tag{color:#06b6d4;}
+    .c-orange .card-tag{color:#f97316;}
+    .card-title{font-family:'Black Han Sans',sans-serif;font-size:22px;line-height:1.15;margin-bottom:8px;}
+    .card-desc{font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:14px;}
+    .card-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+    .chip{font-size:10px;padding:3px 9px;border-radius:100px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);color:var(--muted2);}
+    .card-play{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:100px;font-weight:700;font-size:13px;color:#fff;transition:opacity .2s,transform .15s;}
+    .c-blue   .card-play{background:#3b82f6;}
+    .c-gold   .card-play{background:var(--gold);color:#000;}
+    .c-red    .card-play{background:#ef4444;}
+    .c-purple .card-play{background:#a855f7;}
+    .c-teal   .card-play{background:#06b6d4;}
+    .c-orange .card-play{background:#f97316;}
+    .game-card:hover .card-play{opacity:.85;transform:scale(1.04);}
 
-    .game-card {
-      background: var(--card); border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 24px; padding: 32px 28px;
-      text-decoration: none; color: inherit;
-      display: block; position: relative; overflow: hidden;
-      transition: transform 0.25s ease, border-color 0.25s, box-shadow 0.25s;
-      cursor: pointer;
-    }
-    .game-card::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(circle at 30% 30%, var(--card-glow, rgba(0,132,61,0.15)), transparent 60%);
-      opacity: 0; transition: opacity 0.3s;
-    }
-    .game-card:hover { transform: translateY(-8px); border-color: rgba(255,255,255,0.14); box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
-    .game-card:hover::before { opacity: 1; }
+    /* SHARE */
+    .share-row{position:relative;z-index:5;max-width:800px;margin:0 auto 32px;padding:0 24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+    .share-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:100px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--muted2);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;font-family:'Noto Sans KR',sans-serif;}
+    .share-btn:hover{border-color:rgba(255,255,255,.2);color:var(--text);background:rgba(255,255,255,.08);}
+    .share-btn.kakao{border-color:rgba(255,193,7,.3);color:#ffc107;}
+    .share-btn.copy{border-color:rgba(99,102,241,.3);color:#818cf8;}
 
-    .card-c { --card-glow: rgba(59,130,246,0.2); }
-    .card-d { --card-glow: rgba(255,215,0,0.15); }
-    .card-e { --card-glow: rgba(239,68,68,0.2); }
-    .card-f { --card-glow: rgba(168,85,247,0.2); }
+    /* FOOTER */
+    footer{position:relative;z-index:5;text-align:center;padding:28px 24px 44px;color:var(--muted);font-size:13px;border-top:1px solid rgba(255,255,255,.04);}
+    footer a{color:var(--muted2);text-decoration:none;}
 
-    .card-icon { font-size: 56px; margin-bottom: 16px; display: block; }
-    .card-tag {
-      font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .card-c .card-tag { color: #3b82f6; }
-    .card-d .card-tag { color: var(--gold); }
-    .card-e .card-tag { color: #ef4444; }
-    .card-f .card-tag { color: #a855f7; }
-
-    .card-title { font-family: 'Black Han Sans', sans-serif; font-size: 26px; line-height: 1.15; margin-bottom: 10px; }
-    .card-desc { font-size: 13px; color: var(--muted2); line-height: 1.65; margin-bottom: 18px; }
-
-    .card-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-    .card-chip {
-      font-size: 11px; padding: 4px 10px; border-radius: 100px;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-      color: var(--muted2);
-    }
-
-    .card-play {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 12px 24px; border-radius: 100px;
-      font-weight: 700; font-size: 14px; color: #fff;
-      transition: opacity 0.2s, transform 0.15s;
-    }
-    .card-c .card-play { background: #3b82f6; }
-    .card-d .card-play { background: var(--gold); color: #000; }
-    .card-e .card-play { background: #ef4444; }
-    .card-f .card-play { background: #a855f7; }
-    .game-card:hover .card-play { opacity: 0.85; transform: scale(1.04); }
-
-    /* Big number decoration */
-    .card-deco {
-      position: absolute; top: -10px; right: -10px;
-      font-family: 'Black Han Sans', sans-serif; font-size: 120px;
-      opacity: 0.04; pointer-events: none; line-height: 1;
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      position: relative; z-index: 5; text-align: center;
-      padding: 32px 24px 48px; color: var(--muted); font-size: 13px;
-      border-top: 1px solid rgba(255,255,255,0.04);
-    }
-    footer a { color: var(--muted2); text-decoration: none; }
-
-    /* Mobile */
-    @media (max-width: 600px) {
-      .hero { padding: 40px 16px 30px; }
-      .hero-ball { font-size: 52px; }
-      .stats-bar-inner { grid-template-columns: repeat(2,1fr); }
-      .game-card { padding: 24px 20px; }
-      .card-title { font-size: 22px; }
-      header { padding: 16px 16px 0; }
-      .rank-preview, .stats-bar { padding: 0 16px; }
+    @media(max-width:600px){
+      .hero{padding:32px 16px 24px;}.hero-ball{font-size:48px;}
+      .stats-inner{grid-template-columns:repeat(2,1fr);}
+      header{padding:14px 16px 0;}
+      .rank-preview,.stats-bar,.share-row{padding:0 16px;}
+      .section-label{padding:0 16px;}
     }
   </style>
 </head>
 <body>
-
-<!-- Animated BG -->
 <div class="bg-pitch">
   <div class="bg-lines"></div>
-  <div class="floating-ball" style="left:10%;animation-duration:18s;animation-delay:0s;">⚽</div>
-  <div class="floating-ball" style="left:30%;animation-duration:24s;animation-delay:-8s;font-size:28px;">⚽</div>
-  <div class="floating-ball" style="left:55%;animation-duration:20s;animation-delay:-4s;">⚽</div>
-  <div class="floating-ball" style="left:78%;animation-duration:16s;animation-delay:-12s;font-size:52px;">⚽</div>
-  <div class="floating-ball" style="left:92%;animation-duration:22s;animation-delay:-6s;font-size:24px;">⚽</div>
+  <div class="fb" style="left:8%;animation-duration:18s;animation-delay:0s;">⚽</div>
+  <div class="fb" style="left:28%;animation-duration:25s;animation-delay:-9s;font-size:28px;">⚽</div>
+  <div class="fb" style="left:52%;animation-duration:21s;animation-delay:-5s;">⚽</div>
+  <div class="fb" style="left:74%;animation-duration:17s;animation-delay:-13s;font-size:54px;">⚽</div>
+  <div class="fb" style="left:91%;animation-duration:23s;animation-delay:-7s;font-size:22px;">⚽</div>
 </div>
 
-<!-- Header -->
 <header>
   <div class="logo">⚽ WC GAMES</div>
   <div class="header-right">
     <div class="live-dot"></div>
     <span class="live-text">LIVE</span>
-    <a href="scoreboard.html" class="scoreboard-btn">🏆 랭킹보드</a>
+    <a href="scoreboard.html" class="sb-btn">🏆 랭킹보드</a>
   </div>
 </header>
 
-<!-- Hero -->
 <div class="hero">
   <div class="hero-ball">⚽</div>
   <div class="hero-badge">⚽ 2026 FIFA World Cup Edition</div>
   <h1>월드컵<em>MINI GAMES</em></h1>
-  <p class="hero-sub">잠깐의 여유, 최고의 축구 지식을 확인하세요</p>
+  <p class="hero-sub">6종의 미니게임으로 축구 지식을 테스트하세요!</p>
 </div>
 
 <!-- Live Stats -->
 <div class="stats-bar">
-  <div class="stats-bar-inner">
-    <div class="stat-item">
-      <div class="stat-num" id="stat-players">0</div>
-      <div class="stat-lbl">👥 참가자</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="stat-games-played">0</div>
-      <div class="stat-lbl">🎮 총 게임</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="stat-top-score">0</div>
-      <div class="stat-lbl">🏆 최고점</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="stat-avg-score">0</div>
-      <div class="stat-lbl">📊 평균점</div>
-    </div>
+  <div class="stats-inner">
+    <div class="si"><div class="si-num" id="sp">0</div><div class="si-lbl">👥 참가자</div></div>
+    <div class="si"><div class="si-num" id="sg">0</div><div class="si-lbl">🎮 총 게임</div></div>
+    <div class="si"><div class="si-num" id="st">0</div><div class="si-lbl">🏆 최고점</div></div>
+    <div class="si"><div class="si-num" id="sa">0</div><div class="si-lbl">📊 평균점</div></div>
   </div>
 </div>
 
 <!-- Rank Preview -->
 <div class="rank-preview">
-  <div class="rank-preview-inner">
-    <div class="rank-preview-header">
-      <div class="rank-preview-title">
-        🏆 실시간 TOP 5
-        <span style="background:#ef4444;color:#fff;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 8px;border-radius:100px;animation:livePulse 1.5s infinite;">LIVE</span>
-      </div>
-      <a href="scoreboard.html" style="font-size:13px;color:var(--gold);text-decoration:none;font-weight:700;">전체 보기 →</a>
+  <div class="rp-inner">
+    <div class="rp-hdr">
+      <div class="rp-title">🏆 실시간 TOP 5 <span class="live-pill">LIVE</span></div>
+      <a href="scoreboard.html" style="font-size:13px;color:var(--gold);text-decoration:none;font-weight:700;">전체 →</a>
     </div>
-    <div class="rank-preview-list" id="rank-preview-list">
-      <div style="text-align:center;padding:20px;color:var(--muted);font-size:14px;">
-        ⚽ 아직 기록이 없어요<br><span style="font-size:12px;margin-top:4px;display:block;">게임을 플레이하고 점수를 등록해보세요!</span>
-      </div>
+    <div class="rp-list" id="rp-list">
+      <div style="text-align:center;padding:20px;color:var(--muted);font-size:14px;">⚽ 아직 기록이 없어요<br><span style="font-size:12px;margin-top:4px;display:block;">게임을 플레이하고 점수를 등록해보세요!</span></div>
     </div>
   </div>
 </div>
 
+<!-- Share -->
+<div class="share-row">
+  <button class="share-btn copy" onclick="copyLink()">🔗 링크 복사</button>
+  <button class="share-btn" onclick="shareNative()">📤 공유하기</button>
+</div>
+
 <!-- Games -->
-<div class="section-label">🎮 게임 선택</div>
+<div class="section-label">🎮 게임 선택 — 6종</div>
 <div class="game-grid">
 
-  <a href="games/player-country.html" class="game-card card-c">
-    <span class="card-deco">C</span>
+  <a href="games/player-country.html" class="game-card c-blue">
+    <span class="card-deco">🕵️</span>
     <span class="card-icon">🕵️</span>
     <div class="card-tag">Speed Quiz</div>
     <div class="card-title">이 선수<br>어느 나라?</div>
-    <div class="card-desc">⭐ 난이도 3단계, 국기 표시, 콤보·스피드 보너스까지! 선수 28명 풀</div>
-    <div class="card-meta">
-      <span class="card-chip">⏱ 20초</span>
-      <span class="card-chip">🔥 콤보보너스</span>
-      <span class="card-chip">⚡ 스피드보너스</span>
-    </div>
+    <div class="card-desc">40명 선수 국적 맞추기, 4단계 난이도, 5초 자동힌트 공개</div>
+    <div class="card-chips"><span class="chip">⏱ 20초</span><span class="chip">🔥 콤보</span><span class="chip">⚡ 스피드</span></div>
     <div class="card-play">▶ 플레이</div>
   </a>
 
-  <a href="games/champion-tournament.html" class="game-card card-d">
-    <span class="card-deco">D</span>
+  <a href="games/champion-tournament.html" class="game-card c-gold">
+    <span class="card-deco">🏆</span>
     <span class="card-icon">🏆</span>
     <div class="card-tag">Tournament Quiz</div>
     <div class="card-title">월드컵<br>우승국 퀴즈</div>
-    <div class="card-desc">1930~2022 역대 우승국 10문제 + 🔥 BOSS 문제 (200점) + S/A/B 그레이드</div>
-    <div class="card-meta">
-      <span class="card-chip">📋 10문제</span>
-      <span class="card-chip">🔥 BOSS 문제</span>
-      <span class="card-chip">⭐ 그레이드</span>
-    </div>
+    <div class="card-desc">1930~2022 역대 우승국 10문제, 15초 타이머, BOSS 200점</div>
+    <div class="card-chips"><span class="chip">📋 10문제</span><span class="chip">🔥 BOSS</span><span class="chip">⭐ 그레이드</span></div>
     <div class="card-play">▶ 플레이</div>
   </a>
 
-  <a href="games/penalty-kick.html" class="game-card card-e">
-    <span class="card-deco">E</span>
+  <a href="games/penalty-kick.html" class="game-card c-red">
+    <span class="card-deco">🥅</span>
     <span class="card-icon">🥅</span>
     <div class="card-tag">Timing Game</div>
     <div class="card-title">페널티킥<br>결승전</div>
-    <div class="card-desc">파워게이지 + 바람 + AI 학습 골키퍼 + 서든데스 연장전! 5킥 승부</div>
-    <div class="card-meta">
-      <span class="card-chip">⚡ 5킥 승부</span>
-      <span class="card-chip">🌬️ 바람효과</span>
-      <span class="card-chip">🤖 AI 골키퍼</span>
-    </div>
+    <div class="card-desc">파워게이지 + 바람 + AI 학습 골키퍼, 5킥 승부 + 서든데스</div>
+    <div class="card-chips"><span class="chip">⚡ 5킥</span><span class="chip">🌬️ 바람</span><span class="chip">🤖 AI</span></div>
     <div class="card-play">▶ 플레이</div>
   </a>
 
-  <a href="games/uniform-quiz.html" class="game-card card-f">
-    <span class="card-deco">F</span>
+  <a href="games/uniform-quiz.html" class="game-card c-purple">
+    <span class="card-deco">👕</span>
     <span class="card-icon">👕</span>
     <div class="card-tag">Visual Quiz</div>
     <div class="card-title">이 유니폼<br>어느 팀?</div>
-    <div class="card-desc">SVG 유니폼 직접 보고 맞추기! 홈/원정 토글 + 19개 팀 + 자동힌트</div>
-    <div class="card-meta">
-      <span class="card-chip">⏱ 30초</span>
-      <span class="card-chip">🔄 홈/원정</span>
-      <span class="card-chip">💡 자동힌트</span>
-    </div>
+    <div class="card-desc">24개국 SVG 유니폼, 홈/원정 토글, 9가지 패턴, 자동힌트</div>
+    <div class="card-chips"><span class="chip">⏱ 30초</span><span class="chip">🔄 홈/원정</span><span class="chip">💡 자동힌트</span></div>
+    <div class="card-play">▶ 플레이</div>
+  </a>
+
+  <a href="games/flag-quiz.html" class="game-card c-teal">
+    <span class="card-deco">🚩</span>
+    <span class="card-icon">🚩</span>
+    <div class="card-tag">Flag Quiz</div>
+    <div class="card-title">이 국기<br>어느 나라?</div>
+    <div class="card-desc">48개국 국기, 2초 이내 정답이면 스피드 보너스! 콤보 4배</div>
+    <div class="card-chips"><span class="chip">⏱ 45초</span><span class="chip">⚡ 스피드</span><span class="chip">🔥 x4 콤보</span></div>
+    <div class="card-play">▶ 플레이</div>
+  </a>
+
+  <a href="games/wins-quiz.html" class="game-card c-orange">
+    <span class="card-deco">⚡</span>
+    <span class="card-icon">⚡</span>
+    <div class="card-tag">Numbers Quiz</div>
+    <div class="card-title">월드컵<br>우승 몇 번?</div>
+    <div class="card-desc">브라질은 5번? 독일은 4번? 24개국 우승 횟수를 맞추세요!</div>
+    <div class="card-chips"><span class="chip">⏱ 60초</span><span class="chip">🔥 콤보</span><span class="chip">🏆 트로피</span></div>
     <div class="card-play">▶ 플레이</div>
   </a>
 
@@ -395,68 +249,66 @@
 <footer>
   ⚽ World Cup Mini Games &nbsp;·&nbsp; 2026 FIFA World Cup Edition<br>
   <span style="font-size:12px;margin-top:4px;display:block;">
-    <a href="scoreboard.html">🏆 랭킹보드</a> &nbsp;·&nbsp;
-    Made with ❤️ for football fans
+    <a href="scoreboard.html">🏆 랭킹보드</a> &nbsp;·&nbsp; Made with ❤️ for football fans
   </span>
 </footer>
 
 <script>
-// ── Load stats & rank from localStorage ──────────
-const STORAGE_KEY = 'wc_scoreboard_v1';
-const AVATAR_COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#a855f7','#ec4899'];
+const SK='wc_scoreboard_v1';
+const COLS=['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#a855f7','#ec4899','#14b8a6','#84cc16'];
+function load(){try{return JSON.parse(localStorage.getItem(SK)||'{"players":[],"log":[]}');}catch{return{players:[],log:[]};}}
 
-function loadScoreboardData() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"players":[],"log":[]}'); }
-  catch { return { players: [], log: [] }; }
+function renderStats(d){
+  const sc=d.log.map(e=>e.score);
+  const top=sc.length?Math.max(...sc):0,avg=sc.length?Math.round(sc.reduce((a,b)=>a+b,0)/sc.length):0;
+  const fmt=n=>n>=1000?(n/1000).toFixed(1)+'k':n;
+  document.getElementById('sp').textContent=d.players.length;
+  document.getElementById('sg').textContent=d.log.length;
+  document.getElementById('st').textContent=fmt(top);
+  document.getElementById('sa').textContent=fmt(avg);
 }
 
-function renderStats(data) {
-  const scores = data.log.map(e => e.score);
-  const top = scores.length ? Math.max(...scores) : 0;
-  const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
-  document.getElementById('stat-players').textContent = data.players.length;
-  document.getElementById('stat-games-played').textContent = data.log.length;
-  document.getElementById('stat-top-score').textContent = top >= 1000 ? (top/1000).toFixed(1)+'k' : top;
-  document.getElementById('stat-avg-score').textContent = avg >= 1000 ? (avg/1000).toFixed(1)+'k' : avg;
-}
-
-function renderRankPreview(data) {
-  const sorted = [...data.players].sort((a,b) => b.bestScore - a.bestScore).slice(0, 5);
-  const el = document.getElementById('rank-preview-list');
-  if (!sorted.length) return;
-  const maxScore = sorted[0].bestScore || 1;
-  const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
-  el.innerHTML = sorted.map((p, i) => {
-    const col = AVATAR_COLORS[i % AVATAR_COLORS.length];
-    const barW = Math.round(p.bestScore / maxScore * 100);
-    return `<div class="rank-preview-item">
-      <div class="rp-num">${medals[i]}</div>
+function renderRank(d){
+  const sorted=[...d.players].sort((a,b)=>b.bestScore-a.bestScore).slice(0,5);
+  const el=document.getElementById('rp-list');
+  if(!sorted.length)return;
+  const max=sorted[0].bestScore||1;
+  const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+  el.innerHTML=sorted.map((p,i)=>{
+    const col=COLS[i%COLS.length],bw=Math.round(p.bestScore/max*100);
+    return `<div class="rp-item">
+      <div class="rp-medal">${medals[i]}</div>
       <div class="rp-avatar" style="background:${col}">${p.name.slice(0,2)}</div>
-      <div style="flex:1;min-width:0;">
+      <div class="rp-info">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div class="rp-name">${p.name}</div>
           <div class="rp-score">${p.bestScore.toLocaleString()}<span style="font-size:11px;color:var(--muted);font-family:'Noto Sans KR',sans-serif;font-weight:400;">점</span></div>
         </div>
-        <div class="rp-game">${p.games}게임 · ${p.lastGame}</div>
-        <div class="rp-bar-wrap"><div class="rp-bar" style="width:${barW}%;background:${col}"></div></div>
+        <div class="rp-sub">${p.games}게임 · ${p.lastGame}</div>
+        <div class="rp-bw"><div class="rp-b" style="width:${bw}%;background:${col}"></div></div>
       </div>
     </div>`;
   }).join('');
 }
 
-// Init + auto-refresh every 8s
-function refreshAll() {
-  const data = loadScoreboardData();
-  renderStats(data);
-  renderRankPreview(data);
-}
-refreshAll();
-setInterval(refreshAll, 8000);
+function refresh(){const d=load();renderStats(d);renderRank(d);}
+refresh();
+setInterval(refresh,8000);
 
-// Floating balls random sizes
-document.querySelectorAll('.floating-ball').forEach(b => {
-  b.style.animationDelay = (-Math.random() * 20) + 's';
-});
+// Share
+function copyLink(){
+  const url='https://twinwhdwk.github.io/worldcup_minigame/';
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=document.querySelector('.share-btn.copy');
+    const orig=btn.innerHTML;btn.innerHTML='✅ 복사됨!';
+    setTimeout(()=>btn.innerHTML=orig,2000);
+  }).catch(()=>alert(url));
+}
+function shareNative(){
+  const url='https://twinwhdwk.github.io/worldcup_minigame/';
+  if(navigator.share){navigator.share({title:'⚽ 월드컵 미니게임 2026',text:'6종의 월드컵 미니게임에 도전하세요!',url});}
+  else copyLink();
+}
 </script>
 </body>
 </html>
