@@ -259,9 +259,32 @@
     .shoot-btn { -webkit-tap-highlight-color: transparent; }
     .arrow-btn { min-width: 80px; min-height: 48px; }
 
+    
+    .speed-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: 22px;
+      color: #f59e0b;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(0);
+      transition: none;
+    }
+    .speed-indicator.show {
+      animation: speedPop 0.8s ease forwards;
+    }
+    @keyframes speedPop {
+      0% { opacity: 1; transform: translateY(0) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-40px) scale(0.8); }
+    }
+
     </style>
 </head>
 <body>
+  <div class="speed-indicator" id="speed-indicator">⚡ FAST!</div>
   <a href="../index.html" class="back">← 허브로 돌아가기</a>
   <h1>🕵️ 이 선수 어느 나라?</h1>
   <p class="subtitle">20초 안에 최대한 많이 맞추세요!</p>
@@ -331,6 +354,18 @@
   </div>
 
 <script>
+
+// ── Speed Bonus System ──────────────────────────
+let questionStartTime = 0;
+function startQTimer() { questionStartTime = Date.now(); }
+function getSpeedBonus(baseScore) {
+  const elapsed = (Date.now() - questionStartTime) / 1000;
+  if (elapsed < 2) return Math.round(baseScore * 0.5);  // +50% if < 2s
+  if (elapsed < 4) return Math.round(baseScore * 0.25); // +25% if < 4s
+  return 0;
+}
+// ────────────────────────────────────────────────
+
 
 function shareResult(score, gameName) {
   const text = `⚽ 월드컵 미니게임\n🎮 ${gameName}\n🏆 ${score.toLocaleString()}점 달성!\n\nhttps://twinwhdwk.github.io/worldcup_minigame`;
@@ -521,6 +556,7 @@ function getOptions(correct) {
 function setQuestion() {
   if (timeLeft <= 0) return;
   answered = false;
+  startQTimer();
   const player = getPlayer();
   currentAnswer = player.country;
   totalQ++;
@@ -561,12 +597,23 @@ function answer(btn, selected) {
     streak++;
     if (streak > bestStreak) bestStreak = streak;
     const combo = getCombo(streak);
-    const pts = Math.round(100 * combo.mult);
+    const base = Math.round(100 * combo.mult);
+    const speedBonus = getSpeedBonus(base);
+    const pts = base + speedBonus;
     score += pts;
     correctQ++;
     sfxCorrect(); btn.classList.add('correct');
     fb.className = 'feedback correct'; launchFullConfetti();
-    const cmb = getCombo(streak); fb.textContent = cmb.label ? `${cmb.label} +${pts}점` : `✅ 정답! +${pts}점`; fb.style.color = cmb.color;
+    const cmb = getCombo(streak);
+    if (speedBonus > 0) {
+      const si = document.getElementById('speed-indicator');
+      si.className = 'speed-indicator'; void si.offsetWidth;
+      si.textContent = speedBonus > 30 ? '⚡ SUPER FAST!' : '⚡ FAST!';
+      si.className = 'speed-indicator show';
+    }
+    const speedTxt = speedBonus > 0 ? ` ⚡+${speedBonus}` : '';
+    fb.textContent = cmb.label ? `${cmb.label} +${pts}점${speedTxt}` : `✅ 정답! +${pts}점${speedTxt}`;
+    fb.style.color = cmb.color;
   } else {
     streak = 0;
     sfxWrong(); btn.classList.add('wrong');
