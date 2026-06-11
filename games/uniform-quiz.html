@@ -7,839 +7,461 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --purple:#a855f7; --dark:#080810; --card:#10111e; --text:#f0f0f0; --muted:#555; --muted2:#888; --correct:#22c55e; --wrong:#ef4444; }
+    body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:16px 16px 80px; }
 
-    :root {
-      --purple: #a855f7;
-      --dark: #0a0a0f;
-      --card: #13141f;
-      --text: #f0f0f0;
-      --muted: #666;
-      --correct: #22c55e;
-      --wrong: #ef4444;
-    }
+    .splash{position:fixed;inset:0;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.4s;}
+    .splash.out{opacity:0;pointer-events:none;}
+    .splash-ball{font-size:64px;animation:bounce 0.6s ease infinite alternate;}
+    @keyframes bounce{to{transform:translateY(-20px) rotate(20deg);}}
+    .splash-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,0.08);border-radius:100px;margin-top:24px;overflow:hidden;}
+    .splash-bar{height:100%;background:var(--purple);border-radius:100px;animation:loadBar 0.8s ease forwards;}
+    @keyframes loadBar{from{width:0%}to{width:100%}}
 
-    body {
-      background: var(--dark);
-      color: var(--text);
-      font-family: 'Noto Sans KR', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .back { align-self: flex-start; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 20px; }
-
-    h1 {
-      font-family: 'Black Han Sans', sans-serif;
-      font-size: clamp(28px, 5vw, 48px);
-      text-align: center;
-      background: linear-gradient(135deg, #fff, var(--purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 8px;
-    }
-
-    .subtitle { color: var(--muted); font-size: 14px; text-align: center; margin-bottom: 24px; }
+    .back{align-self:flex-start;color:var(--muted);text-decoration:none;font-size:13px;margin-bottom:16px;}
+    h1{font-family:'Black Han Sans',sans-serif;font-size:clamp(26px,5vw,44px);text-align:center;margin-bottom:6px;background:linear-gradient(135deg,#fff,var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .subtitle{color:var(--muted2);font-size:13px;text-align:center;margin-bottom:20px;}
 
     /* HUD */
-    .hud {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      width: 100%;
-      max-width: 580px;
-    }
-    .hud-box {
-      flex: 1;
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-    }
-    .hud-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-    .hud-value { font-family: 'Black Han Sans', sans-serif; font-size: 26px; margin-top: 2px; }
-    #timer-val { color: var(--purple); }
-    #score-val { color: #FFD700; }
-    #q-val { color: #aaa; }
+    .hud{display:flex;gap:10px;margin-bottom:12px;width:100%;max-width:580px;}
+    .hud-box{flex:1;background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:11px 8px;text-align:center;}
+    .hud-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+    .hud-value{font-family:'Black Han Sans',sans-serif;font-size:26px;margin-top:2px;}
+    #timer-val{color:var(--purple);}#score-val{color:#FFD700;}#q-val{color:#aaa;}
 
-    /* TIMER BAR */
-    .timer-bar-wrap {
-      width: 100%;
-      max-width: 580px;
-      height: 5px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 100px;
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
-    #timer-bar {
-      height: 100%;
-      background: var(--purple);
-      border-radius: 100px;
-      transition: width 1s linear;
-    }
+    /* Timer bar */
+    .timer-bar-wrap{width:100%;max-width:580px;height:5px;background:rgba(255,255,255,0.05);border-radius:100px;margin-bottom:12px;overflow:hidden;}
+    #timer-bar{height:100%;background:var(--purple);border-radius:100px;transition:width 1s linear;}
 
-    /* JERSEY CARD */
-    .jersey-card {
-      background: var(--card);
-      border: 1px solid rgba(168,85,247,0.2);
-      border-radius: 24px;
-      padding: 32px;
-      width: 100%;
-      max-width: 580px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    /* Streak */
+    .streak-bar{text-align:center;font-size:14px;color:#f97316;min-height:22px;margin-bottom:6px;font-weight:700;}
 
-    /* JERSEY SVG DISPLAY */
-    .jersey-display {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 24px;
-      gap: 24px;
-    }
+    /* Jersey card */
+    .jersey-card{background:var(--card);border:1px solid rgba(168,85,247,0.15);border-radius:24px;padding:28px 20px;width:100%;max-width:580px;text-align:center;margin-bottom:14px;}
 
-    .jersey-svg-wrap {
-      position: relative;
-    }
+    /* Jersey display */
+    .jersey-display{display:flex;justify-content:center;align-items:flex-end;gap:32px;margin-bottom:16px;}
+    .jersey-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+    .jersey-wrap svg{width:clamp(100px,18vw,150px);height:auto;filter:drop-shadow(0 6px 20px rgba(0,0,0,0.5));transition:transform 0.3s;}
+    .jersey-wrap:hover svg{transform:scale(1.06);}
+    .jersey-label-txt{font-size:11px;color:var(--muted);letter-spacing:1px;}
 
-    .jersey-svg-wrap svg {
-      width: clamp(100px, 18vw, 160px);
-      height: auto;
-      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
-      transition: transform 0.3s;
-    }
-    .jersey-svg-wrap:hover svg { transform: scale(1.05); }
+    /* Toggle */
+    .toggle-wrap{margin-bottom:14px;}
+    .toggle-btn{background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);color:var(--purple);border-radius:100px;padding:7px 18px;font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;-webkit-tap-highlight-color:transparent;}
+    .toggle-btn:hover{background:rgba(168,85,247,0.2);}
 
-    .jersey-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 8px;
-      letter-spacing: 1px;
-    }
+    /* Clues */
+    .clues{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:10px;}
+    .clue-chip{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:var(--purple);font-size:12px;padding:5px 12px;border-radius:100px;}
 
-    /* CLUES */
-    .clues {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .clue-chip {
-      background: rgba(168,85,247,0.12);
-      border: 1px solid rgba(168,85,247,0.25);
-      color: var(--purple);
-      font-size: 13px;
-      padding: 6px 14px;
-      border-radius: 100px;
-    }
+    /* Auto hint */
+    .auto-hint{font-size:13px;color:#f97316;min-height:18px;margin-bottom:6px;}
 
-    .feedback {
-      font-size: 22px;
-      font-weight: 700;
-      min-height: 30px;
-    }
-    .feedback.correct { color: var(--correct); }
-    .feedback.wrong { color: var(--wrong); }
+    .feedback{font-size:19px;font-weight:700;min-height:26px;}
+    .feedback.correct{color:var(--correct);}
+    .feedback.wrong{color:var(--wrong);}
 
-    /* OPTIONS */
-    .options {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      width: 100%;
-      max-width: 580px;
-    }
+    /* Options */
+    .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:580px;}
+    .opt-btn{background:var(--card);border:2px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px 10px;font-size:15px;font-weight:700;color:var(--text);cursor:pointer;transition:all 0.15s;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;min-height:58px;-webkit-tap-highlight-color:transparent;}
+    .opt-btn .flag{font-size:22px;}
+    .opt-btn:hover:not(:disabled){border-color:var(--purple);background:rgba(168,85,247,0.1);transform:scale(1.02);}
+    .opt-btn.correct{border-color:var(--correct);background:rgba(34,197,94,0.15);color:var(--correct);}
+    .opt-btn.wrong{border-color:var(--wrong);background:rgba(239,68,68,0.15);color:var(--wrong);}
+    .opt-btn:disabled{cursor:not-allowed;}
 
-    .opt-btn {
-      background: var(--card);
-      border: 2px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 16px 12px;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: 'Noto Sans KR', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .opt-btn:hover:not(:disabled) {
-      border-color: var(--purple);
-      background: rgba(168,85,247,0.1);
-      transform: scale(1.02);
-    }
-    .opt-btn.correct { border-color: var(--correct); background: rgba(34,197,94,0.15); color: var(--correct); }
-    .opt-btn.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.15); color: var(--wrong); }
-    .opt-btn:disabled { cursor: not-allowed; }
+    /* Result */
+    .result-screen{display:none;flex-direction:column;align-items:center;text-align:center;width:100%;max-width:580px;}
+    .result-screen.show{display:flex;}
+    .result-trophy{font-size:80px;margin-bottom:12px;}
+    .result-grade{font-family:'Black Han Sans',sans-serif;font-size:52px;margin-bottom:4px;}
+    .result-title{font-family:'Black Han Sans',sans-serif;font-size:30px;margin-bottom:6px;}
+    .result-score{font-size:52px;font-family:'Black Han Sans',sans-serif;color:#FFD700;margin:8px 0;}
+    .result-msg{color:var(--muted2);font-size:14px;margin-bottom:18px;}
+    .result-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;width:100%;}
+    .stat-box{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px;text-align:center;}
+    .stat-val{font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--purple);}
+    .stat-label{font-size:11px;color:var(--muted);margin-top:3px;}
+    .btn-restart{background:var(--purple);color:#fff;border:none;border-radius:100px;padding:14px 40px;font-size:17px;font-weight:700;cursor:pointer;transition:opacity 0.2s,transform 0.15s;}
+    .btn-restart:hover{opacity:0.85;transform:scale(1.03);}
 
-    /* RESULT */
-    .result-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      width: 100%;
-      max-width: 580px;
-    }
-    .result-screen.show { display: flex; }
-    .result-trophy { font-size: 80px; margin-bottom: 16px; }
-    .result-title { font-family: 'Black Han Sans', sans-serif; font-size: 38px; margin-bottom: 8px; }
-    .result-score { font-size: 60px; font-family: 'Black Han Sans', sans-serif; color: #FFD700; margin: 12px 0; }
-    .result-msg { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
-    .btn-restart {
-      background: var(--purple);
-      color: #fff;
-      border: none;
-      border-radius: 100px;
-      padding: 16px 48px;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
-    }
-    .btn-restart:hover { opacity: 0.85; transform: scale(1.03); }
-  
-    @keyframes scorePop {
-      0% { transform: scale(0) translateY(0); opacity: 1; }
-      60% { transform: scale(1.3) translateY(-30px); opacity: 1; }
-      100% { transform: scale(1) translateY(-60px); opacity: 0; }
-    }
-    .score-pop {
-      position: fixed; font-family: 'Black Han Sans', sans-serif;
-      font-size: 28px; font-weight: 900; pointer-events: none; z-index: 9998;
-      animation: scorePop 0.7s ease forwards;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
+    /* Nav */
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,16,0.96);border-top:1px solid rgba(255,255,255,0.07);display:flex;justify-content:space-around;padding:10px 8px;z-index:500;backdrop-filter:blur(10px);}
+    .nav-item{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:var(--muted);font-size:10px;gap:3px;flex:1;transition:color 0.2s;-webkit-tap-highlight-color:transparent;}
+    .nav-item.active{color:#FFD700;}
+    .nav-icon{font-size:20px;}
 
-    
-    /* ── Mobile Optimization ── */
-    @media (max-width: 480px) {
-      body { padding: 12px; }
-      .options { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .opt-btn { padding: 14px 8px; font-size: 14px; min-height: 64px; }
-      .question-card, .q-card, .jersey-card { padding: 24px 16px; }
-      .hud { gap: 8px; }
-      .hud-box { padding: 10px 6px; }
-      .hud-value { font-size: 22px; }
-      .player-emoji, .jersey-display { font-size: 56px; }
-      .hints, .clues, .hint-row { gap: 6px; }
-      .hint-chip, .clue-chip { font-size: 11px; padding: 4px 10px; }
-      .shoot-btn { padding: 16px 40px; font-size: 18px; }
-      h1 { font-size: 28px; }
-    }
-    /* Larger touch targets */
-    .opt-btn { min-height: 56px; -webkit-tap-highlight-color: transparent; }
-    .shoot-btn { -webkit-tap-highlight-color: transparent; }
-    .arrow-btn { min-width: 80px; min-height: 48px; }
-
-    
-    .streak-bar {
-      text-align: center;
-      font-size: 13px;
-      color: #f97316;
-      min-height: 20px;
-      margin-bottom: 4px;
-      font-weight: 700;
-    }
-
-    
-    /* ── Loading Splash ── */
-    .splash {
-      position: fixed; inset: 0; background: #0a0a0f;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 9999; transition: opacity 0.4s ease;
-    }
-    .splash.fade-out { opacity: 0; pointer-events: none; }
-    .splash-ball { font-size: 64px; animation: bounceBall 0.6s ease infinite alternate; }
-    @keyframes bounceBall { from { transform: translateY(0) rotate(0deg); } to { transform: translateY(-20px) rotate(20deg); } }
-    .splash-title { font-family: 'Black Han Sans', sans-serif; font-size: 22px; margin-top: 20px; color: #fff; }
-    .splash-sub { font-size: 13px; color: #555; margin-top: 8px; }
-    .splash-bar-wrap { width: 200px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin-top: 20px; overflow: hidden; }
-    .splash-bar { height: 100%; background: #00843D; border-radius: 100px; animation: loadBar 0.8s ease forwards; }
-    @keyframes loadBar { from { width: 0%; } to { width: 100%; } }
-
-    
-    /* ── Bottom Nav ── */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: rgba(10,10,15,0.95);
-      border-top: 1px solid rgba(255,255,255,0.07);
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 8px;
-      z-index: 500;
-      backdrop-filter: blur(10px);
-    }
-    .nav-item {
-      display: flex; flex-direction: column; align-items: center;
-      text-decoration: none; color: var(--muted);
-      font-size: 10px; gap: 3px; flex: 1;
-      transition: color 0.2s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .nav-item.active { color: #FFD700; }
-    .nav-item:hover { color: #fff; }
-    .nav-icon { font-size: 20px; }
-    /* push content above nav */
-    body { padding-bottom: 72px; }
-
-    </style>
+    @media(max-width:480px){body{padding:12px 12px 80px;}.options{gap:8px;}.opt-btn{padding:12px 6px;font-size:13px;min-height:52px;}.jersey-card{padding:20px 14px;}.jersey-display{gap:16px;}}
+  </style>
 </head>
 <body>
-  <div class="splash" id="splash">
-    <div class="splash-ball">⚽</div>
-    <div class="splash-title">로딩 중...</div>
-    <div class="splash-sub">월드컵 미니게임</div>
-    <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+<div class="splash" id="splash">
+  <div class="splash-ball">👕</div>
+  <div style="font-family:'Black Han Sans',sans-serif;font-size:20px;margin-top:18px;color:#fff;">유니폼 퀴즈</div>
+  <div style="font-size:13px;color:#555;margin-top:6px;">월드컵 미니게임</div>
+  <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+</div>
+
+<a href="../index.html" class="back">← 허브로 돌아가기</a>
+<h1>👕 이 유니폼 어느 팀?</h1>
+<p class="subtitle">유니폼을 보고 어느 나라인지 맞추세요!</p>
+
+<div id="game-area" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+  <div class="hud">
+    <div class="hud-box"><div class="hud-label">⏱ 시간</div><div class="hud-value" id="timer-val">30</div></div>
+    <div class="hud-box"><div class="hud-label">⭐ 점수</div><div class="hud-value" id="score-val">0</div></div>
+    <div class="hud-box"><div class="hud-label">❓ 문제</div><div class="hud-value" id="q-val">1</div></div>
+  </div>
+  <div class="timer-bar-wrap"><div id="timer-bar" style="width:100%"></div></div>
+  <div class="streak-bar" id="streak-bar"></div>
+
+  <div class="jersey-card">
+    <div class="jersey-display" id="jersey-display"></div>
+    <div class="toggle-wrap"><button class="toggle-btn" id="toggle-btn" onclick="toggleKit()">🔄 원정 유니폼 보기</button></div>
+    <div class="clues" id="clues"></div>
+    <div class="auto-hint" id="auto-hint"></div>
+    <div class="feedback" id="feedback"></div>
   </div>
 
-  <a href="../index.html" class="back">← 허브로 돌아가기</a>
-  <h1>👕 이 유니폼 어느 팀?</h1>
-  <p class="subtitle">유니폼 색상과 패턴으로 국가를 맞추세요!</p>
+  <div class="options" id="options"></div>
+</div>
 
-  <div id="game-area" style="width:100%;display:flex;flex-direction:column;align-items:center;">
-    <div class="hud">
-      <div class="hud-box">
-        <div class="hud-label">⏱ 시간</div>
-        <div class="hud-value" id="timer-val">45</div>
-      </div>
-      <div class="hud-box">
-        <div class="hud-label">⭐ 점수</div>
-        <div class="hud-value" id="score-val">0</div>
-      </div>
-      <div class="hud-box">
-        <div class="hud-label">❓ 문제</div>
-        <div class="hud-value" id="q-val">1</div>
-      </div>
-    </div>
-
-    <div class="streak-bar" id="streak-bar"></div>
-    <div class="timer-bar-wrap">
-      <div id="timer-bar" style="width:100%"></div>
-    </div>
-
-    <div class="jersey-card">
-      <div class="jersey-display" id="jersey-display"></div>
-      <div class="clues" id="clues"></div>
-      <div id="auto-hint" style="display:none;font-size:13px;color:#f97316;margin-bottom:8px;"></div>
-      <div class="feedback" id="feedback"></div>
-    </div>
-
-    <div class="options" id="options"></div>
+<div class="result-screen" id="result-screen">
+  <div class="result-trophy" id="res-trophy">🏆</div>
+  <div class="result-grade" id="res-grade">B</div>
+  <div class="result-title" id="res-title">게임 종료!</div>
+  <div class="result-score" id="res-score">0점</div>
+  <div class="result-msg" id="res-msg"></div>
+  <div class="result-stats">
+    <div class="stat-box"><div class="stat-val" id="stat-correct">0</div><div class="stat-label">✅ 정답</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-total">0</div><div class="stat-label">📋 총 문제</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-best">0</div><div class="stat-label">🔥 최고 연속</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-acc">0%</div><div class="stat-label">🎯 정확도</div></div>
   </div>
+  <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
+  <br><br>
+  <a href="#" onclick="goToScoreboard(score)" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:100px;padding:12px 24px;text-decoration:none;color:#FFD700;font-weight:700;font-size:14px;">🏆 랭킹에 등록하기</a>
+  <br><br>
+  <a href="../index.html" style="color:var(--muted);font-size:13px;">← 다른 게임 하기</a>
+</div>
 
-  <div class="result-screen" id="result-screen">
-    <div class="result-trophy" id="res-trophy">🏆</div>
-    <div class="result-title" id="res-title">게임 종료!</div>
-    <div class="result-score" id="res-score">0점</div>
-    <div class="result-msg" id="res-msg"></div>
-    
-    <div id="highscore-box" style="width:100%;max-width:600px;background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;margin-bottom:20px;"></div>
-    <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
-    <br><br>
-    <a href="../index.html" style="color:var(--muted);font-size:14px;">
-    <br>
-    <a href="#" onclick="goToScoreboard(score)" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:100px;padding:12px 24px;text-decoration:none;color:#FFD700;font-weight:700;font-size:15px;margin-top:8px;">
-      🏆 내 점수 랭킹에 등록하기
-    </a>
-
-    <br><a href="../index.html" style="color:var(--muted);font-size:14px;">← 다른 게임 하기</a>
-    <a</a>
-  </div>
+<nav class="bottom-nav">
+  <a href="player-country.html" class="nav-item"><span class="nav-icon">🕵️</span><span>선수퀴즈</span></a>
+  <a href="champion-tournament.html" class="nav-item"><span class="nav-icon">🏆</span><span>우승국</span></a>
+  <a href="penalty-kick.html" class="nav-item"><span class="nav-icon">🥅</span><span>페널티킥</span></a>
+  <a href="uniform-quiz.html" class="nav-item active"><span class="nav-icon">👕</span><span>유니폼</span></a>
+  <a href="../scoreboard.html" class="nav-item"><span class="nav-icon">🏅</span><span>랭킹</span></a>
+  <a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span>허브</span></a>
+</nav>
 
 <script>
+function goToScoreboard(s){const name=localStorage.getItem('wc_player_name')||'';window.location.href='../scoreboard.html'+(name?`?prefill=${encodeURIComponent(name)}&score=${s}`:'');}
 
-function goToScoreboard(score) {
-  const name = localStorage.getItem('wc_player_name') || '';
-  const url = '../scoreboard.html' + (name ? `?prefill=${encodeURIComponent(name)}&score=${score}` : '');
-  window.location.href = url;
-}
+// Audio
+const AudioCtx=window.AudioContext||window.webkitAudioContext;let _ctx=null;
+function getCtx(){if(!_ctx)_ctx=new AudioCtx();if(_ctx.state==='suspended')_ctx.resume();return _ctx;}
+function playTone(f,t,d,v=0.3){try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);o.start();o.stop(c.currentTime+d);}catch(e){}}
+function sfxCorrect(){playTone(523,'sine',0.12,0.35);setTimeout(()=>playTone(659,'sine',0.12,0.35),80);setTimeout(()=>playTone(784,'sine',0.18,0.35),160);}
+function sfxWrong(){playTone(220,'sawtooth',0.25,0.25);setTimeout(()=>playTone(180,'sawtooth',0.2,0.2),120);}
 
+// Confetti
+function launchConfetti(x,y,n=14){const cols=['#FFD700','#00843D','#ef4444','#3b82f6','#a855f7','#fff'];for(let i=0;i<n;i++){const el=document.createElement('div');el.style.cssText=`position:fixed;width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'2px'};left:${x}px;top:${y}px;pointer-events:none;z-index:9998;`;document.body.appendChild(el);const a=Math.random()*360*Math.PI/180,sp=70+Math.random()*120;let px=x,py=y,vy=Math.sin(a)*sp-60,vx=Math.cos(a)*sp,t=0;const tick=()=>{t+=0.016;px+=vx*0.016;vy+=200*0.016;py+=vy*0.016;el.style.left=px+'px';el.style.top=py+'px';el.style.opacity=Math.max(0,1-t*1.4);el.style.transform=`rotate(${t*200}deg)`;if(t<0.9)requestAnimationFrame(tick);else el.remove();};requestAnimationFrame(tick);}}
+function launchFullConfetti(){for(let i=0;i<4;i++)setTimeout(()=>launchConfetti(Math.random()*window.innerWidth,-10,10),i*120);}
 
-let showAway = false;
-function toggleJersey() {
-  showAway = !showAway;
-  const btn = document.getElementById('toggle-jersey-btn');
-  if (btn) btn.textContent = showAway ? '🔄 홈 유니폼 보기' : '🔄 원정 유니폼 보기';
-  setQuestion();
-}
-
-
-function shareResult(score, gameName) {
-  const text = `⚽ 월드컵 미니게임\n🎮 ${gameName}\n🏆 ${score.toLocaleString()}점 달성!\n\nhttps://twinwhdwk.github.io/worldcup_minigame`;
-  if (navigator.share) {
-    navigator.share({ title: '월드컵 미니게임', text });
-  } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => alert('클립보드에 복사됐어요!'));
-  }
-}
-
-
-let wrongStreak = 0;
-function checkAutoHint() {
-  if (wrongStreak >= 2) {
-    const hintEl = document.getElementById('auto-hint');
-    if (hintEl && currentTeam) {
-      hintEl.textContent = '💡 자동 힌트: ' + currentTeam.clues[0];
-      hintEl.style.display = 'block';
-    }
-  }
-}
-
-
-// ── Confetti System ─────────────────────────────
-function launchConfetti(x, y, count=18) {
-  const colors = ['#FFD700','#00843D','#ef4444','#3b82f6','#a855f7','#fff'];
-  for (let i = 0; i < count; i++) {
-    const el = document.createElement('div');
-    el.style.cssText = `
-      position:fixed; width:${6+Math.random()*6}px; height:${6+Math.random()*6}px;
-      background:${colors[Math.floor(Math.random()*colors.length)]};
-      border-radius:${Math.random()>0.5?'50%':'2px'};
-      left:${x}px; top:${y}px; pointer-events:none; z-index:9999;
-      transform:rotate(${Math.random()*360}deg);
-    `;
-    document.body.appendChild(el);
-    const angle = (Math.random() * 360) * Math.PI / 180;
-    const speed = 80 + Math.random() * 120;
-    const vx = Math.cos(angle) * speed;
-    const vy = Math.sin(angle) * speed - 60;
-    let px = x, py = y, vy2 = vy, t = 0;
-    const tick = () => {
-      t += 0.016; px += vx * 0.016; vy2 += 200 * 0.016; py += vy2 * 0.016;
-      el.style.left = px + 'px'; el.style.top = py + 'px';
-      el.style.opacity = Math.max(0, 1 - t * 1.5);
-      el.style.transform = `rotate(${t*200}deg)`;
-      if (t < 0.8) requestAnimationFrame(tick); else el.remove();
-    };
-    requestAnimationFrame(tick);
-  }
-}
-function launchFullConfetti() {
-  for (let i = 0; i < 4; i++) setTimeout(() => launchConfetti(Math.random()*window.innerWidth, -10, 12), i*150);
-}
-// ────────────────────────────────────────────────
-
-
-// ── High Score System ───────────────────────────────────
-function getHighScores(game) {
-  try { return JSON.parse(localStorage.getItem('wc_hs_' + game) || '[]'); } catch { return []; }
-}
-function saveHighScore(game, score) {
-  const scores = getHighScores(game);
-  scores.push({ score, date: new Date().toLocaleDateString('ko-KR') });
-  scores.sort((a,b) => b.score - a.score);
-  const top5 = scores.slice(0, 5);
-  localStorage.setItem('wc_hs_' + game, JSON.stringify(top5));
-  return top5;
-}
-function renderHighScores(game, containerId) {
-  const scores = getHighScores(game);
-  const el = document.getElementById(containerId);
-  if (!el || scores.length === 0) return;
-  el.innerHTML = '<div style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">🏅 역대 최고점</div>' +
-    scores.map((s,i) => `<div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-      <span style="color:${i===0?'#FFD700':i===1?'#aaa':i===2?'#cd7f32':'var(--muted)'}">${['🥇','🥈','🥉','4위','5위'][i]}</span>
-      <span style="font-weight:700">${s.score.toLocaleString()}점</span>
-      <span style="color:var(--muted)">${s.date}</span>
-    </div>`).join('');
-}
-// ────────────────────────────────────────────────────────
-
-
-// ── Web Audio Sound System ──────────────────────────────
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let _ctx = null;
-function getCtx() {
-  if (!_ctx) _ctx = new AudioCtx();
-  if (_ctx.state === 'suspended') _ctx.resume();
-  return _ctx;
-}
-function playTone(freq, type, duration, vol=0.3, decay=0.8) {
-  try {
-    const ctx = getCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = type; osc.frequency.value = freq;
-    gain.gain.setValueAtTime(vol, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-    osc.start(); osc.stop(ctx.currentTime + duration);
-  } catch(e) {}
-}
-function sfxCorrect() {
-  playTone(523, 'sine', 0.12, 0.35);
-  setTimeout(() => playTone(659, 'sine', 0.12, 0.35), 80);
-  setTimeout(() => playTone(784, 'sine', 0.18, 0.35), 160);
-}
-function sfxWrong() {
-  playTone(220, 'sawtooth', 0.25, 0.25);
-  setTimeout(() => playTone(180, 'sawtooth', 0.2, 0.2), 120);
-}
-function sfxGoal() {
-  [523,659,784,1047].forEach((f,i) => setTimeout(()=>playTone(f,'sine',0.22,0.4),i*70));
-}
-function sfxClick() { playTone(440, 'sine', 0.06, 0.15); }
-// ────────────────────────────────────────────────────────
-
-// Jersey SVG generator
-function jerseyPath(colors, pattern = 'solid', number = '10') {
-  const [main, secondary, accent] = colors;
-
-  // Pattern overlays
+// ── SVG Jersey Generator ─────────────────────────
+function makeJersey(colors, pattern='solid', num='10', id='j') {
+  const [main, second, accent=second] = colors;
   let overlay = '';
-  if (pattern === 'stripes') {
-    overlay = `
-      <rect x="62" y="0" width="22" height="140" fill="${secondary}" opacity="0.92"/>
-      <rect x="106" y="0" width="22" height="140" fill="${secondary}" opacity="0.92"/>`;
-  } else if (pattern === 'half') {
-    overlay = `<rect x="100" y="0" width="120" height="140" fill="${secondary}"/>`;
-  } else if (pattern === 'sash') {
-    overlay = `<polygon points="55,0 105,0 65,140 35,140" fill="${secondary}" opacity="0.92"/>`;
-  } else if (pattern === 'collar-stripe') {
-    overlay = `
-      <rect x="55" y="0" width="90" height="16" fill="${secondary}" opacity="0.85"/>
-      <rect x="55" y="130" width="90" height="10" fill="${secondary}" opacity="0.6"/>`;
-  } else if (pattern === 'chevron') {
-    overlay = `<polygon points="55,40 100,70 145,40 145,0 100,30 55,0" fill="${secondary}" opacity="0.85"/>`;
-  } else if (pattern === 'checkerboard') {
-    const rows = 4, cols = 3, w = 90/cols, h = 140/rows;
-    let checks = '';
-    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) {
-      if((r+c)%2===0) checks += `<rect x="${55+c*w}" y="${r*h}" width="${w}" height="${h}" fill="${secondary}" opacity="0.92"/>`;
+
+  if (pattern==='stripes') {
+    overlay=`<rect x="60" y="0" width="24" height="145" fill="${second}" opacity="0.9"/><rect x="108" y="0" width="24" height="145" fill="${second}" opacity="0.9"/>`;
+  } else if (pattern==='half') {
+    overlay=`<rect x="96" y="0" width="110" height="145" fill="${second}"/>`;
+  } else if (pattern==='sash') {
+    overlay=`<polygon points="52,0 108,0 68,145 30,145" fill="${second}" opacity="0.9"/>`;
+  } else if (pattern==='collar-stripe') {
+    overlay=`<rect x="52" y="0" width="92" height="18" fill="${second}" opacity="0.8"/><rect x="52" y="128" width="92" height="12" fill="${second}" opacity="0.5"/>`;
+  } else if (pattern==='chevron') {
+    overlay=`<polygon points="52,45 98,76 144,45 144,0 98,32 52,0" fill="${second}" opacity="0.85"/>`;
+  } else if (pattern==='panel') {
+    overlay=`<rect x="52" y="0" width="28" height="145" fill="${second}" opacity="0.7"/><rect x="116" y="0" width="28" height="145" fill="${second}" opacity="0.7"/>`;
+  } else if (pattern==='checkerboard') {
+    const cw=22,ch=30;
+    for(let r=0;r<5;r++) for(let c=0;c<4;c++) {
+      if((r+c)%2===0) overlay+=`<rect x="${52+c*cw}" y="${r*ch}" width="${cw}" height="${ch}" fill="${second}" opacity="0.9"/>`;
     }
-    overlay = checks;
-  } else if (pattern === 'panel') {
-    overlay = `
-      <rect x="55" y="0" width="30" height="140" fill="${secondary}" opacity="0.7"/>
-      <rect x="115" y="0" width="30" height="140" fill="${secondary}" opacity="0.7"/>`;
+  } else if (pattern==='hoops') {
+    [0,30,60,90,120].forEach(y=>{ overlay+=`<rect x="0" y="${y}" width="200" height="14" fill="${second}" opacity="0.85"/>`; });
+  } else if (pattern==='diagonal') {
+    overlay=`<polygon points="0,0 80,0 0,145" fill="${second}" opacity="0.7"/>`;
   }
 
-  return `<svg viewBox="0 0 200 170" xmlns="http://www.w3.org/2000/svg">
+  return `<svg viewBox="0 0 200 175" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <clipPath id="jersey-clip-${number}">
-      <path d="M40,15 L0,55 L28,70 L28,155 L172,155 L172,70 L200,55 L160,15 Q135,32 100,32 Q65,32 40,15 Z"/>
+    <clipPath id="clip-${id}">
+      <path d="M38,18 L0,56 L27,72 L27,155 L173,155 L173,72 L200,56 L162,18 Q135,36 100,36 Q65,36 38,18 Z"/>
     </clipPath>
-    <filter id="shadow-${number}">
-      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.4)"/>
-    </filter>
+    <filter id="drop-${id}"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="rgba(0,0,0,0.45)"/></filter>
+    <linearGradient id="shine-${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.08)"/>
+      <stop offset="100%" style="stop-color:rgba(0,0,0,0.08)"/>
+    </linearGradient>
   </defs>
-
-  <!-- Jersey shadow -->
-  <path d="M40,15 L0,55 L28,70 L28,155 L172,155 L172,70 L200,55 L160,15 Q135,32 100,32 Q65,32 40,15 Z"
-    fill="rgba(0,0,0,0.3)" transform="translate(3,5)" filter="url(#shadow-${number})"/>
-
-  <!-- Jersey base -->
-  <path d="M40,15 L0,55 L28,70 L28,155 L172,155 L172,70 L200,55 L160,15 Q135,32 100,32 Q65,32 40,15 Z"
-    fill="${main}"/>
-
-  <!-- Pattern layer clipped to jersey shape -->
-  <g clip-path="url(#jersey-clip-${number})">${overlay}</g>
-
-  <!-- Sleeves shading -->
-  <path d="M40,15 L0,55 L28,70 L40,64 Z" fill="rgba(0,0,0,0.12)"/>
-  <path d="M160,15 L200,55 L172,70 L160,64 Z" fill="rgba(0,0,0,0.12)"/>
-
-  <!-- Jersey outline -->
-  <path d="M40,15 L0,55 L28,70 L28,155 L172,155 L172,70 L200,55 L160,15 Q135,32 100,32 Q65,32 40,15 Z"
-    fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-
+  <!-- Shadow -->
+  <path d="M38,18 L0,56 L27,72 L27,155 L173,155 L173,72 L200,56 L162,18 Q135,36 100,36 Q65,36 38,18 Z" fill="rgba(0,0,0,0.25)" transform="translate(3,6)" filter="url(#drop-${id})"/>
+  <!-- Base -->
+  <path d="M38,18 L0,56 L27,72 L27,155 L173,155 L173,72 L200,56 L162,18 Q135,36 100,36 Q65,36 38,18 Z" fill="${main}"/>
+  <!-- Pattern -->
+  <g clip-path="url(#clip-${id})">${overlay}</g>
+  <!-- Sleeve shade -->
+  <path d="M38,18 L0,56 L27,72 L42,64 Z" fill="rgba(0,0,0,0.14)"/>
+  <path d="M162,18 L200,56 L173,72 L158,64 Z" fill="rgba(0,0,0,0.14)"/>
+  <!-- Outline -->
+  <path d="M38,18 L0,56 L27,72 L27,155 L173,155 L173,72 L200,56 L162,18 Q135,36 100,36 Q65,36 38,18 Z" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
   <!-- Collar -->
-  <path d="M78,32 Q100,45 122,32 Q115,15 100,15 Q85,15 78,32 Z" fill="${secondary || main}"/>
-  <path d="M78,32 Q100,45 122,32 Q115,15 100,15 Q85,15 78,32 Z" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
-
-  <!-- Chest shine -->
-  <ellipse cx="86" cy="65" rx="18" ry="28" fill="rgba(255,255,255,0.06)" transform="rotate(-15,86,65)"/>
-
+  <path d="M76,36 Q100,50 124,36 Q118,18 100,18 Q82,18 76,36 Z" fill="${second||main}"/>
+  <path d="M76,36 Q100,50 124,36 Q118,18 100,18 Q82,18 76,36 Z" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+  <!-- Shine -->
+  <path d="M38,18 L0,56 L27,72 L27,155 L173,155 L173,72 L200,56 L162,18 Q135,36 100,36 Q65,36 38,18 Z" fill="url(#shine-${id})"/>
   <!-- Number -->
-  <text x="100" y="118" text-anchor="middle" font-size="36" font-weight="900"
-    fill="${secondary || '#ffffff'}" opacity="0.88" font-family="Arial Black, sans-serif"
-    stroke="rgba(0,0,0,0.2)" stroke-width="1">${number}</text>
+  <text x="100" y="118" text-anchor="middle" font-size="38" font-weight="900" fill="${second||'#ffffff'}" opacity="0.85" font-family="Arial Black,sans-serif" stroke="rgba(0,0,0,0.2)" stroke-width="1">${num}</text>
 </svg>`;
 }
 
+// ── Teams DB (24팀) ───────────────────────────────
 const TEAMS = [
-  {
-    name: "🇧🇷 브라질", flag: "🇧🇷",
-    away: { colors: ["#003087","#003087","#FFD700"], pattern: "solid", label: "원정 유니폼" },
-    home: { colors: ["#FFD700","#009c3b","#009c3b"], pattern: "solid", label: "홈 유니폼" },
-    clues: ["노란 상의", "파란 반바지", "삼바의 나라"],
-    decoy: ["🇨🇴 콜롬비아","🇸🇪 스웨덴","🇺🇦 우크라이나"],
-  },
-  {
-    name: "🇩🇪 독일", flag: "🇩🇪",
-    away: { colors: ["#000000","#ffffff","#cc0000"], pattern: "solid", label: "원정 유니폼" },
-    home: { colors: ["#ffffff","#000000","#cc0000"], pattern: "collar-stripe", label: "홈 유니폼" },
-    clues: ["흰색 상의", "검은 반바지", "독수리 엠블럼"],
-    decoy: ["🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드","🇵🇱 폴란드","🇺🇾 우루과이"],
-  },
-  {
-    name: "🇦🇷 아르헨티나", flag: "🇦🇷",
-    away: { colors: ["#003189","#74ACDF","#003189"], pattern: "solid", label: "원정 유니폼" },
-    home: { colors: ["#74ACDF","#ffffff","#74ACDF"], pattern: "stripes", label: "홈 유니폼" },
-    clues: ["하늘색 + 흰색 세로줄", "남미 강국", "메시의 나라"],
-    decoy: ["🇺🇾 우루과이","🇸🇻 엘살바도르","🇬🇷 그리스"],
-  },
-  {
-    name: "🇫🇷 프랑스", flag: "🇫🇷",
-    away: { colors: ["#ffffff","#003189","#ffffff"], pattern: "collar-stripe", label: "원정 유니폼" },
-    home: { colors: ["#003189","#ff0000","#ffffff"], pattern: "solid", label: "홈 유니폼" },
-    clues: ["진한 파란색", "수탉 엠블럼", "레 블뢰"],
-    decoy: ["🇮🇹 이탈리아","🇸🇪 스웨덴","🇧🇦 보스니아"],
-  },
-  {
-    name: "🇮🇹 이탈리아", flag: "🇮🇹",
-    home: { colors: ["#0066CC","#0066CC","#ffffff"], pattern: "solid", label: "홈 유니폼" },
-    clues: ["밝은 파란색", "아주리", "로마의 후예"],
-    decoy: ["🇫🇷 프랑스","🇸🇰 슬로바키아","🇫🇮 핀란드"],
-  },
-  {
-    name: "🇪🇸 스페인", flag: "🇪🇸",
-    home: { colors: ["#c60b1e","#ffc400","#c60b1e"], pattern: "collar-stripe", label: "홈 유니폼" },
-    clues: ["빨간 상의", "황금색 포인트", "라 로하"],
-    decoy: ["🇨🇭 스위스","🇩🇰 덴마크","🇵🇹 포르투갈"],
-  },
-  {
-    name: "🇳🇱 네덜란드", flag: "🇳🇱",
-    home: { colors: ["#FF6600","#FF6600","#ffffff"], pattern: "solid", label: "홈 유니폼" },
-    clues: ["선명한 오렌지", "오렌지 군단", "크루이프의 나라"],
-    decoy: ["🇨🇮 코트디부아르","🇲🇽 멕시코","🇵🇸 팔레스타인"],
-  },
-  {
-    name: "🇵🇹 포르투갈", flag: "🇵🇹",
-    home: { colors: ["#006600","#ff0000","#006600"], pattern: "half", label: "홈 유니폼" },
-    clues: ["초록+빨강 반반", "이베리아 반도", "셀레상"],
-    decoy: ["🇲🇽 멕시코","🇸🇦 사우디아라비아","🇨🇲 카메룬"],
-  },
-  {
-    name: "🇰🇷 대한민국", flag: "🇰🇷",
-    away: { colors: ["#ffffff","#C60C30","#003478"], pattern: "collar-stripe", label: "원정 유니폼" },
-    home: { colors: ["#C60C30","#003478","#ffffff"], pattern: "solid", label: "홈 유니폼" },
-    clues: ["빨간 악마", "태극 문양", "붉은 유니폼"],
-    decoy: ["🇩🇰 덴마크","🇨🇭 스위스","🇹🇷 터키"],
-  },
-  {
-    name: "🇯🇵 일본", flag: "🇯🇵",
-    home: { colors: ["#1A2F5F","#1A2F5F","#ffffff"], pattern: "solid", label: "홈 유니폼" },
-    clues: ["진한 남색", "사무라이 블루", "벚꽃 엠블럼"],
-    decoy: ["🇸🇪 스웨덴","🇸🇮 슬로베니아","🇬🇷 그리스"],
-  },
-  {
-    name: "🇧🇪 벨기에", flag: "🇧🇪",
-    home: { colors: ["#ED2939","#000000","#FAE042"], pattern: "sash", label: "홈 유니폼" },
-    clues: ["검은 사선", "빨강+검정", "붉은 악마"],
-    decoy: ["🇩🇪 독일","🇧🇫 부르키나파소","🇦🇱 알바니아"],
-  },
-
-  {
-    name: "🇸🇳 세네갈", flag: "🇸🇳",
-    home: { colors: ["#ffffff","#00853F","#FDEF42"], pattern: "sash", label: "홈 유니폼" },
-    clues: ["흰색 + 초록 사선", "아프리카 사자", "마네의 나라"],
-    decoy: ["🇮🇪 아일랜드","🇸🇦 사우디아라비아","🇯🇲 자메이카"],
-  },
-  {
-    name: "🇳🇬 나이지리아", flag: "🇳🇬",
-    home: { colors: ["#008751","#ffffff","#008751"], pattern: "stripes", label: "홈 유니폼" },
-    clues: ["초록+흰 세로줄", "슈퍼 이글스", "나이키 특별 에디션"],
-    decoy: ["🇲🇽 멕시코","🇧🇦 보스니아","🇸🇦 사우디아라비아"],
-  },
-  {
-    name: "🇩🇰 덴마크", flag: "🇩🇰",
-    home: { colors: ["#C60C30","#ffffff","#C60C30"], pattern: "collar-stripe", label: "홈 유니폼" },
-    clues: ["빨간색 단색", "덴마크의 역동성", "에릭센의 나라"],
-    decoy: ["🇨🇭 스위스","🇹🇳 튀니지","🇧🇾 벨라루스"],
-  },
-  {
-    name: "🇺🇾 우루과이", flag: "🇺🇾",
-    home: { colors: ["#5EB6E4","#ffffff","#5EB6E4"], pattern: "solid", label: "홈 유니폼" },
-    clues: ["연한 하늘색", "하늘색 단색", "첫 번째 챔피언"],
-    decoy: ["🇦🇷 아르헨티나","🇸🇻 엘살바도르","🇫🇮 핀란드"],
-  },
-
-  {
-    name: "🇯🇵 일본", flag: "🇯🇵",
-    home: { colors: ["#1A2F5F","#ffffff","#CC0000"], pattern: "chevron", label: "홈 유니폼" },
-    clues: ["진한 남색", "사무라이 블루", "벚꽃 엠블럼"],
-    decoy: ["🇸🇪 스웨덴","🇸🇮 슬로베니아","🇬🇷 그리스"],
-  },
-  {
-    name: "🇭🇷 크로아티아", flag: "🇭🇷",
-    home: { colors: ["#FF0000","#ffffff","#FF0000"], pattern: "checkerboard", label: "홈 유니폼" },
-    clues: ["빨강+흰 체크무늬", "발칸 반도", "모드리치의 나라"],
-    decoy: ["🇦🇹 오스트리아","🇵🇱 폴란드","🇨🇿 체코"],
-  },
-  {
-    name: "🇬🇭 가나", flag: "🇬🇭",
-    home: { colors: ["#ffffff","#000000","#FFD700"], pattern: "panel", label: "홈 유니폼" },
-    clues: ["흰색+검정 사이드", "검은 별", "아프리카 강호"],
-    decoy: ["🇸🇳 세네갈","🇮🇪 아일랜드","🇺🇾 우루과이"],
-  },
-  {
-    name: "🇲🇽 멕시코", flag: "🇲🇽",
-    home: { colors: ["#006847","#006847","#ffffff"], pattern: "collar-stripe", label: "홈 유니폼" },
-    clues: ["진한 초록색", "독수리+뱀 엠블럼", "치차리토의 나라"],
-    decoy: ["🇳🇬 나이지리아","🇸🇦 사우디아라비아","🇸🇳 세네갈"],
-  },
+  {name:"🇧🇷 브라질",flag:"🇧🇷",
+   home:{c:["#FFD700","#009c3b","#009c3b"],p:"solid",label:"홈 (노란 삼바)"},
+   away:{c:["#003087","#FFD700","#FFD700"],p:"solid",label:"원정 (파란 삼바)"},
+   clues:["노란 상의 + 파란 반바지","삼바의 나라","노란 카나리아"],decoy:["🇨🇴 콜롬비아","🇸🇪 스웨덴","🇪🇨 에콰도르"]},
+  {name:"🇩🇪 독일",flag:"🇩🇪",
+   home:{c:["#ffffff","#000000","#cc0000"],p:"collar-stripe",label:"홈 (흰 독수리)"},
+   away:{c:["#000000","#ffffff","#cc0000"],p:"solid",label:"원정 (검은 독수리)"},
+   clues:["흰색 + 검정 반바지","독수리 엠블럼","게르만 군단"],decoy:["🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드","🇵🇱 폴란드","🇺🇾 우루과이"]},
+  {name:"🇦🇷 아르헨티나",flag:"🇦🇷",
+   home:{c:["#74ACDF","#ffffff","#74ACDF"],p:"stripes",label:"홈 (하늘색+흰 줄)"},
+   away:{c:["#003189","#74ACDF","#003189"],p:"solid",label:"원정 (진한 파랑)"},
+   clues:["하늘색 + 흰색 세로줄","남미 강국","알비셀레스테"],decoy:["🇺🇾 우루과이","🇸🇻 엘살바도르","🇬🇷 그리스"]},
+  {name:"🇫🇷 프랑스",flag:"🇫🇷",
+   home:{c:["#003189","#ff0000","#ffffff"],p:"solid",label:"홈 (레 블뢰)"},
+   away:{c:["#ffffff","#003189","#003189"],p:"collar-stripe",label:"원정 (흰색)"},
+   clues:["진한 파란색 상의","수탉 엠블럼","레 블뢰"],decoy:["🇮🇹 이탈리아","🇸🇪 스웨덴","🇫🇮 핀란드"]},
+  {name:"🇮🇹 이탈리아",flag:"🇮🇹",
+   home:{c:["#0066CC","#0066CC","#ffffff"],p:"solid",label:"홈 (아주리)"},
+   away:{c:["#ffffff","#0066CC","#0066CC"],p:"solid",label:"원정 (흰색)"},
+   clues:["밝은 파란색","아주리","로마의 후예"],decoy:["🇫🇷 프랑스","🇸🇰 슬로바키아","🇬🇷 그리스"]},
+  {name:"🇪🇸 스페인",flag:"🇪🇸",
+   home:{c:["#c60b1e","#ffc400","#c60b1e"],p:"collar-stripe",label:"홈 (라 로하)"},
+   away:{c:["#0032A0","#c60b1e","#0032A0"],p:"solid",label:"원정 (파랑)"},
+   clues:["빨간 상의","황금색 포인트","라 로하"],decoy:["🇨🇭 스위스","🇩🇰 덴마크","🇵🇹 포르투갈"]},
+  {name:"🇳🇱 네덜란드",flag:"🇳🇱",
+   home:{c:["#FF6600","#FF6600","#ffffff"],p:"solid",label:"홈 (오렌지 군단)"},
+   away:{c:["#003366","#FF6600","#003366"],p:"solid",label:"원정 (파랑)"},
+   clues:["선명한 오렌지","오렌지 군단","크루이프의 나라"],decoy:["🇨🇮 코트디부아르","🇲🇽 멕시코","🇨🇲 카메룬"]},
+  {name:"🇵🇹 포르투갈",flag:"🇵🇹",
+   home:{c:["#006600","#ff0000","#006600"],p:"half",label:"홈 (초록+빨강)"},
+   away:{c:["#ffffff","#006600","#ff0000"],p:"collar-stripe",label:"원정 (흰색)"},
+   clues:["초록 + 빨강 반반","이베리아 반도","셀레상"],decoy:["🇲🇽 멕시코","🇸🇦 사우디아라비아","🇨🇲 카메룬"]},
+  {name:"🇰🇷 대한민국",flag:"🇰🇷",
+   home:{c:["#C60C30","#003478","#ffffff"],p:"solid",label:"홈 (붉은 악마)"},
+   away:{c:["#ffffff","#C60C30","#003478"],p:"collar-stripe",label:"원정 (흰색)"},
+   clues:["빨간 악마","태극 문양","붉은 유니폼"],decoy:["🇩🇰 덴마크","🇨🇭 스위스","🇹🇷 튀르키예"]},
+  {name:"🇯🇵 일본",flag:"🇯🇵",
+   home:{c:["#1A2F5F","#CC0000","#ffffff"],p:"chevron",label:"홈 (사무라이 블루)"},
+   away:{c:["#ffffff","#1A2F5F","#CC0000"],p:"solid",label:"원정 (흰색)"},
+   clues:["진한 남색","사무라이 블루","벚꽃 엠블럼"],decoy:["🇸🇪 스웨덴","🇸🇮 슬로베니아","🇧🇦 보스니아"]},
+  {name:"🇧🇪 벨기에",flag:"🇧🇪",
+   home:{c:["#ED2939","#000000","#FAE042"],p:"sash",label:"홈 (붉은 악마)"},
+   away:{c:["#000000","#ED2939","#FAE042"],p:"solid",label:"원정 (검은색)"},
+   clues:["검은 사선","빨강+검정","레 디아블 루쥬"],decoy:["🇩🇪 독일","🇦🇱 알바니아","🇭🇷 크로아티아"]},
+  {name:"🇲🇽 멕시코",flag:"🇲🇽",
+   home:{c:["#006847","#006847","#ffffff"],p:"collar-stripe",label:"홈 (녹색)"},
+   away:{c:["#ffffff","#006847","#006847"],p:"solid",label:"원정 (흰색)"},
+   clues:["진한 초록색","독수리+뱀 엠블럼","엘 트리"],decoy:["🇳🇬 나이지리아","🇸🇦 사우디아라비아","🇸🇳 세네갈"]},
+  {name:"🇳🇬 나이지리아",flag:"🇳🇬",
+   home:{c:["#008751","#ffffff","#008751"],p:"stripes",label:"홈 (슈퍼 이글스)"},
+   away:{c:["#ffffff","#008751","#ffffff"],p:"solid",label:"원정 (흰색)"},
+   clues:["초록+흰 세로줄","슈퍼 이글스","나이키 특별 에디션"],decoy:["🇲🇽 멕시코","🇧🇦 보스니아","🇸🇦 사우디아라비아"]},
+  {name:"🇸🇳 세네갈",flag:"🇸🇳",
+   home:{c:["#ffffff","#00853F","#FDEF42"],p:"sash",label:"홈 (흰색+초록 사선)"},
+   away:{c:["#00853F","#ffffff","#FDEF42"],p:"solid",label:"원정 (초록)"},
+   clues:["흰색 + 초록 사선","아프리카 사자","마네의 나라"],decoy:["🇮🇪 아일랜드","🇸🇦 사우디아라비아","🇬🇭 가나"]},
+  {name:"🇩🇰 덴마크",flag:"🇩🇰",
+   home:{c:["#C60C30","#ffffff","#C60C30"],p:"collar-stripe",label:"홈 (빨간색)"},
+   away:{c:["#ffffff","#C60C30","#C60C30"],p:"solid",label:"원정 (흰색)"},
+   clues:["빨간색 단색","덴마크의 역동성","에릭센의 나라"],decoy:["🇨🇭 스위스","🇹🇳 튀니지","🇵🇱 폴란드"]},
+  {name:"🇺🇾 우루과이",flag:"🇺🇾",
+   home:{c:["#5EB6E4","#000000","#5EB6E4"],p:"solid",label:"홈 (하늘색)"},
+   away:{c:["#000000","#5EB6E4","#000000"],p:"solid",label:"원정 (검은색)"},
+   clues:["연한 하늘색","하늘색 단색","첫 번째 챔피언"],decoy:["🇦🇷 아르헨티나","🇬🇷 그리스","🇫🇮 핀란드"]},
+  {name:"🇭🇷 크로아티아",flag:"🇭🇷",
+   home:{c:["#FF0000","#ffffff","#FF0000"],p:"checkerboard",label:"홈 (체크무늬)"},
+   away:{c:["#003366","#FF0000","#003366"],p:"solid",label:"원정 (파랑)"},
+   clues:["빨강+흰 체크무늬","발칸 반도","모드리치의 나라"],decoy:["🇦🇹 오스트리아","🇵🇱 폴란드","🇨🇿 체코"]},
+  {name:"🇬🇭 가나",flag:"🇬🇭",
+   home:{c:["#ffffff","#000000","#FFD700"],p:"panel",label:"홈 (검정 사이드)"},
+   away:{c:["#FFD700","#000000","#FFD700"],p:"solid",label:"원정 (노란색)"},
+   clues:["흰색+검정 사이드","검은 별","아프리카 강호"],decoy:["🇸🇳 세네갈","🇮🇪 아일랜드","🇺🇾 우루과이"]},
+  {name:"🇮🇷 이란",flag:"🇮🇷",
+   home:{c:["#ffffff","#239F40","#C8102E"],p:"hoops",label:"홈 (흰색 줄무늬)"},
+   away:{c:["#C8102E","#ffffff","#239F40"],p:"solid",label:"원정 (빨간색)"},
+   clues:["가로 줄무늬","페르시아의 후예","팀 멜리"],decoy:["🇬🇷 그리스","🇸🇮 슬로베니아","🇵🇱 폴란드"]},
+  {name:"🇸🇦 사우디아라비아",flag:"🇸🇦",
+   home:{c:["#ffffff","#006C35","#ffffff"],p:"solid",label:"홈 (흰색 팔콘)"},
+   away:{c:["#006C35","#ffffff","#006C35"],p:"collar-stripe",label:"원정 (초록)"},
+   clues:["순백 유니폼","팔콘 엠블럼","사막의 전사"],decoy:["🇵🇱 폴란드","🇺🇾 우루과이","🇮🇪 아일랜드"]},
+  {name:"🇨🇲 카메룬",flag:"🇨🇲",
+   home:{c:["#007A5E","#CE1126","#FCD116"],p:"diagonal",label:"홈 (삼색 사선)"},
+   away:{c:["#CE1126","#007A5E","#FCD116"],p:"solid",label:"원정 (빨간색)"},
+   clues:["녹색+빨강 대각선","불굴의 사자","아프리카 강호"],decoy:["🇵🇹 포르투갈","🇲🇽 멕시코","🇸🇳 세네갈"]},
+  {name:"🇸🇪 스웨덴",flag:"🇸🇪",
+   home:{c:["#006AA7","#FECC02","#006AA7"],p:"collar-stripe",label:"홈 (파란+노란)"},
+   away:{c:["#FECC02","#006AA7","#FECC02"],p:"solid",label:"원정 (노란색)"},
+   clues:["파란+노란 조합","북유럽 강호","세 왕관 엠블럼"],decoy:["🇦🇷 아르헨티나","🇺🇦 우크라이나","🇫🇮 핀란드"]},
+  {name:"🇦🇺 호주",flag:"🇦🇺",
+   home:{c:["#FFD700","#00843D","#FFD700"],p:"solid",label:"홈 (녹색+노란)"},
+   away:{c:["#ffffff","#00843D","#FFD700"],p:"collar-stripe",label:"원정 (흰색)"},
+   clues:["녹색+노란 조합","사커루","오세아니아 대표"],decoy:["🇧🇷 브라질","🇳🇬 나이지리아","🇬🇭 가나"]},
+  {name:"🇲🇦 모로코",flag:"🇲🇦",
+   home:{c:["#C1272D","#006233","#C1272D"],p:"solid",label:"홈 (붉은 사자)"},
+   away:{c:["#ffffff","#C1272D","#006233"],p:"solid",label:"원정 (흰색)"},
+   clues:["빨간 단색","아틀라스 사자","아프리카 최강"],decoy:["🇩🇰 덴마크","🇹🇳 튀니지","🇪🇬 이집트"]},
 ];
 
-let score = 0, timeLeft = 30, qNum = 0, totalQ = 0, correctQ = 0, streak = 0;
-let timerInterval;
-let usedIdx = [], answered = false;
+let score=0,timeLeft=30,qNum=0,totalQ=0,correctQ=0,streak=0,bestStreak=0,wrongStreak=0;
+let timerInterval,usedIdx=[],currentTeam=null,answered=false,showAway=false;
 
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+
+function getTeam(){
+  if(usedIdx.length===TEAMS.length) usedIdx=[];
+  const avail=TEAMS.map((_,i)=>i).filter(i=>!usedIdx.includes(i));
+  const idx=avail[Math.floor(Math.random()*avail.length)];
+  usedIdx.push(idx); return TEAMS[idx];
 }
 
-function getTeam() {
-  if (usedIdx.length === TEAMS.length) usedIdx = [];
-  const avail = TEAMS.map((_, i) => i).filter(i => !usedIdx.includes(i));
-  const idx = avail[Math.floor(Math.random() * avail.length)];
-  usedIdx.push(idx);
-  return TEAMS[idx];
+function toggleKit(){
+  showAway=!showAway;
+  document.getElementById('toggle-btn').textContent=showAway?'🔄 홈 유니폼 보기':'🔄 원정 유니폼 보기';
+  renderJersey();
 }
 
-let currentTeam;
-
-function setQuestion() {
-  if (timeLeft <= 0) return;
-  answered = false;
-  currentTeam = getTeam();
-  qNum++;
-  totalQ++;
-  document.getElementById('q-val').textContent = qNum;
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').className = 'feedback';
-
-  // Draw jersey
-  const jd = document.getElementById('jersey-display');
-  const j = currentTeam.home;
-  jd.innerHTML = `
-    <div class="jersey-svg-wrap">
-      ${jerseyPath(j.colors, j.pattern)}
-      <div class="jersey-label">${j.label}</div>
-    </div>`;
-
-  // Clues
-  const cluesEl = document.getElementById('clues');
-  cluesEl.innerHTML = currentTeam.clues.map(c => `<span class="clue-chip">${c}</span>`).join('');
-
-  // Options
-  // Always include correct answer + 3 unique wrong answers
-  const wrongPool = shuffle(currentTeam.decoy.filter(d => d !== currentTeam.name));
-  const opts = shuffle([currentTeam.name, ...wrongPool.slice(0,3)]);
-
-  const optEl = document.getElementById('options');
-  optEl.innerHTML = opts.map(o => `
-    <button class="opt-btn" onclick="answer(this, '${o.replace(/'/g, "\\'")}')">
-      ${o}
-    </button>`).join('');
+function renderJersey(){
+  if(!currentTeam) return;
+  const kit=showAway&&currentTeam.away?currentTeam.away:currentTeam.home;
+  const jd=document.getElementById('jersey-display');
+  jd.innerHTML=`<div class="jersey-wrap">
+    ${makeJersey(kit.c,kit.p,'10','h')}
+    <div class="jersey-label-txt">${kit.label}</div>
+  </div>`;
 }
 
-function answer(btn, selected) {
-  if (answered || timeLeft <= 0) return;
-  answered = true;
-  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+function setQuestion(){
+  if(timeLeft<=0) return;
+  answered=false; showAway=false;
+  document.getElementById('toggle-btn').textContent='🔄 원정 유니폼 보기';
+  currentTeam=getTeam();
+  qNum++; totalQ++;
+  document.getElementById('q-val').textContent=qNum;
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('auto-hint').textContent='';
 
-  const fb = document.getElementById('feedback');
-  if (selected === currentTeam.name) {
-    const pts = 100;
-    score += pts;
-    correctQ++;
-    sfxCorrect(); btn.classList.add('correct'); wrongStreak = 0; document.getElementById('auto-hint') && (document.getElementById('auto-hint').style.display='none');
-    fb.className = 'feedback correct'; launchFullConfetti();
-    fb.textContent = `✅ 정답! +${pts}점`;
+  renderJersey();
+
+  document.getElementById('clues').innerHTML=currentTeam.clues.map(c=>`<span class="clue-chip">${c}</span>`).join('');
+
+  // Options — always include correct
+  const wrongPool=shuffle(currentTeam.decoy.filter(d=>d!==currentTeam.name));
+  const opts=shuffle([currentTeam.name,...wrongPool.slice(0,3)]);
+  document.getElementById('options').innerHTML=opts.map(o=>{
+    const f=o.match(/^(\S+)/)?.[1]||'';
+    const n=o.replace(/^\S+\s*/,'');
+    return `<button class="opt-btn" onclick="answer(this,'${o.replace(/'/g,"\\'")}')"><span class="flag">${f}</span>${n}</button>`;
+  }).join('');
+}
+
+function answer(btn,selected){
+  if(answered||timeLeft<=0) return;
+  answered=true;
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('feedback');
+  if(selected===currentTeam.name){
+    streak++; wrongStreak=0;
+    if(streak>bestStreak) bestStreak=streak;
+    const pts=100+(streak>=5?50:streak>=3?25:0);
+    score+=pts; correctQ++;
+    sfxCorrect(); launchFullConfetti();
+    btn.classList.add('correct');
+    fb.className='feedback correct';
+    fb.textContent=streak>=5?`🌟 ${streak}연속! +${pts}점`:streak>=3?`🔥 ${streak}연속! +${pts}점`:`✅ 정답! +${pts}점`;
+    document.getElementById('streak-bar').textContent=streak>=3?`🔥 ${streak}연속 정답!`:'';
   } else {
-    sfxWrong(); btn.classList.add('wrong'); wrongStreak++; checkAutoHint();
-    streak = 0;
-  document.querySelectorAll('.opt-btn').forEach(b => {
-      if (b.textContent.trim() === currentTeam.name) b.classList.add('correct');
+    streak=0; wrongStreak++;
+    sfxWrong();
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt-btn').forEach(b=>{
+      if(b.textContent.trim().includes(currentTeam.name.replace(/^\S+\s*/,''))) b.classList.add('correct');
     });
-    fb.className = 'feedback wrong';
-    fb.textContent = `❌ 오답! 정답: ${currentTeam.name}`;
-  }
-
-  document.getElementById('score-val').textContent = score;
-  const sb = document.getElementById('streak-bar');
-  if (sb) { sb.textContent = streak >= 3 ? '🔥 ' + streak + '연속 정답!' : ''; }
-  setTimeout(setQuestion, 900);
-}
-
-function startGame() {
-  score = 0; timeLeft = 30; qNum = 0; totalQ = 0; correctQ = 0; usedIdx = [];
-  document.getElementById('game-area').style.display = 'flex';
-  document.getElementById('result-screen').classList.remove('show');
-  document.getElementById('score-val').textContent = 0;
-  document.getElementById("timer-val").textContent = 30;
-  document.getElementById('timer-bar').style.width = '100%';
-  document.getElementById('timer-bar').style.background = 'var(--purple)';
-
-  setQuestion();
-
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    document.getElementById('timer-val').textContent = timeLeft;
-    document.getElementById('timer-bar').style.width = (timeLeft / 45 * 100) + '%';
-    if (timeLeft <= 10) document.getElementById('timer-bar').style.background = '#ef4444';
-    else if (timeLeft <= 20) document.getElementById('timer-bar').style.background = '#f59e0b';
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      showResult();
+    fb.className='feedback wrong';
+    fb.textContent=`❌ 오답! 정답: ${currentTeam.flag} ${currentTeam.name.replace(/^\S+\s*/,'')}`;
+    document.getElementById('streak-bar').textContent='';
+    // Auto hint on 2 consecutive wrong
+    if(wrongStreak>=2){
+      document.getElementById('auto-hint').textContent='💡 힌트: '+currentTeam.clues[0];
     }
-  }, 1000);
+  }
+  document.getElementById('score-val').textContent=score;
+  setTimeout(setQuestion,950);
 }
 
-function showResult() {
-  document.getElementById('game-area').style.display = 'none';
-  saveHighScore('uniform', score);
+function startGame(){
+  score=0;timeLeft=30;qNum=0;totalQ=0;correctQ=0;streak=0;bestStreak=0;wrongStreak=0;usedIdx=[];
+  document.getElementById('game-area').style.display='flex';
+  document.getElementById('result-screen').classList.remove('show');
+  document.getElementById('score-val').textContent=0;
+  document.getElementById('timer-val').textContent=30;
+  document.getElementById('streak-bar').textContent='';
+  const bar=document.getElementById('timer-bar');
+  bar.style.width='100%'; bar.style.background='var(--purple)';
+  setQuestion();
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    timeLeft--;
+    document.getElementById('timer-val').textContent=timeLeft;
+    bar.style.width=(timeLeft/30*100)+'%';
+    if(timeLeft<=8) bar.style.background='#ef4444';
+    else if(timeLeft<=15) bar.style.background='#f59e0b';
+    if(timeLeft<=0){clearInterval(timerInterval);showResult();}
+  },1000);
+}
+
+function showResult(){
+  document.getElementById('game-area').style.display='none';
   document.getElementById('result-screen').classList.add('show');
-  renderHighScores('uniform', 'highscore-box');
-
-  const pct = totalQ > 0 ? Math.round(correctQ / totalQ * 100) : 0;
-  let trophy = '😅', title = '더 공부가 필요해요!', msg = '유니폼을 더 연구해보세요!';
-  if (score >= 1000) { trophy = '🏆'; title = '유니폼 마스터!'; msg = '완벽한 유니폼 지식이에요!'; }
-  else if (score >= 700) { trophy = '🥇'; title = '유니폼 박사!'; msg = '훌륭해요!'; }
-  else if (score >= 400) { trophy = '🥈'; title = '잘 하고 있어요!'; msg = '꽤 많이 아시네요!'; }
-  else if (score >= 200) { trophy = '🥉'; title = '나쁘지 않아요!'; msg = '더 연습해보세요!'; }
-
-  document.getElementById('res-trophy').textContent = trophy;
-  document.getElementById('res-title').textContent = title;
-  document.getElementById('res-score').textContent = score + '점';
-  document.getElementById('res-msg').textContent = `${msg} 정확도: ${pct}% (${correctQ}/${totalQ})`;
+  const acc=totalQ>0?Math.round(correctQ/totalQ*100):0;
+  const GRADES=[
+    {min:1000,g:'S',c:'#FFD700',t:'🌟 유니폼 마스터!',  m:'완벽한 유니폼 지식이에요!'},
+    {min:700, g:'A',c:'#22c55e',t:'🥇 유니폼 박사!',    m:'훌륭한 지식이에요!'},
+    {min:400, g:'B',c:'#3b82f6',t:'🥈 잘 하고 있어요!', m:'꽤 많이 아시네요!'},
+    {min:200, g:'C',c:'#f59e0b',t:'🥉 나쁘지 않아요!',  m:'더 연습해봐요!'},
+    {min:0,   g:'D',c:'#ef4444',t:'😅 더 공부해봐요!',  m:'유니폼을 더 연구해보세요!'},
+  ];
+  const gr=GRADES.find(g=>score>=g.min)||GRADES[GRADES.length-1];
+  document.getElementById('res-trophy').textContent=score>=700?'🏆':score>=400?'🥇':'😅';
+  document.getElementById('res-grade').innerHTML=`<span style="color:${gr.c}">GRADE ${gr.g}</span>`;
+  document.getElementById('res-title').textContent=gr.t;
+  document.getElementById('res-score').textContent=score.toLocaleString()+'점';
+  document.getElementById('res-msg').textContent=gr.m+` (정확도 ${acc}%)`;
+  document.getElementById('stat-correct').textContent=correctQ;
+  document.getElementById('stat-total').textContent=totalQ;
+  document.getElementById('stat-best').textContent=bestStreak;
+  document.getElementById('stat-acc').textContent=acc+'%';
 }
 
+setTimeout(()=>{const s=document.getElementById('splash');s.classList.add('out');setTimeout(()=>s.remove(),400);},900);
 startGame();
-
-  // Remove splash
-  setTimeout(() => {
-    const s = document.getElementById('splash');
-    if(s){ s.classList.add('fade-out'); setTimeout(()=>s.remove(), 400); }
-  }, 900);
-
 </script>
-  <nav class="bottom-nav">
-    <a href="player-country.html" class="nav-item "><span class="nav-icon">🕵️</span><span>선수퀴즈</span></a>
-<a href="champion-tournament.html" class="nav-item "><span class="nav-icon">🏆</span><span>우승국</span></a>
-<a href="penalty-kick.html" class="nav-item "><span class="nav-icon">🥅</span><span>페널티킥</span></a>
-<a href="uniform-quiz.html" class="nav-item active"><span class="nav-icon">👕</span><span>유니폼</span></a>
-<a href="../scoreboard.html" class="nav-item"><span class="nav-icon">🏅</span><span>랭킹</span></a>
-<a href="../index.html" class="nav-item"><span class="nav-icon">🏠</span><span>허브</span></a>
-  </nav>
 </body>
 </html>
