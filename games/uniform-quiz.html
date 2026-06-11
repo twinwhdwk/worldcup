@@ -459,7 +459,7 @@ const TEAMS = [
   },
 ];
 
-let score = 0, timeLeft = 45, qNum = 0, totalQ = 0, correctQ = 0;
+let score = 0, timeLeft = 30, qNum = 0, totalQ = 0, correctQ = 0;
 let timerInterval;
 let usedIdx = [], answered = false;
 
@@ -543,11 +543,11 @@ function answer(btn, selected) {
 }
 
 function startGame() {
-  score = 0; timeLeft = 45; qNum = 0; totalQ = 0; correctQ = 0; usedIdx = [];
+  score = 0; timeLeft = 30; qNum = 0; totalQ = 0; correctQ = 0; usedIdx = [];
   document.getElementById('game-area').style.display = 'flex';
   document.getElementById('result-screen').classList.remove('show');
   document.getElementById('score-val').textContent = 0;
-  document.getElementById('timer-val').textContent = 45;
+  document.getElementById("timer-val").textContent = 30;
   document.getElementById('timer-bar').style.width = '100%';
   document.getElementById('timer-bar').style.background = 'var(--purple)';
 

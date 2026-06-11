@@ -230,7 +230,7 @@
 <body>
   <a href="../index.html" class="back">← 허브로 돌아가기</a>
   <h1>🕵️ 이 선수 어느 나라?</h1>
-  <p class="subtitle">30초 안에 최대한 많이 맞추세요!</p>
+  <p class="subtitle">20초 안에 최대한 많이 맞추세요!</p>
 
   <div class="game-area" id="game-area">
     <div class="hud">
@@ -397,7 +397,7 @@ const PLAYERS = [
 
 const ALL_COUNTRIES = [...new Set(PLAYERS.map(p => p.country))];
 
-let score = 0, timeLeft = 30, streak = 0, bestStreak = 0;
+let score = 0, timeLeft = 20, streak = 0, bestStreak = 0;
 let totalQ = 0, correctQ = 0;
 let timerInterval, questionTimeout;
 let usedIndices = [], currentAnswer = '';
@@ -487,12 +487,12 @@ function updateHUD() {
 }
 
 function startGame() {
-  score = 0; timeLeft = 30; streak = 0; bestStreak = 0;
+  score = 0; timeLeft = 20; streak = 0; bestStreak = 0;
   totalQ = 0; correctQ = 0; usedIndices = [];
 
   document.getElementById('game-area').style.display = 'flex';
   document.getElementById('result-screen').classList.remove('show');
-  document.getElementById('timer-val').textContent = 30;
+  document.getElementById("timer-val").textContent = 20;
   document.getElementById('score-val').textContent = 0;
   document.getElementById('streak-val').textContent = 0;
 
