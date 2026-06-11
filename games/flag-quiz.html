@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚩 이 국기 어느 나라?</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{--teal:#06b6d4;--dark:#080810;--card:#10111e;--text:#f0f0f0;--muted:#555;--muted2:#888;--correct:#22c55e;--wrong:#ef4444;--gold:#FFD700;}
+    body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 16px 80px;}
+
+    .splash{position:fixed;inset:0;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s;}
+    .splash.out{opacity:0;pointer-events:none;}
+    .splash-ball{font-size:64px;animation:bop .6s ease infinite alternate;}
+    @keyframes bop{to{transform:translateY(-20px) rotate(20deg);}}
+    .splash-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,.08);border-radius:100px;margin-top:24px;overflow:hidden;}
+    .splash-bar{height:100%;background:var(--teal);border-radius:100px;animation:lb .8s ease forwards;}
+    @keyframes lb{from{width:0}to{width:100%}}
+
+    .back{align-self:flex-start;color:var(--muted);text-decoration:none;font-size:13px;margin-bottom:16px;}
+    h1{font-family:'Black Han Sans',sans-serif;font-size:clamp(24px,5vw,42px);text-align:center;margin-bottom:6px;background:linear-gradient(135deg,#fff,var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .subtitle{color:var(--muted2);font-size:13px;text-align:center;margin-bottom:20px;}
+
+    .hud{display:flex;gap:10px;margin-bottom:12px;width:100%;max-width:560px;}
+    .hud-box{flex:1;background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:11px 8px;text-align:center;}
+    .hud-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+    .hud-value{font-family:'Black Han Sans',sans-serif;font-size:26px;margin-top:2px;}
+    #timer-val{color:var(--teal);}#score-val{color:var(--gold);}#streak-val{color:var(--correct);}
+
+    .tbar-wrap{width:100%;max-width:560px;height:5px;background:rgba(255,255,255,.05);border-radius:100px;margin-bottom:12px;overflow:hidden;}
+    #tbar{height:100%;background:var(--teal);border-radius:100px;transition:width 1s linear;}
+
+    .combo-bar{height:24px;width:100%;max-width:560px;text-align:center;font-weight:700;font-size:15px;margin-bottom:6px;}
+
+    /* Flag card — massive emoji */
+    .flag-card{background:var(--card);border:1px solid rgba(6,182,212,.15);border-radius:24px;padding:40px 20px;width:100%;max-width:560px;text-align:center;margin-bottom:16px;}
+    .big-flag{font-size:clamp(90px,22vw,140px);display:block;line-height:1;margin-bottom:16px;animation:flagIn .3s ease;}
+    @keyframes flagIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+    .q-num-badge{display:inline-block;font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+    /* speed timer per-question */
+    .q-tbar-wrap{width:80%;height:4px;background:rgba(255,255,255,.05);border-radius:100px;margin:0 auto 12px;overflow:hidden;}
+    #q-tbar{height:100%;background:var(--teal);border-radius:100px;transition:width .2s linear;}
+    .feedback{font-size:20px;font-weight:700;min-height:28px;}
+    .feedback.correct{color:var(--correct);}
+    .feedback.wrong{color:var(--wrong);}
+
+    .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:560px;}
+    .opt-btn{background:var(--card);border:2px solid rgba(255,255,255,.07);border-radius:14px;padding:16px 10px;font-size:16px;font-weight:700;color:var(--text);cursor:pointer;transition:all .15s;font-family:'Noto Sans KR',sans-serif;-webkit-tap-highlight-color:transparent;min-height:60px;}
+    .opt-btn:hover:not(:disabled){border-color:var(--teal);background:rgba(6,182,212,.1);transform:scale(1.02);}
+    .opt-btn.correct{border-color:var(--correct);background:rgba(34,197,94,.15);color:var(--correct);}
+    .opt-btn.wrong{border-color:var(--wrong);background:rgba(239,68,68,.15);color:var(--wrong);}
+    .opt-btn:disabled{cursor:not-allowed;}
+
+    .result-screen{display:none;flex-direction:column;align-items:center;text-align:center;width:100%;max-width:560px;}
+    .result-screen.show{display:flex;}
+    .result-grade{font-family:'Black Han Sans',sans-serif;font-size:52px;margin-bottom:4px;}
+    .result-title{font-family:'Black Han Sans',sans-serif;font-size:30px;margin-bottom:6px;}
+    .result-score{font-size:52px;font-family:'Black Han Sans',sans-serif;color:var(--gold);margin:8px 0;}
+    .result-msg{color:var(--muted2);font-size:14px;margin-bottom:18px;}
+    .result-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;width:100%;}
+    .stat-box{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;text-align:center;}
+    .stat-val{font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--teal);}
+    .stat-label{font-size:11px;color:var(--muted);margin-top:3px;}
+    .btn-restart{background:var(--teal);color:#fff;border:none;border-radius:100px;padding:14px 40px;font-size:17px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;}
+    .btn-restart:hover{opacity:.85;transform:scale(1.03);}
+
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,16,.96);border-top:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-around;padding:10px 8px;z-index:500;backdrop-filter:blur(10px);}
+    .nav-item{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:var(--muted);font-size:10px;gap:3px;flex:1;transition:color .2s;-webkit-tap-highlight-color:transparent;}
+    .nav-item.active{color:var(--gold);}
+    .nav-icon{font-size:20px;}
+    @media(max-width:480px){.options{gap:8px;}.opt-btn{padding:13px 6px;font-size:14px;}}
+  </style>
+</head>
+<body>
+<div class="splash" id="splash">
+  <div class="splash-ball">🚩</div>
+  <div style="font-family:'Black Han Sans',sans-serif;font-size:20px;margin-top:18px;color:#fff;">국기 퀴즈</div>
+  <div style="font-size:13px;color:#555;margin-top:6px;">월드컵 미니게임</div>
+  <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+</div>
+
+<a href="../index.html" class="back">← 허브로 돌아가기</a>
+<h1>🚩 이 국기 어느 나라?</h1>
+<p class="subtitle">국기를 보고 나라 이름을 맞추세요! 빠를수록 고득점!</p>
+
+<div id="game-area" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+  <div class="hud">
+    <div class="hud-box"><div class="hud-label">⏱ 시간</div><div class="hud-value" id="timer-val">45</div></div>
+    <div class="hud-box"><div class="hud-label">⭐ 점수</div><div class="hud-value" id="score-val">0</div></div>
+    <div class="hud-box"><div class="hud-label">🔥 연속</div><div class="hud-value" id="streak-val">0</div></div>
+  </div>
+  <div class="tbar-wrap"><div id="tbar" style="width:100%"></div></div>
+  <div class="combo-bar" id="combo-bar"></div>
+
+  <div class="flag-card">
+    <div class="q-num-badge" id="q-num">문제 1</div>
+    <span class="big-flag" id="big-flag">🌍</span>
+    <div class="q-tbar-wrap"><div id="q-tbar" style="width:100%"></div></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="options" id="options"></div>
+</div>
+
+<div class="result-screen" id="result-screen">
+  <div style="font-size:72px;margin-bottom:14px;" id="res-emoji">🏆</div>
+  <div class="result-grade" id="res-grade">B</div>
+  <div class="result-title" id="res-title">게임 종료!</div>
+  <div class="result-score" id="res-score">0점</div>
+  <div class="result-msg" id="res-msg"></div>
+  <div class="result-stats">
+    <div class="stat-box"><div class="stat-val" id="sc">0</div><div class="stat-label">✅ 정답</div></div>
+    <div class="stat-box"><div class="stat-val" id="st">0</div><div class="stat-label">📋 총 문제</div></div>
+    <div class="stat-box"><div class="stat-val" id="sb">0</div><div class="stat-label">🔥 최고 연속</div></div>
+    <div class="stat-box"><div class="stat-val" id="sa">0%</div><div class="stat-label">🎯 정확도</div></div>
+  </div>
+  <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
+  <br><br>
+  <a href="#" onclick="gos(score)" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);border-radius:100px;padding:12px 24px;text-decoration:none;color:#FFD700;font-weight:700;font-size:14px;">🏆 랭킹에 등록하기</a>
+  <br><br>
+  <a href="../index.html" style="color:var(--muted);font-size:13px;">← 다른 게임 하기</a>
+</div>
+
+<nav class="bottom-nav">
+  <a href="player-country.html" class="nav-item"><span class="nav-icon">🕵️</span><span>선수퀴즈</span></a>
+  <a href="champion-tournament.html" class="nav-item"><span class="nav-icon">🏆</span><span>우승국</span></a>
+  <a href="penalty-kick.html" class="nav-item"><span class="nav-icon">🥅</span><span>페널티킥</span></a>
+  <a href="uniform-quiz.html" class="nav-item"><span class="nav-icon">👕</span><span>유니폼</span></a>
+  <a href="wins-quiz.html" class="nav-item"><span class="nav-icon">⚡</span><span>우승횟수</span></a>
+  <a href="flag-quiz.html" class="nav-item active"><span class="nav-icon">🚩</span><span>국기퀴즈</span></a>
+</nav>
+
+<script>
+function gos(s){const n=localStorage.getItem('wc_player_name')||'';location.href='../scoreboard.html'+(n?`?prefill=${encodeURIComponent(n)}&score=${s}`:'');}
+
+const AC=window.AudioContext||window.webkitAudioContext;let _ac=null;
+function ctx(){if(!_ac)_ac=new AC();if(_ac.state==='suspended')_ac.resume();return _ac;}
+function tone(f,t,d,v=.3){try{const c=ctx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.start();o.stop(c.currentTime+d);}catch(e){}}
+function sfxOk(){tone(523,'sine',.1,.35);setTimeout(()=>tone(659,'sine',.1,.35),70);setTimeout(()=>tone(784,'sine',.15,.35),140);}
+function sfxBad(){tone(220,'sawtooth',.2,.25);setTimeout(()=>tone(180,'sawtooth',.15,.2),110);}
+function confetti(x,y,n=12){const cs=['#FFD700','#06b6d4','#ef4444','#22c55e','#fff'];for(let i=0;i<n;i++){const el=document.createElement('div');el.style.cssText=`position:fixed;width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;background:${cs[~~(Math.random()*cs.length)]};border-radius:${Math.random()>.5?'50%':'2px'};left:${x}px;top:${y}px;pointer-events:none;z-index:9998;`;document.body.appendChild(el);const a=Math.random()*360*Math.PI/180,sp=60+Math.random()*110;let px=x,py=y,vy=Math.sin(a)*sp-50,vx=Math.cos(a)*sp,t=0;const f=()=>{t+=.016;px+=vx*.016;vy+=200*.016;py+=vy*.016;el.style.left=px+'px';el.style.top=py+'px';el.style.opacity=Math.max(0,1-t*1.5);el.style.transform=`rotate(${t*200}deg)`;if(t<.8)requestAnimationFrame(f);else el.remove();};requestAnimationFrame(f);}}
+function bigC(){for(let i=0;i<5;i++)setTimeout(()=>confetti(Math.random()*innerWidth,-10,10),i*120);}
+
+// 48개국 국기 DB (월드컵 출전 주요국)
+const FLAGS = [
+  {flag:'🇧🇷',name:'브라질',decoy:['콜롬비아','베네수엘라','에콰도르']},
+  {flag:'🇩🇪',name:'독일',decoy:['오스트리아','스위스','벨기에']},
+  {flag:'🇦🇷',name:'아르헨티나',decoy:['우루과이','파라과이','칠레']},
+  {flag:'🇫🇷',name:'프랑스',decoy:['벨기에','룩셈부르크','모나코']},
+  {flag:'🇮🇹',name:'이탈리아',decoy:['스페인','포르투갈','그리스']},
+  {flag:'🇪🇸',name:'스페인',decoy:['포르투갈','이탈리아','안도라']},
+  {flag:'🇵🇹',name:'포르투갈',decoy:['스페인','브라질','앙골라']},
+  {flag:'🇳🇱',name:'네덜란드',decoy:['벨기에','룩셈부르크','독일']},
+  {flag:'🇧🇪',name:'벨기에',decoy:['네덜란드','프랑스','룩셈부르크']},
+  {flag:'🇰🇷',name:'대한민국',decoy:['일본','중국','북한']},
+  {flag:'🇯🇵',name:'일본',decoy:['대한민국','중국','대만']},
+  {flag:'🇲🇽',name:'멕시코',decoy:['과테말라','온두라스','코스타리카']},
+  {flag:'🇺🇸',name:'미국',decoy:['캐나다','호주','영국']},
+  {flag:'🇨🇦',name:'캐나다',decoy:['미국','호주','뉴질랜드']},
+  {flag:'🇦🇺',name:'호주',decoy:['뉴질랜드','캐나다','아일랜드']},
+  {flag:'🇬🇧',name:'영국',decoy:['아일랜드','호주','캐나다']},
+  {flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'잉글랜드',decoy:['스코틀랜드','웨일스','아일랜드']},
+  {flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'스코틀랜드',decoy:['아일랜드','웨일스','잉글랜드']},
+  {flag:'🇨🇭',name:'스위스',decoy:['오스트리아','독일','리히텐슈타인']},
+  {flag:'🇩🇰',name:'덴마크',decoy:['스웨덴','노르웨이','핀란드']},
+  {flag:'🇸🇪',name:'스웨덴',decoy:['노르웨이','덴마크','핀란드']},
+  {flag:'🇳🇴',name:'노르웨이',decoy:['스웨덴','덴마크','아이슬란드']},
+  {flag:'🇵🇱',name:'폴란드',decoy:['체코','슬로바키아','우크라이나']},
+  {flag:'🇭🇷',name:'크로아티아',decoy:['세르비아','슬로베니아','보스니아']},
+  {flag:'🇷🇸',name:'세르비아',decoy:['크로아티아','몬테네그로','북마케도니아']},
+  {flag:'🇺🇦',name:'우크라이나',decoy:['러시아','폴란드','벨라루스']},
+  {flag:'🇷🇺',name:'러시아',decoy:['우크라이나','벨라루스','카자흐스탄']},
+  {flag:'🇹🇷',name:'튀르키예',decoy:['아제르바이잔','카자흐스탄','우즈베키스탄']},
+  {flag:'🇸🇦',name:'사우디아라비아',decoy:['아랍에미리트','카타르','쿠웨이트']},
+  {flag:'🇶🇦',name:'카타르',decoy:['바레인','쿠웨이트','오만']},
+  {flag:'🇮🇷',name:'이란',decoy:['이라크','아프가니스탄','파키스탄']},
+  {flag:'🇮🇶',name:'이라크',decoy:['이란','시리아','요르단']},
+  {flag:'🇪🇬',name:'이집트',decoy:['리비아','수단','알제리']},
+  {flag:'🇳🇬',name:'나이지리아',decoy:['가나','카메룬','세네갈']},
+  {flag:'🇿🇦',name:'남아프리카공화국',decoy:['짐바브웨','나미비아','보츠와나']},
+  {flag:'🇨🇲',name:'카메룬',decoy:['나이지리아','가나','코트디부아르']},
+  {flag:'🇬🇭',name:'가나',decoy:['토고','베냉','코트디부아르']},
+  {flag:'🇸🇳',name:'세네갈',decoy:['감비아','기니','말리']},
+  {flag:'🇲🇦',name:'모로코',decoy:['알제리','튀니지','리비아']},
+  {flag:'🇺🇾',name:'우루과이',decoy:['파라과이','볼리비아','아르헨티나']},
+  {flag:'🇨🇱',name:'칠레',decoy:['아르헨티나','페루','볼리비아']},
+  {flag:'🇨🇴',name:'콜롬비아',decoy:['베네수엘라','에콰도르','파나마']},
+  {flag:'🇵🇪',name:'페루',decoy:['볼리비아','에콰도르','칠레']},
+  {flag:'🇬🇷',name:'그리스',decoy:['키프로스','알바니아','불가리아']},
+  {flag:'🇨🇿',name:'체코',decoy:['슬로바키아','폴란드','헝가리']},
+  {flag:'🇭🇺',name:'헝가리',decoy:['체코','루마니아','오스트리아']},
+  {flag:'🇦🇹',name:'오스트리아',decoy:['스위스','독일','헝가리']},
+  {flag:'🇵🇸',name:'팔레스타인',decoy:['요르단','이스라엘','레바논']},
+];
+
+const TOTAL_TIME=45;
+let score=0,timeLeft=TOTAL_TIME,streak=0,bestStreak=0,totalQ=0,correctQ=0;
+let timerInterval,qTimer,qTimeLeft,current=null,answered=false,usedIdx=[],qNum=0;
+
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+
+function getFlag(){
+  if(usedIdx.length===FLAGS.length)usedIdx=[];
+  const avail=FLAGS.map((_,i)=>i).filter(i=>!usedIdx.includes(i));
+  const idx=avail[~~(Math.random()*avail.length)];
+  usedIdx.push(idx);return FLAGS[idx];
+}
+
+let qStartTime=0;
+function startQTimer(){
+  clearInterval(qTimer);qTimeLeft=8;
+  const bar=document.getElementById('q-tbar');
+  bar.style.width='100%';bar.style.background='var(--teal)';
+  bar.style.transition='width .2s linear';
+  qTimer=setInterval(()=>{
+    qTimeLeft-=.2;
+    bar.style.width=Math.max(0,qTimeLeft/8*100)+'%';
+    if(qTimeLeft<=3)bar.style.background='#ef4444';
+    if(qTimeLeft<=0)clearInterval(qTimer);
+  },200);
+}
+
+function setQuestion(){
+  if(timeLeft<=0)return;
+  answered=false;qStartTime=Date.now();qNum++;
+  current=getFlag();totalQ++;
+  document.getElementById('big-flag').textContent=current.flag;
+  document.getElementById('q-num').textContent=`문제 ${qNum}`;
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  startQTimer();
+
+  const wrongs=shuffle(current.decoy).slice(0,3);
+  const opts=shuffle([current.name,...wrongs]);
+  document.getElementById('options').innerHTML=opts.map(o=>`
+    <button class="opt-btn" onclick="answer(this,'${o.replace(/'/g,"\\'")}')">
+      ${o}
+    </button>`).join('');
+}
+
+function answer(btn,sel){
+  if(answered||timeLeft<=0)return;
+  answered=true;
+  clearInterval(qTimer);
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  const elapsed=(Date.now()-qStartTime)/1000;
+  const fb=document.getElementById('feedback');
+  if(sel===current.name){
+    streak++;if(streak>bestStreak)bestStreak=streak;
+    const comboMult=streak>=8?4:streak>=5?3:streak>=3?2:1;
+    const speedBonus=elapsed<2?60:elapsed<4?30:0;
+    const pts=100*comboMult+speedBonus;
+    score+=pts;correctQ++;
+    sfxOk();bigC();
+    btn.classList.add('correct');
+    fb.className='feedback correct';
+    const badges=[];
+    if(speedBonus>0)badges.push(`⚡+${speedBonus}`);
+    if(comboMult>1)badges.push(`x${comboMult}`);
+    fb.textContent=`✅ +${pts}점 ${badges.join(' ')}`;
+    const cb=document.getElementById('combo-bar');
+    cb.style.color=comboMult>=4?'#FFD700':comboMult>=3?'#a855f7':comboMult>=2?'#ef4444':'#aaa';
+    cb.textContent=comboMult>=4?'🌟 GOD MODE':comboMult>=3?'⚡ TRIPLE':comboMult>=2?'💥 DOUBLE':'';
+  }else{
+    streak=0;sfxBad();
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt-btn').forEach(b=>{if(b.textContent.trim()===current.name)b.classList.add('correct');});
+    fb.className='feedback wrong';
+    fb.textContent=`❌ 정답: ${current.flag} ${current.name}`;
+    document.getElementById('combo-bar').textContent='';
+  }
+  document.getElementById('score-val').textContent=score;
+  document.getElementById('streak-val').textContent=streak;
+  setTimeout(setQuestion,800);
+}
+
+function startGame(){
+  score=0;timeLeft=TOTAL_TIME;streak=0;bestStreak=0;totalQ=0;correctQ=0;usedIdx=[];qNum=0;
+  document.getElementById('game-area').style.display='flex';
+  document.getElementById('result-screen').classList.remove('show');
+  document.getElementById('score-val').textContent=0;
+  document.getElementById('streak-val').textContent=0;
+  document.getElementById('timer-val').textContent=TOTAL_TIME;
+  document.getElementById('combo-bar').textContent='';
+  const bar=document.getElementById('tbar');
+  bar.style.width='100%';bar.style.background='var(--teal)';
+  setQuestion();
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    timeLeft--;
+    document.getElementById('timer-val').textContent=timeLeft;
+    bar.style.width=(timeLeft/TOTAL_TIME*100)+'%';
+    if(timeLeft<=10)bar.style.background='#ef4444';
+    else if(timeLeft<=20)bar.style.background='#f59e0b';
+    if(timeLeft<=0){clearInterval(timerInterval);clearInterval(qTimer);showResult();}
+  },1000);
+}
+
+function showResult(){
+  document.getElementById('game-area').style.display='none';
+  document.getElementById('result-screen').classList.add('show');
+  const acc=totalQ>0?Math.round(correctQ/totalQ*100):0;
+  const G=[
+    {min:1800,g:'S',c:'#FFD700',t:'🌟 국기 마스터!',   em:'🏆'},
+    {min:1000,g:'A',c:'#22c55e',t:'🥇 국기 박사!',     em:'🥇'},
+    {min:600, g:'B',c:'#3b82f6',t:'🥈 잘 했어요!',     em:'🥈'},
+    {min:300, g:'C',c:'#f59e0b',t:'🥉 나쁘지 않아요!', em:'😅'},
+    {min:0,   g:'D',c:'#ef4444',t:'📖 더 공부해봐요!', em:'😭'},
+  ];
+  const gr=G.find(g=>score>=g.min)||G[G.length-1];
+  document.getElementById('res-emoji').textContent=gr.em;
+  document.getElementById('res-grade').innerHTML=`<span style="color:${gr.c}">GRADE ${gr.g}</span>`;
+  document.getElementById('res-title').textContent=gr.t;
+  document.getElementById('res-score').textContent=score.toLocaleString()+'점';
+  document.getElementById('res-msg').textContent=`정확도 ${acc}% · 최고 ${bestStreak}연속`;
+  document.getElementById('sc').textContent=correctQ;
+  document.getElementById('st').textContent=totalQ;
+  document.getElementById('sb').textContent=bestStreak;
+  document.getElementById('sa').textContent=acc+'%';
+}
+
+setTimeout(()=>{const s=document.getElementById('splash');s.classList.add('out');setTimeout(()=>s.remove(),400);},900);
+startGame();
+</script>
+</body>
+</html>

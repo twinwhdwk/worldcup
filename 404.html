@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚽ 페이지를 찾을 수 없어요</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#080810;color:#f0f0f0;font-family:'Noto Sans KR',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;}
+    .ball{font-size:80px;animation:bounce 0.8s ease infinite alternate;margin-bottom:24px;}
+    @keyframes bounce{to{transform:translateY(-20px) rotate(15deg);}}
+    h1{font-family:'Black Han Sans',sans-serif;font-size:48px;background:linear-gradient(135deg,#fff,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+    p{color:#888;font-size:16px;margin-bottom:32px;}
+    .btn{display:inline-block;background:#00843D;color:#fff;text-decoration:none;padding:14px 36px;border-radius:100px;font-weight:700;font-size:16px;transition:opacity 0.2s;}
+    .btn:hover{opacity:0.85;}
+  </style>
+</head>
+<body>
+  <div class="ball">⚽</div>
+  <h1>오프사이드!</h1>
+  <p>페이지를 찾을 수 없어요. 허브로 돌아가세요!</p>
+  <a href="/worldcup_minigame/" class="btn">🏠 게임 허브로</a>
+</body>
+</html>

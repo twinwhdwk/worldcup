@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ 월드컵 우승 횟수 퀴즈</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap');
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{--orange:#f97316;--dark:#080810;--card:#10111e;--text:#f0f0f0;--muted:#555;--muted2:#888;--correct:#22c55e;--wrong:#ef4444;--gold:#FFD700;}
+    body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 16px 80px;}
+
+    /* Splash */
+    .splash{position:fixed;inset:0;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s;}
+    .splash.out{opacity:0;pointer-events:none;}
+    .splash-ball{font-size:64px;animation:bop .6s ease infinite alternate;}
+    @keyframes bop{to{transform:translateY(-20px) rotate(20deg);}}
+    .splash-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,.08);border-radius:100px;margin-top:24px;overflow:hidden;}
+    .splash-bar{height:100%;background:var(--orange);border-radius:100px;animation:lb .8s ease forwards;}
+    @keyframes lb{from{width:0}to{width:100%}}
+
+    .back{align-self:flex-start;color:var(--muted);text-decoration:none;font-size:13px;margin-bottom:16px;}
+    h1{font-family:'Black Han Sans',sans-serif;font-size:clamp(24px,5vw,42px);text-align:center;margin-bottom:6px;background:linear-gradient(135deg,#fff,var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .subtitle{color:var(--muted2);font-size:13px;text-align:center;margin-bottom:20px;}
+
+    /* HUD */
+    .hud{display:flex;gap:10px;margin-bottom:12px;width:100%;max-width:560px;}
+    .hud-box{flex:1;background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:11px 8px;text-align:center;}
+    .hud-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+    .hud-value{font-family:'Black Han Sans',sans-serif;font-size:26px;margin-top:2px;}
+    #timer-val{color:var(--orange);}#score-val{color:var(--gold);}#streak-val{color:var(--correct);}
+
+    /* Timer bar */
+    .tbar-wrap{width:100%;max-width:560px;height:5px;background:rgba(255,255,255,.05);border-radius:100px;margin-bottom:12px;overflow:hidden;}
+    #tbar{height:100%;background:var(--orange);border-radius:100px;transition:width 1s linear;}
+
+    /* Question card */
+    .q-card{background:var(--card);border:1px solid rgba(249,115,22,.15);border-radius:24px;padding:32px 20px;width:100%;max-width:560px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;}
+    .q-card::before{content:'🏆';position:absolute;font-size:160px;opacity:.025;top:-20px;right:-20px;pointer-events:none;}
+
+    .country-flag{font-size:80px;margin-bottom:10px;display:block;animation:flagIn .35s ease;}
+    @keyframes flagIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+    .country-name{font-family:'Black Han Sans',sans-serif;font-size:clamp(24px,5vw,38px);margin-bottom:6px;}
+    .country-hint{font-size:13px;color:var(--muted2);margin-bottom:14px;}
+
+    /* Trophy tally visual */
+    .trophy-tally{display:flex;justify-content:center;gap:4px;margin-bottom:14px;flex-wrap:wrap;}
+    .trophy-slot{font-size:22px;opacity:.15;transition:opacity .3s;}
+    .trophy-slot.lit{opacity:1;}
+
+    .feedback{font-size:20px;font-weight:700;min-height:28px;margin-top:4px;}
+    .feedback.correct{color:var(--correct);}
+    .feedback.wrong{color:var(--wrong);}
+
+    /* Options: 0~5 big buttons */
+    .options{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:560px;}
+    .opt-btn{background:var(--card);border:2px solid rgba(255,255,255,.07);border-radius:16px;padding:20px 8px;font-family:'Black Han Sans',sans-serif;font-size:32px;color:var(--text);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;}
+    .opt-btn span.sub{font-size:11px;font-family:'Noto Sans KR',sans-serif;font-weight:400;color:var(--muted);}
+    .opt-btn:hover:not(:disabled){border-color:var(--orange);background:rgba(249,115,22,.1);transform:scale(1.04);}
+    .opt-btn.correct{border-color:var(--correct);background:rgba(34,197,94,.15);}
+    .opt-btn.wrong{border-color:var(--wrong);background:rgba(239,68,68,.15);}
+    .opt-btn:disabled{cursor:not-allowed;}
+
+    /* Combo */
+    .combo-bar{height:24px;width:100%;max-width:560px;text-align:center;font-weight:700;font-size:15px;margin-bottom:6px;color:var(--orange);}
+
+    /* Result */
+    .result-screen{display:none;flex-direction:column;align-items:center;text-align:center;width:100%;max-width:560px;}
+    .result-screen.show{display:flex;}
+    .result-grade{font-family:'Black Han Sans',sans-serif;font-size:52px;margin-bottom:4px;}
+    .result-title{font-family:'Black Han Sans',sans-serif;font-size:30px;margin-bottom:6px;}
+    .result-score{font-size:52px;font-family:'Black Han Sans',sans-serif;color:var(--gold);margin:8px 0;}
+    .result-msg{color:var(--muted2);font-size:14px;margin-bottom:18px;}
+    .result-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;width:100%;}
+    .stat-box{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;text-align:center;}
+    .stat-val{font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--orange);}
+    .stat-label{font-size:11px;color:var(--muted);margin-top:3px;}
+    .btn-restart{background:var(--orange);color:#fff;border:none;border-radius:100px;padding:14px 40px;font-size:17px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;}
+    .btn-restart:hover{opacity:.85;transform:scale(1.03);}
+
+    /* Nav */
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,16,.96);border-top:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-around;padding:10px 8px;z-index:500;backdrop-filter:blur(10px);}
+    .nav-item{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:var(--muted);font-size:10px;gap:3px;flex:1;transition:color .2s;-webkit-tap-highlight-color:transparent;}
+    .nav-item.active{color:var(--gold);}
+    .nav-icon{font-size:20px;}
+
+    @media(max-width:480px){.options{grid-template-columns:repeat(3,1fr);}.opt-btn{padding:16px 6px;font-size:28px;}}
+  </style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="splash-ball">🏆</div>
+  <div style="font-family:'Black Han Sans',sans-serif;font-size:20px;margin-top:18px;color:#fff;">우승 횟수 퀴즈</div>
+  <div style="font-size:13px;color:#555;margin-top:6px;">월드컵 미니게임</div>
+  <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+</div>
+
+<a href="../index.html" class="back">← 허브로 돌아가기</a>
+<h1>⚡ 월드컵 우승 횟수?</h1>
+<p class="subtitle">이 나라가 월드컵을 몇 번 우승했을까요?</p>
+
+<div id="game-area" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+  <div class="hud">
+    <div class="hud-box"><div class="hud-label">⏱ 시간</div><div class="hud-value" id="timer-val">60</div></div>
+    <div class="hud-box"><div class="hud-label">⭐ 점수</div><div class="hud-value" id="score-val">0</div></div>
+    <div class="hud-box"><div class="hud-label">🔥 연속</div><div class="hud-value" id="streak-val">0</div></div>
+  </div>
+  <div class="tbar-wrap"><div id="tbar" style="width:100%"></div></div>
+  <div class="combo-bar" id="combo-bar"></div>
+
+  <div class="q-card">
+    <span class="country-flag" id="c-flag">🌍</span>
+    <div class="country-name" id="c-name">...</div>
+    <div class="country-hint" id="c-hint"></div>
+    <div class="trophy-tally" id="trophy-tally"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="options" id="options"></div>
+</div>
+
+<div class="result-screen" id="result-screen">
+  <div style="font-size:72px;margin-bottom:14px;" id="res-emoji">🏆</div>
+  <div class="result-grade" id="res-grade">B</div>
+  <div class="result-title" id="res-title">게임 종료!</div>
+  <div class="result-score" id="res-score">0점</div>
+  <div class="result-msg" id="res-msg"></div>
+  <div class="result-stats">
+    <div class="stat-box"><div class="stat-val" id="stat-correct">0</div><div class="stat-label">✅ 정답</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-total">0</div><div class="stat-label">📋 총 문제</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-best">0</div><div class="stat-label">🔥 최고 연속</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-acc">0%</div><div class="stat-label">🎯 정확도</div></div>
+  </div>
+  <button class="btn-restart" onclick="startGame()">🔄 다시 도전</button>
+  <br><br>
+  <a href="#" onclick="goScore(score)" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);border-radius:100px;padding:12px 24px;text-decoration:none;color:#FFD700;font-weight:700;font-size:14px;">🏆 랭킹에 등록하기</a>
+  <br><br>
+  <a href="../index.html" style="color:var(--muted);font-size:13px;">← 다른 게임 하기</a>
+</div>
+
+<nav class="bottom-nav">
+  <a href="player-country.html" class="nav-item"><span class="nav-icon">🕵️</span><span>선수퀴즈</span></a>
+  <a href="champion-tournament.html" class="nav-item"><span class="nav-icon">🏆</span><span>우승국</span></a>
+  <a href="penalty-kick.html" class="nav-item"><span class="nav-icon">🥅</span><span>페널티킥</span></a>
+  <a href="uniform-quiz.html" class="nav-item"><span class="nav-icon">👕</span><span>유니폼</span></a>
+  <a href="wins-quiz.html" class="nav-item active"><span class="nav-icon">⚡</span><span>우승횟수</span></a>
+  <a href="../scoreboard.html" class="nav-item"><span class="nav-icon">🏅</span><span>랭킹</span></a>
+</nav>
+
+<script>
+function goScore(s){const n=localStorage.getItem('wc_player_name')||'';location.href='../scoreboard.html'+(n?`?prefill=${encodeURIComponent(n)}&score=${s}`:'');}
+
+// Audio
+const AC=window.AudioContext||window.webkitAudioContext;let _ac=null;
+function ctx(){if(!_ac)_ac=new AC();if(_ac.state==='suspended')_ac.resume();return _ac;}
+function tone(f,t,d,v=.3){try{const c=ctx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.start();o.stop(c.currentTime+d);}catch(e){}}
+function sfxOk(){tone(523,'sine',.12,.35);setTimeout(()=>tone(659,'sine',.12,.35),80);setTimeout(()=>tone(784,'sine',.18,.35),160);}
+function sfxBad(){tone(220,'sawtooth',.25,.25);setTimeout(()=>tone(180,'sawtooth',.2,.2),120);}
+
+// Confetti
+function confetti(x,y,n=12){const cs=['#FFD700','#f97316','#ef4444','#22c55e','#3b82f6','#fff'];for(let i=0;i<n;i++){const el=document.createElement('div');el.style.cssText=`position:fixed;width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;background:${cs[~~(Math.random()*cs.length)]};border-radius:${Math.random()>.5?'50%':'2px'};left:${x}px;top:${y}px;pointer-events:none;z-index:9998;`;document.body.appendChild(el);const a=Math.random()*360*Math.PI/180,sp=60+Math.random()*110;let px=x,py=y,vy=Math.sin(a)*sp-50,vx=Math.cos(a)*sp,t=0;const f=()=>{t+=.016;px+=vx*.016;vy+=200*.016;py+=vy*.016;el.style.left=px+'px';el.style.top=py+'px';el.style.opacity=Math.max(0,1-t*1.5);el.style.transform=`rotate(${t*200}deg)`;if(t<.8)requestAnimationFrame(f);else el.remove();};requestAnimationFrame(f);}}
+function bigConfetti(){for(let i=0;i<5;i++)setTimeout(()=>confetti(Math.random()*innerWidth,-10,10),i*120);}
+
+// ── Countries data ────────────────────────────────
+// wins = actual World Cup wins, decoys = plausible wrong answers
+const COUNTRIES = [
+  {flag:'🇧🇷',name:'브라질',    wins:5, hint:'남미 최강, 삼바의 나라',       decoys:[4,3,6,2]},
+  {flag:'🇩🇪',name:'독일',     wins:4, hint:'게르만 정밀 축구',              decoys:[3,5,2,6]},
+  {flag:'🇮🇹',name:'이탈리아', wins:4, hint:'카테나치오 수비 전술',          decoys:[3,5,2,6]},
+  {flag:'🇦🇷',name:'아르헨티나',wins:3,hint:'마라도나·메시의 나라',          decoys:[2,4,1,5]},
+  {flag:'🇫🇷',name:'프랑스',   wins:2, hint:'레 블뢰, 지단의 나라',          decoys:[1,3,4,0]},
+  {flag:'🇺🇾',name:'우루과이', wins:2, hint:'첫 번째 월드컵 우승국',         decoys:[1,3,0,4]},
+  {flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'잉글랜드', wins:1, hint:'1966년 홈에서 단 한 번',      decoys:[0,2,3,4]},
+  {flag:'🇪🇸',name:'스페인',   wins:1, hint:'2010 남아공, 패싱 축구',        decoys:[0,2,3,4]},
+  {flag:'🇵🇹',name:'포르투갈', wins:0, hint:'유럽 챔피언, 월드컵 우승 없음', decoys:[1,2,3,4]},
+  {flag:'🇳🇱',name:'네덜란드', wins:0, hint:'오렌지 군단, 준우승 3회',       decoys:[1,2,3,4]},
+  {flag:'🇧🇪',name:'벨기에',   wins:0, hint:'레 디아블 루쥬',               decoys:[1,2,3,4]},
+  {flag:'🇰🇷',name:'대한민국', wins:0, hint:'2002 4강 신화',                decoys:[1,2,3,4]},
+  {flag:'🇯🇵',name:'일본',     wins:0, hint:'사무라이 블루, 아시아 강호',    decoys:[1,2,3,4]},
+  {flag:'🇲🇽',name:'멕시코',   wins:0, hint:'2회 개최국, 엘 트리',          decoys:[1,2,3,4]},
+  {flag:'🇨🇭',name:'스위스',   wins:0, hint:'알프스 요새, 중립국',           decoys:[1,2,3,4]},
+  {flag:'🇭🇷',name:'크로아티아',wins:0,hint:'체크무늬, 모드리치',            decoys:[1,2,3,4]},
+  {flag:'🇩🇰',name:'덴마크',   wins:0, hint:'에릭센의 나라',                decoys:[1,2,3,4]},
+  {flag:'🇸🇪',name:'스웨덴',   wins:0, hint:'이브라히모비치의 나라',         decoys:[1,2,3,4]},
+  {flag:'🇺🇸',name:'미국',     wins:0, hint:'2026 개최국',                  decoys:[1,2,3,4]},
+  {flag:'🇨🇦',name:'캐나다',   wins:0, hint:'2026 공동 개최국',             decoys:[1,2,3,4]},
+  {flag:'🇦🇺',name:'호주',     wins:0, hint:'사커루, 아시아 소속',           decoys:[1,2,3,4]},
+  {flag:'🇳🇬',name:'나이지리아',wins:0,hint:'슈퍼 이글스',                   decoys:[1,2,3,4]},
+  {flag:'🇨🇲',name:'카메룬',   wins:0, hint:'불굴의 사자',                   decoys:[1,2,3,4]},
+  {flag:'🇸🇳',name:'세네갈',   wins:0, hint:'마네의 나라, 아프리카 사자',    decoys:[1,2,3,4]},
+];
+
+const TOTAL_TIME = 60;
+let score=0,timeLeft=TOTAL_TIME,streak=0,bestStreak=0,totalQ=0,correctQ=0;
+let timerInterval,currentC=null,answered=false,usedIdx=[];
+
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+
+function getCountry(){
+  if(usedIdx.length===COUNTRIES.length)usedIdx=[];
+  const avail=COUNTRIES.map((_,i)=>i).filter(i=>!usedIdx.includes(i));
+  const idx=avail[~~(Math.random()*avail.length)];
+  usedIdx.push(idx);return COUNTRIES[idx];
+}
+
+function makeTally(wins){
+  if(wins===0) return '<span style="font-size:13px;color:var(--muted);">우승 기록 없음 😢</span>';
+  return Array.from({length:Math.min(wins,6)},()=>'<span class="trophy-slot lit">🏆</span>').join('');
+}
+
+function makeOptions(correct){
+  // Always include correct, pick 5 unique options from 0-6
+  const pool=new Set([correct]);
+  for(const d of shuffle([...currentC.decoys,0,1,2,3,4,5,6])){
+    if(pool.size>=6)break;
+    if(d>=0&&d<=6)pool.add(d);
+  }
+  while(pool.size<6){pool.add(~~(Math.random()*7));}
+  return shuffle([...pool]).slice(0,6);
+}
+
+function setQuestion(){
+  if(timeLeft<=0)return;
+  answered=false;
+  currentC=getCountry();
+  totalQ++;
+
+  document.getElementById('c-flag').textContent=currentC.flag;
+  document.getElementById('c-name').textContent=currentC.name;
+  document.getElementById('c-hint').textContent=currentC.hint;
+  document.getElementById('trophy-tally').innerHTML=makeTally(currentC.wins);
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+
+  const opts=makeOptions(currentC.wins);
+  document.getElementById('options').innerHTML=opts.map(n=>`
+    <button class="opt-btn" onclick="answer(this,${n})">
+      ${n}<span class="sub">${n===0?'없음':n+'회'}</span>
+    </button>`).join('');
+}
+
+function answer(btn,selected){
+  if(answered||timeLeft<=0)return;
+  answered=true;
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('feedback');
+  if(selected===currentC.wins){
+    streak++;if(streak>bestStreak)bestStreak=streak;
+    const mult=streak>=8?4:streak>=5?3:streak>=3?2:1;
+    const pts=100*mult;
+    score+=pts;correctQ++;
+    sfxOk();bigConfetti();
+    btn.classList.add('correct');
+    fb.className='feedback correct';
+    fb.textContent=mult>1?`🔥 ${streak}연속! +${pts}점`:`✅ 정답! +${pts}점`;
+    const cb=document.getElementById('combo-bar');
+    cb.textContent=streak>=8?'🌟 GOD MODE x4':streak>=5?'⚡ TRIPLE x3':streak>=3?'💥 DOUBLE x2':'';
+  }else{
+    streak=0;sfxBad();
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt-btn').forEach(b=>{
+      if(+b.querySelector('span')?.previousSibling?.textContent?.trim()===currentC.wins||b.textContent.trim().startsWith(currentC.wins))b.classList.add('correct');
+    });
+    // highlight correct button
+    document.querySelectorAll('.opt-btn').forEach(b=>{
+      if(parseInt(b.textContent)===currentC.wins)b.classList.add('correct');
+    });
+    fb.className='feedback wrong';
+    fb.textContent=`❌ 정답은 ${currentC.wins}회!`;
+    document.getElementById('combo-bar').textContent='';
+  }
+  document.getElementById('score-val').textContent=score;
+  document.getElementById('streak-val').textContent=streak;
+  setTimeout(setQuestion,1000);
+}
+
+function startGame(){
+  score=0;timeLeft=TOTAL_TIME;streak=0;bestStreak=0;totalQ=0;correctQ=0;usedIdx=[];
+  document.getElementById('game-area').style.display='flex';
+  document.getElementById('result-screen').classList.remove('show');
+  document.getElementById('score-val').textContent=0;
+  document.getElementById('streak-val').textContent=0;
+  document.getElementById('timer-val').textContent=TOTAL_TIME;
+  document.getElementById('combo-bar').textContent='';
+  const bar=document.getElementById('tbar');
+  bar.style.width='100%';bar.style.background='var(--orange)';
+  setQuestion();
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    timeLeft--;
+    document.getElementById('timer-val').textContent=timeLeft;
+    bar.style.width=(timeLeft/TOTAL_TIME*100)+'%';
+    if(timeLeft<=10)bar.style.background='#ef4444';
+    else if(timeLeft<=20)bar.style.background='#f59e0b';
+    if(timeLeft<=0){clearInterval(timerInterval);showResult();}
+  },1000);
+}
+
+function showResult(){
+  document.getElementById('game-area').style.display='none';
+  document.getElementById('result-screen').classList.add('show');
+  const acc=totalQ>0?Math.round(correctQ/totalQ*100):0;
+  const G=[
+    {min:1500,g:'S',c:'#FFD700',t:'🌟 월드컵 역사 박사!',em:'🏆'},
+    {min:900, g:'A',c:'#22c55e',t:'🥇 역사 마니아!',      em:'🥇'},
+    {min:500, g:'B',c:'#3b82f6',t:'🥈 잘 했어요!',        em:'🥈'},
+    {min:200, g:'C',c:'#f59e0b',t:'🥉 나쁘지 않아요!',    em:'😅'},
+    {min:0,   g:'D',c:'#ef4444',t:'📖 더 공부해봐요!',    em:'😭'},
+  ];
+  const gr=G.find(g=>score>=g.min)||G[G.length-1];
+  document.getElementById('res-emoji').textContent=gr.em;
+  document.getElementById('res-grade').innerHTML=`<span style="color:${gr.c}">GRADE ${gr.g}</span>`;
+  document.getElementById('res-title').textContent=gr.t;
+  document.getElementById('res-score').textContent=score.toLocaleString()+'점';
+  document.getElementById('res-msg').textContent=`정확도 ${acc}% · 최고 ${bestStreak}연속`;
+  document.getElementById('stat-correct').textContent=correctQ;
+  document.getElementById('stat-total').textContent=totalQ;
+  document.getElementById('stat-best').textContent=bestStreak;
+  document.getElementById('stat-acc').textContent=acc+'%';
+}
+
+setTimeout(()=>{const s=document.getElementById('splash');s.classList.add('out');setTimeout(()=>s.remove(),400);},900);
+startGame();
+</script>
+</body>
+</html>
