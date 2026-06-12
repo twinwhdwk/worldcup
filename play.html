@@ -207,6 +207,10 @@
     <div class="rv-correct-lbl">정답</div>
     <div class="rv-correct-val" id="rv-correct">—</div>
   </div>
+  <div id="rv-my-answer" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:8px 18px;margin-bottom:14px;text-align:center;">
+    <div style="font-size:10px;color:#f87171;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">내 선택</div>
+    <div style="font-family:'Black Han Sans',sans-serif;font-size:17px;color:#f87171;" id="rv-my-val">—</div>
+  </div>
   <div class="rv-gain" id="rv-gain">+100점</div>
   <div class="rv-total" id="rv-total">총 점수: 0점</div>
   <div class="rv-rank" id="rv-rank"></div>
@@ -446,6 +450,12 @@ function showReveal(s){
   document.getElementById('rv-icon').textContent=!answered?'⏰':correct?'🎉':'❌';
   document.getElementById('rv-title').textContent=!answered?'시간 초과!':correct?'정답! 🎊':'아쉽다! ❌';
   document.getElementById('rv-correct').textContent=s.question?.options?.[ci]||'—';
+  const myAnsEl=document.getElementById('rv-my-answer');
+  const myAnsVal=document.getElementById('rv-my-val');
+  if(answered&&!correct&&myAnswerIdx>=0&&s.question?.options){
+    myAnsVal.textContent=LETTERS[myAnswerIdx]+' — '+(s.question.options[myAnswerIdx]||'?');
+    myAnsEl.style.display='block';
+  } else {myAnsEl.style.display='none';}
   document.getElementById('rv-gain').textContent=gain>0?'+'+gain+'점':'0점';
   document.getElementById('rv-gain').className='rv-gain'+(gain>0?'':' zero');
   document.getElementById('rv-total').textContent='총 점수: '+myScore+'점';
