@@ -453,6 +453,7 @@ function sndTick(){snd(880,.05,'square',.08);}
 function sndUrgent(){snd(660,.06,'square',.12);}
 function sndStart(){snd(440,.08);setTimeout(()=>snd(550,.08),110);setTimeout(()=>snd(660,.2),220);}
 function sndReveal(){snd(392,.1);setTimeout(()=>snd(523,.1),120);setTimeout(()=>snd(659,.1),240);setTimeout(()=>snd(784,.3),360);}
+function sndJoin(){snd(660,.06,'sine',.12);}
 
 // ── QUESTION BANKS ────────────────────────────────────────────────
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
@@ -647,9 +648,12 @@ async function startSession(){
 function startListening(){
   if(playersES){try{playersES.close();}catch{}}
   playersES=new EventSource(FB+'/players.json');
+  let prevPlayerCount=0;
   const onPlayers=d=>{
     currentPlayers=d||{};
     const n=Object.keys(currentPlayers).length;
+    if(n>prevPlayerCount){sndJoin();}
+    prevPlayerCount=n;
     document.getElementById('st-players').textContent=n;
     document.getElementById('tv-lobby-count').textContent=n>0?'👥 '+n+'명 대기중':'';
     // Player name chips in TV lobby
