@@ -637,6 +637,7 @@ function startListening(){
 
 // ── Next question ──────────────────────────────────────────────────
 async function nextQuestion(){
+  revealInProgress=false;
   currentQIdx++;
   if(currentQIdx>=sessionQuestions.length){await endSession();return;}
 
@@ -646,6 +647,7 @@ async function nextQuestion(){
   beepedSeconds=new Set();
 
   currentAnswers={};
+  allAnsweredPending=false;
   await fbDelete('/answers');
   await fbPatch('/session',{
     state:'question',
@@ -713,7 +715,11 @@ async function skipQuestion(){
 }
 
 // ── Reveal answer ──────────────────────────────────────────────────
+let revealInProgress=false;
 async function revealAnswer(){
+  if(revealInProgress)return;
+  revealInProgress=true;
+  allAnsweredPending=false;
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
   document.getElementById('tv-countdown').textContent='';
   const q=sessionQuestions[currentQIdx];
@@ -801,17 +807,30 @@ async function endSession(){
 }
 
 // ── Answer distribution ────────────────────────────────────────────
+let allAnsweredPending = false;
 function renderAnswerDist(){
   const counts=[0,0,0,0];
   Object.values(currentAnswers).forEach(a=>{if(a&&a.idx>=0&&a.idx<4)counts[a.idx]++;});
   const total=counts.reduce((a,b)=>a+b,0);
+  const playerCount=Object.keys(currentPlayers).length;
   const max=Math.max(...counts,1);
   [0,1,2,3].forEach(i=>{
     document.getElementById('abar'+i).style.width=(counts[i]/max*100)+'%';
     document.getElementById('acnt'+i).textContent=counts[i];
   });
-  document.getElementById('ans-total').textContent=total+' / '+Object.keys(currentPlayers).length+' 응답';
+  const label=total>=playerCount&&playerCount>0?'✅ 전원 응답!':total+' / '+playerCount+' 응답';
+  document.getElementById('ans-total').textContent=label;
   document.getElementById('st-answered').textContent=total;
+
+  // Auto-reveal when all players have answered
+  if(total>=playerCount&&playerCount>=2&&!allAnsweredPending&&sessionActive&&
+     document.getElementById('btn-reveal').style.display!=='none'){
+    allAnsweredPending=true;
+    toast('✅ 전원 응답! 곧 정답이 공개됩니다...');
+    setTimeout(()=>{
+      if(document.getElementById('btn-reveal').style.display!=='none')revealAnswer();
+    },1200);
+  }
 }
 
 // ── Leaderboard ────────────────────────────────────────────────────
