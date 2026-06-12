@@ -281,6 +281,10 @@
           <span class="game-sel-icon">⚡</span>
           <div class="game-sel-name">우승 횟수</div>
         </div>
+        <div class="game-sel-btn" onclick="selectGame('유니폼퀴즈',this)">
+          <span class="game-sel-icon">👕</span>
+          <div class="game-sel-name">유니폼 퀴즈</div>
+        </div>
       </div>
       <div class="q-count-row">
         <div class="q-count-lbl">문제 수:</div>
@@ -405,6 +409,7 @@ function sndReveal(){snd(392,.1);setTimeout(()=>snd(523,.1),120);setTimeout(()=>
 
 // ── QUESTION BANKS ────────────────────────────────────────────────
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function shuffleOptions(q){const items=q.options.map((o,i)=>({o,c:i===q.correct}));for(let i=items.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]];}return{...q,options:items.map(x=>x.o),correct:items.findIndex(x=>x.c)};}
 
 const QB = {
   '선수퀴즈': ()=>shuffle([
@@ -507,6 +512,28 @@ const QB = {
     {emoji:'🇭🇷',text:'크로아티아의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:0},
     {emoji:'🇲🇽',text:'멕시코의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:0},
   ]),
+  '유니폼퀴즈': ()=>shuffle([
+    {emoji:'👕',text:'아르헨티나 홈 유니폼의 특징은?',options:['하늘색·흰색 세로줄무늬','노란색·초록색','빨간색·흰색','남색 단색'],correct:0},
+    {emoji:'👕',text:'브라질 홈 유니폼 상의 색상은?',options:['초록색','빨간색','노란색','흰색'],correct:2},
+    {emoji:'👕',text:'독일 홈 유니폼의 전통 색상은?',options:['검정색','빨간색','흰색','파란색'],correct:2},
+    {emoji:'👕',text:'프랑스 홈 유니폼의 색상은?',options:['흰색','남색(진파랑)','빨간색','하늘색'],correct:1},
+    {emoji:'👕',text:'스페인 홈 유니폼의 색상은?',options:['빨간색','노란색','파란색','흰색'],correct:0},
+    {emoji:'👕',text:'"아주리"로 불리는 이탈리아 유니폼 색상은?',options:['초록색','빨간색','흰색','파란색'],correct:3},
+    {emoji:'👕',text:'잉글랜드 홈 유니폼의 전통 색상은?',options:['빨간색','파란색','흰색','노란색'],correct:2},
+    {emoji:'👕',text:'포르투갈 홈 유니폼의 색상은?',options:['빨간색','파란색','흰색','초록색'],correct:0},
+    {emoji:'👕',text:'"오란예(Oranje)"로 유명한 네덜란드 유니폼 색상은?',options:['노란색','빨간색','파란색','주황색'],correct:3},
+    {emoji:'👕',text:'대한민국 홈 유니폼 색상은?',options:['빨간색','파란색','흰색','초록색'],correct:0},
+    {emoji:'👕',text:'크로아티아 유니폼의 특징적인 패턴은?',options:['별무늬','세로줄무늬','빨간·흰 체크무늬','삼각형 패턴'],correct:2},
+    {emoji:'👕',text:'우루과이 홈 유니폼의 색상은?',options:['흰색·파란색','빨간색','하늘색','초록색'],correct:2},
+    {emoji:'👕',text:'멕시코 홈 유니폼의 색상은?',options:['흰색','파란색','초록색','빨간색'],correct:2},
+    {emoji:'👕',text:'나이지리아 유니폼의 주요 색상은?',options:['빨간색','초록색','파란색','노란색'],correct:1},
+    {emoji:'👕',text:'덴마크 홈 유니폼의 색상 조합은?',options:['파란색·흰색','빨간색·흰색','초록색·흰색','노란색·빨간색'],correct:1},
+    {emoji:'👕',text:'폴란드 홈 유니폼의 색상은?',options:['빨간색','파란색','흰색','노란색'],correct:2},
+    {emoji:'👕',text:'벨기에 홈 유니폼의 특징 색상은?',options:['파란색','노란색','빨간색·검정색','초록색'],correct:2},
+    {emoji:'👕',text:'세네갈 홈 유니폼의 주요 색상은?',options:['초록색·노란색·빨간색','파란색','흰색','빨간색'],correct:2},
+    {emoji:'👕',text:'모로코 홈 유니폼의 색상은?',options:['파란색','노란색','흰색','빨간색'],correct:3},
+    {emoji:'👕',text:'일본 홈 유니폼의 전통 색상은?',options:['흰색','빨간색','파란색(사무라이 블루)','초록색'],correct:2},
+  ]),
 };
 
 // ── State ──────────────────────────────────────────────────────────
@@ -541,7 +568,7 @@ function selectGame(name,el){
 async function startSession(){
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
   const n=parseInt(document.getElementById('qcount').value);
-  const qs=QB[selectedGame]().slice(0,n);
+  const qs=QB[selectedGame]().slice(0,n).map(shuffleOptions);
   sessionQuestions=qs;
   currentQIdx=-1;
   sessionActive=true;
@@ -639,7 +666,12 @@ function startTvTimer(startAt,limit){
     cntEl.textContent=rem>0?remSec+'초':'⏰';
     cntEl.className='tv-countdown'+(rem<6?' urgent':'');
     if(rem<6&&rem>0&&!beepedSeconds.has(remSec)){beepedSeconds.add(remSec);sndUrgent();}
-    if(rem<=0){clearInterval(tvTimerInt);clearInterval(cntdownInt);cntEl.textContent='';}
+    if(rem<=0){
+      clearInterval(tvTimerInt);clearInterval(cntdownInt);cntEl.textContent='';
+      if(sessionActive&&document.getElementById('btn-reveal').style.display!=='none'){
+        setTimeout(revealAnswer,700);
+      }
+    }
   };
   run();tvTimerInt=setInterval(run,200);
 }
@@ -695,7 +727,12 @@ async function revealAnswer(){
     currentScores[encName]=scoreUpdates[encName];
   }
 
-  await fbPatch('/session',{state:'reveal',question:{...q,correctIdx:ci},scoreGains:gains});
+  // Compute allRanks from merged scores for player rank display on phones
+  const mergedScores={...currentScores,...scoreUpdates};
+  const allRanks={};
+  Object.entries(mergedScores).sort((a,b)=>b[1].total-a[1].total).forEach(([k,p],i)=>{allRanks[k]=i+1;});
+
+  await fbPatch('/session',{state:'reveal',question:{...q,correctIdx:ci},scoreGains:gains,allRanks});
   if(Object.keys(scoreUpdates).length>0)await fbPatch('/scores',scoreUpdates);
 
   // TV reveal
