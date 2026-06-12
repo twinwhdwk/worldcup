@@ -619,6 +619,10 @@ function selectGame(name,el){
 // ── Start session ──────────────────────────────────────────────────
 async function startSession(){
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
+  // Restore play QR (in case previous session swapped it to scoreboard)
+  updateQR();
+  const qrLabel=document.querySelector('.qr-label');
+  if(qrLabel)qrLabel.textContent='📱 스캔해서 참가';
   const n=parseInt(document.getElementById('qcount').value);
   const qs=QB[selectedGame]().slice(0,n).map(shuffleOptions);
   sessionQuestions=qs;
@@ -872,9 +876,19 @@ async function endSession(){
   document.getElementById('game-setup').style.display='block';
   document.getElementById('ans-dist-section').style.display='none';
   document.getElementById('st-state').textContent='종료';
-  document.getElementById('tv-lobby-sub').textContent='게임 종료! 최종 스코어보드를 확인하세요.';
+  document.getElementById('tv-lobby-sub').textContent='게임 종료! QR을 스캔해 최종 순위를 확인하세요.';
+  // Swap QR to scoreboard URL
+  if(USE_FB){
+    const sbUrl=BASE_URL+'/scoreboard.html?db='+btoa(FIREBASE_URL);
+    document.getElementById('qr-img').src=`https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(sbUrl)}&chs=300x300&chld=M|1`;
+    document.getElementById('qr-url-text').textContent=sbUrl.replace('https://','');
+    document.getElementById('tv-lobby-count').textContent='🏆 최종 순위 발표!';
+    const qrLabel=document.querySelector('.qr-label');
+    if(qrLabel)qrLabel.textContent='📊 스코어보드 보기';
+  }
   tvShow('tv-lobby');
   toast('🏁 세션 종료!');
+  confetti(60);
 }
 
 // ── Admin utilities ────────────────────────────────────────────────
