@@ -93,7 +93,9 @@
     .nav-icon{font-size:20px;}
 
     @media(max-width:480px){body{padding:12px 12px 80px;}.options{gap:8px;}.opt-btn{padding:12px 6px;font-size:13px;min-height:52px;}.jersey-card{padding:20px 14px;}.jersey-display{gap:16px;}}
+    .opt-btn .flag img.emoji{height:1em;width:1em;vertical-align:middle;}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="splash" id="splash">
@@ -384,11 +386,13 @@ function setQuestion(){
   // Options — always include correct
   const wrongPool=shuffle(currentTeam.decoy.filter(d=>d!==currentTeam.name));
   const opts=shuffle([currentTeam.name,...wrongPool.slice(0,3)]);
-  document.getElementById('options').innerHTML=opts.map(o=>{
+  const uOptEl=document.getElementById('options');
+  uOptEl.innerHTML=opts.map(o=>{
     const f=o.match(/^(\S+)/)?.[1]||'';
     const n=o.replace(/^\S+\s*/,'');
     return `<button class="opt-btn" onclick="answer(this,'${o.replace(/'/g,"\\'")}')"><span class="flag">${f}</span>${n}</button>`;
   }).join('');
+  if(typeof twemoji!=='undefined')twemoji.parse(uOptEl);
 }
 
 function answer(btn,selected){
@@ -415,6 +419,7 @@ function answer(btn,selected){
     });
     fb.className='feedback wrong';
     fb.textContent=`❌ 오답! 정답: ${currentTeam.flag} ${currentTeam.name.replace(/^\S+\s*/,'')}`;
+    if(typeof twemoji!=='undefined')twemoji.parse(fb);
     document.getElementById('streak-bar').textContent='';
     // Auto hint on 2 consecutive wrong
     if(wrongStreak>=2){

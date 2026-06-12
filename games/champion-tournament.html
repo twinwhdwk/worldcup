@@ -98,7 +98,9 @@
     .nav-icon{font-size:20px;}
 
     @media(max-width:480px){ body{padding:12px 12px 80px;} .opt-btn{padding:14px 8px;font-size:15px;} .q-card{padding:24px 16px;} .year-badge{font-size:40px;padding:6px 24px;} }
+    .opt-btn .flag img.emoji{height:1em;width:1em;vertical-align:middle;}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="splash" id="splash">
@@ -273,6 +275,7 @@ function startQTimer(){
         document.querySelectorAll('.opt-btn').forEach(b=>{if(b.textContent.includes(q.winner.replace(/^\S+\s*/,'')))b.classList.add('correct');});
         const fb=document.getElementById('feedback');
         fb.className='feedback-area wrong'; fb.textContent=`⏰ 시간 초과! 정답: ${q.winner}`;
+        if(typeof twemoji!=='undefined')twemoji.parse(fb);
         sfxWrong();
         history.push({year:q.year,winner:q.winner,correct:false,timeout:true});
         currentQ++; updateHUD();
@@ -313,10 +316,12 @@ function setQuestion(){
   const wrongPool=ALL_COUNTRIES.filter(c=>c.name!==q.winner);
   const wrongs=shuffle(wrongPool).slice(0,3);
   const opts=shuffle([{name:q.winner,flag:q.flag},...wrongs]);
-  document.getElementById('options').innerHTML=opts.map(o=>`
+  const optEl2=document.getElementById('options');
+  optEl2.innerHTML=opts.map(o=>`
     <button class="opt-btn" onclick="answer(this,'${o.name.replace(/'/g,"\\'")}')">
       <span class="flag">${o.flag}</span>${o.name.replace(/^\S+\s*/,'')}
     </button>`).join('');
+  if(typeof twemoji!=='undefined')twemoji.parse(optEl2);
 }
 
 function revealExtra(){
@@ -346,6 +351,7 @@ function answer(btn,selected){
     btn.classList.add('wrong');
     fb.className='feedback-area wrong';
     fb.textContent=`❌ 오답! 정답: ${q.winner}`;
+    if(typeof twemoji!=='undefined')twemoji.parse(fb);
     sfxWrong();
     history.push({year:q.year,winner:q.winner,correct:false});
   }
@@ -370,12 +376,14 @@ function showResult(){
   document.getElementById('result-title').textContent=gr.t;
   document.getElementById('result-score').textContent=score.toLocaleString()+'점';
   document.getElementById('result-msg').textContent=gr.m+` (${correctCount}/${TOTAL} 정답)`;
-  document.getElementById('history-list').innerHTML=history.map(h=>`
+  const hlEl=document.getElementById('history-list');
+  hlEl.innerHTML=history.map(h=>`
     <div class="rh-item">
       <span class="rh-year">${h.year}년</span>
       <span class="rh-win">${h.winner}${h.boss?' 🔥':''}</span>
       <span>${h.timeout?'⏰':h.correct?'✅':'❌'}</span>
     </div>`).join('');
+  if(typeof twemoji!=='undefined')twemoji.parse(hlEl);
 }
 
 setTimeout(()=>{const s=document.getElementById('splash');s.classList.add('out');setTimeout(()=>s.remove(),400);},900);
