@@ -376,6 +376,7 @@ function onSession(s){
     return;
   }
   if(!s||s.state==='lobby'){
+    startSyncPoll(); // restart poll if it was stopped after a previous session ended
     show('s-lobby');
     document.getElementById('lb-score').textContent=myScore;
     updateLobbyRank();
