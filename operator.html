@@ -325,6 +325,10 @@
           <span class="game-sel-icon">👕</span>
           <div class="game-sel-name">유니폼 퀴즈</div>
         </div>
+        <div class="game-sel-btn" onclick="selectGame('2026퀴즈',this)">
+          <span class="game-sel-icon">🌎</span>
+          <div class="game-sel-name">2026 월드컵</div>
+        </div>
       </div>
       <div class="q-count-row">
         <div class="q-count-lbl">문제 수:</div>
@@ -581,6 +585,23 @@ const QB = {
     {emoji:'👕',text:'세네갈 홈 유니폼의 주요 색상은?',options:['초록색·노란색·빨간색','파란색','흰색','빨간색'],correct:2},
     {emoji:'👕',text:'모로코 홈 유니폼의 색상은?',options:['파란색','노란색','흰색','빨간색'],correct:3},
     {emoji:'👕',text:'일본 홈 유니폼의 전통 색상은?',options:['흰색','빨간색','파란색(사무라이 블루)','초록색'],correct:2},
+  ]),
+  '2026퀴즈': ()=>shuffle([
+    {emoji:'🌎',text:'2026 FIFA 월드컵의 참가팀 수는?',options:['32팀','40팀','48팀','56팀'],correct:2},
+    {emoji:'🏟️',text:'2026 월드컵 개최국은 몇 개 나라인가?',options:['1개국','2개국','3개국','4개국'],correct:2},
+    {emoji:'🇺🇸',text:'2026 월드컵 주요 개최국이 아닌 나라는?',options:['미국','캐나다','멕시코','브라질'],correct:3},
+    {emoji:'🏙️',text:'2026 월드컵 결승전이 열리는 경기장은?',options:['AT&T 스타디움','메트라이프 스타디움','소피 스타디움','로즈볼'],correct:1},
+    {emoji:'⚽',text:'2026 월드컵의 총 경기 수는?',options:['64경기','80경기','104경기','96경기'],correct:2},
+    {emoji:'🗂️',text:'2026 월드컵 조별 리그 형식은?',options:['4팀씩 12조','4팀씩 16조','3팀씩 16조','5팀씩 10조'],correct:2},
+    {emoji:'🇺🇸',text:'미국에서 2026 월드컵이 열리는 도시 수는?',options:['9개','11개','13개','8개'],correct:1},
+    {emoji:'🏙️',text:'멕시코에서 월드컵이 열리는 도시 수는?',options:['1개','2개','3개','4개'],correct:2},
+    {emoji:'🌆',text:'캐나다에서 2026 월드컵 경기가 열리는 도시가 아닌 곳은?',options:['토론토','밴쿠버','몬트리올','오타와'],correct:3},
+    {emoji:'📅',text:'2026 FIFA 월드컵 개막전 날짜는?',options:['2026년 5월 11일','2026년 6월 11일','2026년 7월 11일','2026년 6월 1일'],correct:1},
+    {emoji:'🏆',text:'2026 월드컵 결승전 날짜는?',options:['2026년 7월 12일','2026년 7월 19일','2026년 8월 1일','2026년 7월 25일'],correct:1},
+    {emoji:'🔢',text:'2026 월드컵 조별리그에서 각 조 몇 팀이 16강에 오르나?',options:['1팀','2팀','3팀(상위 2팀 + 3위 중 최우수 8팀)','4팀'],correct:2},
+    {emoji:'🌎',text:'2026 월드컵 마스코트 이름은?',options:['풀레코','아티','풀라','카토'],correct:1},
+    {emoji:'🇲🇽',text:'멕시코에서 월드컵이 열리는 도시가 아닌 것은?',options:['멕시코시티','과달라하라','몬테레이','칸쿤'],correct:3},
+    {emoji:'📺',text:'2026 월드컵 공식 주제가는 누가 불렀나?',options:['BTS','피타 불','샤키라','방탄소년단 정국'],correct:1},
   ]),
 };
 
