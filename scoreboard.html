@@ -346,19 +346,37 @@ function confetti(count=50){
   }
 }
 
+// ── Handle ?prefill (localStorage fallback score submission) ───────
+(()=>{
+  const up=new URLSearchParams(location.search);
+  const pName=up.get('prefill'),pScore=parseInt(up.get('score')||'0');
+  if(!USE_FB&&pName&&pScore>0){
+    try{
+      const SK='wc_scoreboard_v1';
+      const d=JSON.parse(localStorage.getItem(SK)||'{"players":[],"log":[]}');
+      if(!d.log)d.log=[];
+      const now=new Date().toLocaleDateString('ko-KR',{month:'short',day:'numeric'});
+      d.log.push({name:pName,score:pScore,game:'개인게임',date:now});
+      const p=d.players.find(p=>p.name===pName);
+      if(p){p.bestScore=Math.max(p.bestScore,pScore);p.games++;p.lastGame='개인게임';}
+      else d.players.push({name:pName,bestScore:pScore,games:1,lastGame:'개인게임'});
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e){}
+  }
+})();
+
 // ── Init ───────────────────────────────────────────────────────────
 if(USE_FB){
   startStream();
 } else {
-  // localStorage fallback (single-device mode)
-  const load = ()=>{
-    const data = JSON.parse(localStorage.getItem('wc_scoreboard_v1')||'{"players":[]}');
-    allScores = {};
+  const load=()=>{
+    const data=JSON.parse(localStorage.getItem('wc_scoreboard_v1')||'{"players":[]}');
+    allScores={};
     (data.players||[]).forEach(p=>{allScores[p.name]={name:p.name,total:p.bestScore||0,correct:p.games||0,streak:0};});
     render();
   };
   load();
-  setInterval(load, 3000);
+  setInterval(load,3000);
 }
 </script>
 </body>

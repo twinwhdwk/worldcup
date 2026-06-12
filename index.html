@@ -149,6 +149,13 @@
   <div class="hero-badge">⚽ 2026 FIFA World Cup Edition</div>
   <h1>월드컵<em>MINI GAMES</em></h1>
   <p class="hero-sub">30명이 함께하는 실시간 월드컵 퀴즈!</p>
+  <!-- 닉네임 입력 -->
+  <div style="display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:6px 6px 6px 18px;max-width:320px;width:100%;">
+    <input id="name-in" type="text" maxlength="8" placeholder="내 닉네임 입력 (랭킹 등록용)" autocomplete="off"
+      style="flex:1;background:transparent;border:none;outline:none;color:#fff;font-family:'Noto Sans KR',sans-serif;font-size:14px;min-width:0;">
+    <button onclick="saveName()" style="background:var(--green);border:none;border-radius:100px;padding:8px 18px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;font-family:'Noto Sans KR',sans-serif;">저장</button>
+  </div>
+  <div id="name-saved" style="font-size:12px;color:#4ade80;margin-top:8px;height:16px;"></div>
 </div>
 
 <!-- Main CTA: Multiplayer -->
@@ -289,7 +296,74 @@ const SK='wc_scoreboard_v1';
 const COLS=['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#a855f7','#ec4899','#14b8a6','#84cc16'];
 function load(){try{return JSON.parse(localStorage.getItem(SK)||'{"players":[],"log":[]}');}catch{return{players:[],log:[]};}}
 
+// ── Name management ───────────────────────────────
+function saveName(){
+  const n=document.getElementById('name-in').value.trim();
+  if(!n)return;
+  localStorage.setItem('wc_player_name',n);
+  const el=document.getElementById('name-saved');
+  el.textContent='✅ 저장됨! 게임 종료 시 자동으로 랭킹에 등록됩니다.';
+  setTimeout(()=>el.textContent='',3000);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('wc_player_name')||'';
+  if(saved){
+    document.getElementById('name-in').value=saved;
+    document.getElementById('name-saved').textContent='안녕하세요, '+saved+'님! 게임을 시작하세요.';
+  }
+  document.getElementById('name-in').addEventListener('keydown',e=>{if(e.key==='Enter')saveName();});
+});
+
+// ── Firebase real-time stats ──────────────────────
+const fbUrl=localStorage.getItem('wc_fb_url')||'';
+const USE_FB=fbUrl.startsWith('https://');
+let fbScores={};
+
+if(USE_FB){
+  // Update scoreboard links with ?db= param
+  const encoded=btoa(fbUrl);
+  document.querySelectorAll('a[href="scoreboard.html"]').forEach(a=>{a.href='scoreboard.html?db='+encoded;});
+
+  const es=new EventSource(fbUrl+'/wc_live/scores.json');
+  es.addEventListener('put',e=>{fbScores=JSON.parse(e.data).data||{};renderFbStats();});
+  es.addEventListener('patch',e=>{Object.assign(fbScores,JSON.parse(e.data).data||{});renderFbStats();});
+  es.onerror=()=>{};
+
+  function renderFbStats(){
+    const players=Object.values(fbScores).filter(p=>p&&p.name);
+    const scores=players.map(p=>p.total||0);
+    const top=scores.length?Math.max(...scores):0;
+    const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+    const fmt=n=>n>=1000?(n/1000).toFixed(1)+'k':n;
+    document.getElementById('sp').textContent=players.length;
+    document.getElementById('sg').textContent=players.reduce((a,p)=>(p.correct||0)+a,0);
+    document.getElementById('st').textContent=fmt(top);
+    document.getElementById('sa').textContent=fmt(avg);
+    // Rank
+    const sorted=[...players].sort((a,b)=>b.total-a.total).slice(0,5);
+    if(!sorted.length)return;
+    const max=sorted[0].total||1;
+    const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+    document.getElementById('rp-list').innerHTML=sorted.map((p,i)=>{
+      const col=COLS[i%COLS.length],bw=Math.round(p.total/max*100);
+      return `<div class="rp-item">
+        <div class="rp-medal">${medals[i]}</div>
+        <div class="rp-avatar" style="background:${col}">${p.name.slice(0,2)}</div>
+        <div class="rp-info">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="rp-name">${p.name}</div>
+            <div class="rp-score">${(p.total||0).toLocaleString()}<span style="font-size:11px;color:var(--muted);font-family:'Noto Sans KR',sans-serif;font-weight:400;">점</span></div>
+          </div>
+          <div class="rp-sub">정답 ${p.correct||0}개 · ${p.lastGame||'퀴즈'}</div>
+          <div class="rp-bw"><div class="rp-b" style="width:${bw}%;background:${col}"></div></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
 function renderStats(d){
+  if(USE_FB)return; // Firebase overrides
   const sc=d.log.map(e=>e.score);
   const top=sc.length?Math.max(...sc):0,avg=sc.length?Math.round(sc.reduce((a,b)=>a+b,0)/sc.length):0;
   const fmt=n=>n>=1000?(n/1000).toFixed(1)+'k':n;
@@ -300,6 +374,7 @@ function renderStats(d){
 }
 
 function renderRank(d){
+  if(USE_FB)return; // Firebase overrides
   const sorted=[...d.players].sort((a,b)=>b.bestScore-a.bestScore).slice(0,5);
   const el=document.getElementById('rp-list');
   if(!sorted.length)return;
