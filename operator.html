@@ -99,6 +99,18 @@
     .score-changes{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:700px;}
     .sc-chip{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);border-radius:100px;padding:8px 18px;font-family:'Black Han Sans',sans-serif;font-size:17px;color:var(--gold);animation:chipIn .35s ease both;}
     @keyframes chipIn{from{transform:scale(.6) translateY(12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+    /* mini-leaderboard in reveal panel */
+    .tv-mini-lb{display:none;width:100%;max-width:600px;margin-top:24px;animation:miniLbIn .5s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes miniLbIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .tv-mini-lb.show{display:block;}
+    .tv-mini-lb-title{font-family:'Black Han Sans',sans-serif;font-size:16px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;text-align:center;}
+    .tv-mini-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:14px;margin-bottom:6px;background:rgba(255,255,255,.04);}
+    .tv-mini-row.r1{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);}
+    .tv-mini-row.r2{background:rgba(192,192,192,.06);border:1px solid rgba(192,192,192,.15);}
+    .tv-mini-row.r3{background:rgba(205,127,50,.06);border:1px solid rgba(205,127,50,.15);}
+    .tv-mini-rank{font-family:'Black Han Sans',sans-serif;font-size:22px;width:36px;text-align:center;}
+    .tv-mini-name{flex:1;font-family:'Black Han Sans',sans-serif;font-size:18px;}
+    .tv-mini-score{font-family:'Black Han Sans',sans-serif;font-size:22px;color:var(--gold);}
 
     /* ── RIGHT CONTROLS ── */
     .ctrl-panel{width:340px;flex-shrink:0;background:#08090f;border-left:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;overflow-y:auto;padding:20px 18px;}
@@ -257,6 +269,10 @@
       <div class="tv-rv-text" id="tv-rv-text">정답은...</div>
       <div class="tv-rv-sub" id="tv-rv-sub">정답 옵션</div>
       <div class="score-changes" id="score-changes"></div>
+      <div class="tv-mini-lb" id="tv-mini-lb">
+        <div class="tv-mini-lb-title">🏆 현재 순위</div>
+        <div id="tv-mini-rows"></div>
+      </div>
     </div>
 
   </div>
@@ -674,6 +690,7 @@ async function nextQuestion(){
 
   currentAnswers={};
   allAnsweredPending=false;
+  const miniLbEl=document.getElementById('tv-mini-lb');if(miniLbEl)miniLbEl.classList.remove('show');
   const tvBar2=document.getElementById('tv-ans-bar');const tvLbl2=document.getElementById('tv-ans-lbl');
   if(tvBar2){tvBar2.style.width='0%';tvBar2.style.background='var(--green)';}
   if(tvLbl2){tvLbl2.textContent='0명 응답';}
@@ -822,6 +839,24 @@ async function revealAnswer(){
   sndReveal();
   if(correctCount>0)setTimeout(()=>confetti(),400);
   renderLeaderboard();
+
+  // Show mini-leaderboard on TV after 2.5s
+  const miniLb=document.getElementById('tv-mini-lb');
+  if(miniLb)miniLb.classList.remove('show');
+  setTimeout(()=>{
+    if(!document.getElementById('tv-reveal').style.display||document.getElementById('tv-reveal').style.display!=='none')return;
+    const top5=Object.values(currentScores).sort((a,b)=>b.total-a.total).slice(0,5);
+    const medals=['🥇','🥈','🥉','4위','5위'];
+    const rowClasses=['r1','r2','r3','',''];
+    document.getElementById('tv-mini-rows').innerHTML=top5.map((p,i)=>
+      `<div class="tv-mini-row ${rowClasses[i]}">
+        <div class="tv-mini-rank">${medals[i]}</div>
+        <div class="tv-mini-name">${p.name||'?'}</div>
+        <div class="tv-mini-score">${(p.total||0).toLocaleString()}점</div>
+      </div>`
+    ).join('');
+    if(miniLb)miniLb.classList.add('show');
+  },2500);
 }
 
 // ── End session ────────────────────────────────────────────────────
