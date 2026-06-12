@@ -804,10 +804,10 @@ function scheduleReconnect(){
 }
 
 // ── Listening ──────────────────────────────────────────────────────
+let prevPlayerCount=0;
 function startListening(){
   if(playersES){try{playersES.close();}catch{}}
   playersES=new EventSource(FB+'/players.json');
-  let prevPlayerCount=0;
   const onPlayers=d=>{
     currentPlayers=d||{};
     const n=Object.keys(currentPlayers).length;
