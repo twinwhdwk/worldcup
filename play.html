@@ -306,13 +306,16 @@ function join(){
 // ── Polling fallback (session state + score / players / answers) ──
 // Firebase free plan: 100 simultaneous connections. 30 players × 4 SSE = 120 → over limit.
 // Fix: 1 SSE per player (sessionES only); poll secondary data here.
-let _pollInt=null, _pollTick=0;
+let _pollInt=null, _pollTick=0, _heartTick=0;
 function startSyncPoll(){
   if(_pollInt)return;
   _pollInt=setInterval(async()=>{
     if(!joined||!USE_FB)return;
     const sid=document.querySelector('.screen:not(.hidden)')?.id;
     if(!sid||sid==='s-done')return;
+    // Heartbeat: update lastSeen every ~15s so operator knows who's live
+    _heartTick=(_heartTick+1)%6;
+    if(_heartTick===0&&myName)fetch(FB+'/players/'+enc(myName)+'.json',{method:'PATCH',body:JSON.stringify({lastSeen:Date.now()}),headers:{'Content-Type':'application/json'}}).catch(()=>{});
     if(sid==='s-lobby'||sid==='s-wait'||sid==='s-reveal'||sid==='s-question'){
       const cur=await fbGet('/session');
       if(cur&&(

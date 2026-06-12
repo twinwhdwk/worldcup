@@ -760,8 +760,22 @@ function applyFbPatch(obj, d){
   if(!d.path||d.path==='/'||d.path===''){
     Object.assign(obj, d.data||{});
   } else {
-    const key=d.path.replace(/^\//,'').split('/')[0];
-    if(key) obj[key]=d.data;
+    // Navigate to the correct depth, then merge or set
+    const parts=d.path.replace(/^\//,'').split('/');
+    let target=obj;
+    for(let i=0;i<parts.length-1;i++){
+      if(!target[parts[i]]||typeof target[parts[i]]!=='object')target[parts[i]]={};
+      target=target[parts[i]];
+    }
+    const leaf=parts[parts.length-1];
+    if(leaf){
+      // Merge if both existing value and incoming data are objects (partial update)
+      if(typeof target[leaf]==='object'&&target[leaf]!==null&&typeof d.data==='object'&&d.data!==null){
+        Object.assign(target[leaf],d.data);
+      } else {
+        target[leaf]=d.data;
+      }
+    }
   }
 }
 
@@ -783,7 +797,9 @@ function startListening(){
     const n=Object.keys(currentPlayers).length;
     if(n>prevPlayerCount){sndJoin();}
     prevPlayerCount=n;
-    document.getElementById('st-players').textContent=n;
+    const now=Date.now();
+    const onlineN=Object.values(currentPlayers).filter(p=>p&&(!p.lastSeen||(now-p.lastSeen)<30000)).length;
+    document.getElementById('st-players').textContent=onlineN<n?`${onlineN}/${n}`:n;
     document.getElementById('tv-lobby-count').textContent=n>0?'👥 '+n+'명 대기중':'';
     // Player name chips in TV lobby
     const wrap=document.getElementById('player-chips-wrap');
@@ -791,8 +807,12 @@ function startListening(){
     if(wrap&&chips){
       if(n>0){
         wrap.style.display='block';
-        const names=Object.values(currentPlayers).filter(p=>p&&typeof p==='object'&&p.name).map(p=>p.name);
-        chips.innerHTML=names.map(name=>`<div class="player-chip">${esc(name)}</div>`).join('');
+        const now=Date.now();
+        const players=Object.values(currentPlayers).filter(p=>p&&typeof p==='object'&&p.name);
+        chips.innerHTML=players.map(p=>{
+          const online=!p.lastSeen||(now-p.lastSeen)<30000;
+          return`<div class="player-chip" style="${online?'':'opacity:.4;filter:grayscale(1);'}" title="${online?'온라인':'오프라인 (30초 이상 응답 없음)'}">${esc(p.name)}</div>`;
+        }).join('');
       } else {wrap.style.display='none';}
     }
   };
@@ -1069,7 +1089,9 @@ function renderAnswerDist(){
   const counts=[0,0,0,0];
   Object.values(currentAnswers).forEach(a=>{if(a&&typeof a==='object'&&a.idx>=0&&a.idx<4)counts[a.idx]++;});
   const total=counts.reduce((a,b)=>a+b,0);
-  const playerCount=Object.values(currentPlayers).filter(p=>p&&typeof p==='object').length;
+  const now=Date.now();
+  // Active = joined but no heartbeat yet (fresh join) OR heartbeat < 60s ago
+  const playerCount=Object.values(currentPlayers).filter(p=>p&&typeof p==='object'&&(!p.lastSeen||(now-p.lastSeen)<60000)).length;
   const max=Math.max(...counts,1);
   [0,1,2,3].forEach(i=>{
     document.getElementById('abar'+i).style.width=(counts[i]/max*100)+'%';
