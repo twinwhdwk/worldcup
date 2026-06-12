@@ -226,14 +226,9 @@
     <div class="tv-lobby" id="tv-lobby">
       <div class="tv-ball">⚽</div>
       <div class="tv-lobby-title">월드컵 QUIZ</div>
-      <div class="tv-lobby-sub" id="tv-lobby-sub">QR 코드를 스캔해서 참가하세요!</div>
+      <div class="tv-lobby-sub" id="tv-lobby-sub">참가하세요!</div>
       <div class="tv-lobby-count" id="tv-lobby-count"></div>
       <div class="tv-lobby-main">
-        <div class="qr-big">
-          <img id="qr-img" src="" alt="QR" onerror="this.style.display='none'">
-          <p class="qr-label">📱 스캔해서 참가</p>
-          <p class="qr-url" id="qr-url-text"></p>
-        </div>
         <div id="player-chips-wrap" style="display:none;">
           <div class="player-chips-title">참가자 목록</div>
           <div class="player-chips" id="player-chips"></div>
@@ -435,13 +430,7 @@ if(USE_FB){
   document.getElementById('sb-link').href = BASE_URL + '/scoreboard.html?db=' + btoa(FIREBASE_URL);
 }
 
-// ── QR Code ──────────────────────────────────────────────────────
-function updateQR(){
-  const url = getPlayUrl();
-  document.getElementById('qr-img').src = `https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(url)}&chs=300x300&chld=M|1`;
-  document.getElementById('qr-url-text').textContent = url.replace('https://','');
-}
-updateQR();
+function updateQR(){}
 
 // ── Sound Effects (Web Audio API) ────────────────────────────────
 let AC = null;
@@ -700,7 +689,7 @@ async function startSession(){
   tvShow('tv-lobby');
   startListening();
   sndStart();
-  toast('✅ 세션 시작! QR을 스캔해서 참가하세요.');
+  toast('✅ 세션 시작! 참가자들이 접속하길 기다리세요.');
 }
 
 // ── Listening ──────────────────────────────────────────────────────
@@ -942,16 +931,8 @@ async function endSession(){
   document.getElementById('game-setup').style.display='block';
   document.getElementById('ans-dist-section').style.display='none';
   document.getElementById('st-state').textContent='종료';
-  document.getElementById('tv-lobby-sub').textContent='게임 종료! QR을 스캔해 최종 순위를 확인하세요.';
-  // Swap QR to scoreboard URL
-  if(USE_FB){
-    const sbUrl=BASE_URL+'/scoreboard.html?db='+btoa(FIREBASE_URL);
-    document.getElementById('qr-img').src=`https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(sbUrl)}&chs=300x300&chld=M|1`;
-    document.getElementById('qr-url-text').textContent=sbUrl.replace('https://','');
-    document.getElementById('tv-lobby-count').textContent='🏆 최종 순위 발표!';
-    const qrLabel=document.querySelector('.qr-label');
-    if(qrLabel)qrLabel.textContent='📊 스코어보드 보기';
-  }
+  document.getElementById('tv-lobby-sub').textContent='게임 종료! 최종 순위를 확인하세요.';
+  document.getElementById('tv-lobby-count').textContent='🏆 최종 순위 발표!';
   tvShow('tv-lobby');
   // Show final top-10 leaderboard on TV
   const top10=Object.values(currentScores).sort((a,b)=>b.total-a.total).slice(0,10);
@@ -986,8 +967,9 @@ async function clearScores(){
 }
 async function clearPlayers(){
   if(!USE_FB){toast('Firebase 미연결');return;}
-  if(!confirm('참가자 목록을 초기화합니다. 계속하시겠습니까?'))return;
+  if(!confirm('참가자 목록을 초기화합니다. 연결된 참가자는 로그인 화면으로 이동됩니다. 계속하시겠습니까?'))return;
   await fbDelete('/players');
+  await fbPatch('/session',{lastClearedAt:Date.now()});
   currentPlayers={};
   document.getElementById('st-players').textContent='0';
   document.getElementById('tv-lobby-count').textContent='';

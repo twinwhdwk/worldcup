@@ -241,6 +241,7 @@ const LETTERS = ['A','B','C','D'];
 let myName='', myScore=0, myStreak=0, myRank=0;
 let myAnswerIdx=-1, lastQId='', timerInt=null;
 let sessionES=null, beepedSecs=new Set();
+let myJoinedAt=0;
 
 // ── Sound Effects (Web Audio API) ─────────────────────────────────
 let AC=null;
@@ -291,13 +292,32 @@ function join(){
   const n=document.getElementById('name-in').value.trim();
   if(!n){joined=false;document.getElementById('name-in').focus();return;}
   if(!USE_FB){joined=false;setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
-  myName=n;localStorage.setItem('wc_player_name',n);
-  fetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:Date.now(),lastSeen:Date.now()})});
+  myName=n;myJoinedAt=Date.now();localStorage.setItem('wc_player_name',n);
+  fetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:myJoinedAt,lastSeen:myJoinedAt})});
   document.getElementById('lb-name').textContent=n+' 참가 중';
   show('s-lobby');
   listen();
+  startSyncPoll();
   fbGet('/scores/'+enc(n)).then(d=>{if(d){myScore=d.total||0;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;}});
   sndJoin();
+}
+
+// ── Polling fallback (handles missed SSE patch events) ────────────
+let _pollInt=null;
+function startSyncPoll(){
+  if(_pollInt)return;
+  _pollInt=setInterval(async()=>{
+    if(!joined||!USE_FB)return;
+    const sid=document.querySelector('.screen:not(.hidden)')?.id;
+    if(sid!=='s-lobby'&&sid!=='s-wait')return;
+    const cur=await fbGet('/session');
+    if(!cur)return;
+    if(cur.state!==(_sessState?.state||'lobby')||
+       (cur.state==='question'&&cur.questionIdx!==_sessState?.questionIdx)||
+       (cur.state==='reveal'&&cur.questionIdx!==_sessState?.questionIdx)){
+      _sessState=cur;onSession(cur);
+    }
+  },2500);
 }
 
 // ── Listen ────────────────────────────────────────────────────────
@@ -347,6 +367,13 @@ function updateLobbyRank(){
   }
 }
 function onSession(s){
+  if(s&&s.lastClearedAt&&myJoinedAt>0&&s.lastClearedAt>myJoinedAt){
+    joined=false;myJoinedAt=0;myName='';myScore=0;myStreak=0;
+    clearInterval(timerInt);
+    show('s-login');
+    setStatus('운영자가 참가자 목록을 초기화했습니다. 다시 참가하세요.','warn');
+    return;
+  }
   if(!s||s.state==='lobby'){
     show('s-lobby');
     document.getElementById('lb-score').textContent=myScore;
