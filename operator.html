@@ -161,6 +161,9 @@
     .toast.show{transform:translateX(-50%) translateY(0);}
 
     @keyframes confettiFall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+    @keyframes tvPanelIn{from{opacity:0;transform:scale(.97) translateY(-12px)}to{opacity:1;transform:none}}
+    .tv-panel-anim{animation:tvPanelIn .45s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes optFlyIn{from{transform:translateX(-20px) scale(.95);opacity:0}to{transform:none;opacity:1}}
     @media(max-width:900px){.main{flex-direction:column-reverse;}.ctrl-panel{width:100%;border-left:none;border-top:1px solid rgba(255,255,255,.05);}.tv-panel{padding:16px;}}
   </style>
 </head>
@@ -561,7 +564,11 @@ let beepedSeconds = new Set();
 // ── Utils ──────────────────────────────────────────────────────────
 function enc(n){return n.replace(/[.#$[\]]/g,'_');}
 function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'#ef4444':'var(--green)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-function tvShow(id){['tv-lobby','tv-question','tv-reveal'].forEach(x=>{const el=document.getElementById(x);if(el)el.style.display=x===id?'flex':'none';});}
+function tvShow(id){
+  ['tv-lobby','tv-question','tv-reveal'].forEach(x=>{const el=document.getElementById(x);if(el)el.style.display=x===id?'flex':'none';});
+  const el=document.getElementById(id);
+  if(el){el.classList.remove('tv-panel-anim');void el.offsetWidth;el.classList.add('tv-panel-anim');el.addEventListener('animationend',()=>el.classList.remove('tv-panel-anim'),{once:true});}
+}
 
 // ── Firebase ───────────────────────────────────────────────────────
 async function fbPut(p,d){if(!USE_FB)return;await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}
@@ -663,7 +670,9 @@ async function nextQuestion(){
   document.getElementById('tv-q-text').textContent=q.text;
   q.options.forEach((o,i)=>{
     document.getElementById('tv-ot'+i).textContent=o;
-    document.getElementById('tv-o'+i).className='tv-opt '+['a','b','c','d'][i];
+    const opt=document.getElementById('tv-o'+i);
+    opt.className='tv-opt '+['a','b','c','d'][i];
+    opt.style.animation=`optFlyIn .4s ${i*.07+.2}s cubic-bezier(.34,1.56,.64,1) both`;
   });
   startTvTimer(startAt,limit);
 
@@ -764,9 +773,9 @@ async function revealAnswer(){
 
   // TV reveal
   tvShow('tv-reveal');
-  document.getElementById('tv-rv-icon').textContent='🎯';
-  document.getElementById('tv-rv-text').textContent='정답은... '+q.options[ci]+'!';
-  document.getElementById('tv-rv-sub').textContent=`✅ 정답자 ${correctCount}명 / 총 ${Object.keys(currentAnswers).length}명 응답`;
+  document.getElementById('tv-rv-icon').textContent=correctCount>0?'🎯':'❌';
+  document.getElementById('tv-rv-text').textContent='정답: '+q.options[ci];
+  document.getElementById('tv-rv-sub').textContent=`✅ 정답자 ${correctCount}명 · 오답자 ${Object.keys(currentAnswers).length-correctCount}명`;
 
   const topGainers=Object.entries(gains).filter(([,g])=>g>0).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const sc=document.getElementById('score-changes');
@@ -777,6 +786,7 @@ async function revealAnswer(){
 
   [0,1,2,3].forEach(i=>{
     const el=document.getElementById('tv-o'+i);
+    el.style.animation='';
     el.classList.add(i===ci?'correct':'wrong');
   });
 
