@@ -313,7 +313,7 @@ function startSyncPoll(){
     if(!joined||!USE_FB)return;
     const sid=document.querySelector('.screen:not(.hidden)')?.id;
     if(!sid||sid==='s-done')return;
-    if(sid==='s-lobby'||sid==='s-wait'){
+    if(sid==='s-lobby'||sid==='s-wait'||sid==='s-reveal'||sid==='s-question'){
       const cur=await fbGet('/session');
       if(cur&&(
         cur.state!==(_sessState?.state||'lobby')||
@@ -348,7 +348,7 @@ function listen(){
   if(sessionES){try{sessionES.close();}catch{}}
   sessionES=new EventSource(FB+'/session.json');
   sessionES.addEventListener('put',e=>{const d=JSON.parse(e.data);_sessState=d.data;onSession(_sessState);});
-  sessionES.addEventListener('patch',e=>{const d=JSON.parse(e.data);_sessState=Object.assign(_sessState||{},d.data);onSession(_sessState);});
+  sessionES.addEventListener('patch',e=>{const d=JSON.parse(e.data);if(!d.data)return;_sessState=Object.assign(_sessState||{},d.data);onSession(_sessState);});
   sessionES.onerror=()=>{if(!joined||_listenTimer)return;setStatus('⚠️ 연결 끊김, 재연결 중...','err');_listenTimer=setTimeout(listen,3000);};
   sessionES.onopen=()=>setStatus('✅ 연결됨','ok');
 }
@@ -449,8 +449,10 @@ function renderOptHtml(text){
 // ── Render question ───────────────────────────────────────────────
 async function renderQ(s){
   const q=s.question;if(!q)return;
+  const capturedQId=lastQId;
   // Check if player already answered this question (page reload guard)
   const existingAns=await fbGet('/answers/'+enc(myName));
+  if(lastQId!==capturedQId||_sessState?.state!=='question')return; // state changed during async
   if(existingAns&&existingAns.idx>=0){
     myAnswerIdx=existingAns.idx;
     const wpEl=document.getElementById('wait-prev');
