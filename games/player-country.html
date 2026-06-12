@@ -195,14 +195,14 @@
 <script>
 async function fbAutoSubmit(s,gameName){
   const nm=localStorage.getItem('wc_player_name')||'';if(!nm)return;
-  const fbUrl=localStorage.getItem('wc_fb_url')||'';if(!fbUrl.startsWith('https://'))return;
+  const fbUrl=localStorage.getItem('wc_fb_url')||'https://worldcup-minigame-default-rtdb.firebaseio.com';if(!fbUrl.startsWith('https://'))return;
   try{const enc=n=>n.replace(/[.#$[\]]/g,'_'),FB=fbUrl+'/wc_live',en=enc(nm);
     const cur=await fetch(FB+'/scores/'+en+'.json').then(r=>r.json())||{};
     await fetch(FB+'/scores/'+en+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:nm,total:(cur.total||0)+s,correct:(cur.correct||0)+1,streak:cur.streak||0,lastGame:gameName})});
   }catch(e){}
 }
 function goToScoreboard(s){
-  const fbUrl=localStorage.getItem('wc_fb_url')||'';
+  const fbUrl=localStorage.getItem('wc_fb_url')||'https://worldcup-minigame-default-rtdb.firebaseio.com';
   if(fbUrl.startsWith('https://'))location.href='../scoreboard.html?db='+btoa(fbUrl);
   else{const n=localStorage.getItem('wc_player_name')||'';location.href='../scoreboard.html'+(n?`?prefill=${encodeURIComponent(n)}&score=${s}`:'');}
 }

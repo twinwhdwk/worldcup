@@ -198,7 +198,7 @@
 const FIREBASE_URL = (()=>{
   const p = new URLSearchParams(location.search).get('db');
   if(p){try{const u=atob(p);localStorage.setItem('wc_fb_url',u);return u;}catch{}}
-  return localStorage.getItem('wc_fb_url')||'';
+  const u=localStorage.getItem('wc_fb_url')||'https://worldcup-minigame-default-rtdb.firebaseio.com';localStorage.setItem('wc_fb_url',u);return u;
 })();
 
 const FB = FIREBASE_URL + '/wc_live';

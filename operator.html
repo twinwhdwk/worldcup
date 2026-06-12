@@ -396,7 +396,7 @@
 <script>
 // ── Firebase URL (from localStorage — no code editing needed!) ────
 const FIREBASE_URL = (()=>{
-  return localStorage.getItem('wc_fb_url') || '';
+  const u=localStorage.getItem('wc_fb_url')||'https://worldcup-minigame-default-rtdb.firebaseio.com';localStorage.setItem('wc_fb_url',u);return u;
 })();
 const FB = FIREBASE_URL + '/wc_live';
 const USE_FB = FIREBASE_URL.startsWith('https://');

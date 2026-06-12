@@ -226,7 +226,7 @@
 const FIREBASE_URL = (()=>{
   const p = new URLSearchParams(location.search).get('db');
   if(p){try{const u=atob(p);localStorage.setItem('wc_fb_url',u);return u;}catch{}}
-  return localStorage.getItem('wc_fb_url')||'';
+  const u=localStorage.getItem('wc_fb_url')||'https://worldcup-minigame-default-rtdb.firebaseio.com';localStorage.setItem('wc_fb_url',u);return u;
 })();
 const FB = FIREBASE_URL + '/wc_live';
 const USE_FB = FIREBASE_URL.startsWith('https://');
@@ -541,7 +541,7 @@ const FOOTBALL_FACTS=[
   '호날두는 2018 러시아 월드컵 스페인전에서 혼자 3골을 넣어 3-3 무승부를 이끌었습니다.',
   '1930년 첫 월드컵 개최국이자 우승국은 우루과이였습니다.',
   '메시는 2022 카타르 월드컵까지 5번의 대회, 26경기 출전으로 역대 최다 출전 기록을 세웠습니다.',
-  '라민 야말은 2006년생으로 유로 2024에서 스페인 우승을 이끈 최연소 스타입니다.',
+  '라민 야말은 2007년생으로 유로 2024에서 스페인 우승을 이끈 역대 최연소 스타입니다.',
   '2026 월드컵은 미국, 캐나다, 멕시코 3개국이 공동 개최하는 역대 최초의 3국 공동 개최입니다.',
   '2026 월드컵부터 참가팀이 32팀에서 48팀으로 확대됩니다.',
   '주드 벨링엄은 레알 마드리드에서 UCL 결승골을 넣으며 세계 최고의 선수로 자리매김했습니다.',
