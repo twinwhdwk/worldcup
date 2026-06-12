@@ -590,6 +590,8 @@ async function startSession(){
   sessionQuestions=qs;
   currentQIdx=-1;
   sessionActive=true;
+  revealInProgress=false;
+  allAnsweredPending=false;
 
   await fbPut('/session',{state:'lobby',game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
   await fbDelete('/answers');
@@ -700,7 +702,7 @@ function startTvTimer(startAt,limit){
     if(rem<6&&rem>0&&!beepedSeconds.has(remSec)){beepedSeconds.add(remSec);sndUrgent();}
     if(rem<=0){
       clearInterval(tvTimerInt);clearInterval(cntdownInt);cntEl.textContent='';
-      if(sessionActive&&document.getElementById('btn-reveal').style.display!=='none'){
+      if(sessionActive&&!revealInProgress&&document.getElementById('btn-reveal').style.display!=='none'){
         setTimeout(revealAnswer,700);
       }
     }
