@@ -186,6 +186,11 @@
     @keyframes optFlyIn{from{transform:translateX(-20px) scale(.95);opacity:0}to{transform:none;opacity:1}}
     @media(max-width:900px){.main{flex-direction:column-reverse;}.ctrl-panel{width:100%;border-left:none;border-top:1px solid rgba(255,255,255,.05);}.tv-panel{padding:16px;}}
   </style>
+  <style>
+    img.emoji{height:1em;width:1em;margin:0 .05em 0 .05em;vertical-align:-0.1em;}
+    .tv-q-emoji img.emoji{height:80px;width:80px;vertical-align:middle;}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -396,6 +401,7 @@ const FIREBASE_URL = (()=>{
 const FB = FIREBASE_URL + '/wc_live';
 const USE_FB = FIREBASE_URL.startsWith('https://');
 const BASE_URL = 'https://twinwhdwk.github.io/worldcup_minigame';
+function twparse(el){if(typeof twemoji!=='undefined'&&el)twemoji.parse(el);}
 
 function saveFbUrl(){
   const url = document.getElementById('fb-url-in').value.trim().replace(/\/$/, '');
@@ -759,10 +765,11 @@ async function nextQuestion(){
   tvShow('tv-question');
   document.getElementById('tv-q-game').textContent=selectedGame;
   document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
-  document.getElementById('tv-q-emoji').textContent=q.emoji||'⚽';
+  const _emojiEl=document.getElementById('tv-q-emoji');
+  _emojiEl.textContent=q.emoji||'⚽';twparse(_emojiEl);
   document.getElementById('tv-q-text').textContent=q.text;
   q.options.forEach((o,i)=>{
-    document.getElementById('tv-ot'+i).textContent=o;
+    const _ot=document.getElementById('tv-ot'+i);_ot.textContent=o;twparse(_ot);
     const opt=document.getElementById('tv-o'+i);
     opt.className='tv-opt '+['a','b','c','d'][i];
     opt.style.animation=`optFlyIn .4s ${i*.07+.2}s cubic-bezier(.34,1.56,.64,1) both`;
@@ -1117,11 +1124,11 @@ if(USE_FB)startListening();
       const q=fbSess.question||sessionQuestions[currentQIdx];
       if(q){
         tvShow('tv-question');
-        document.getElementById('tv-q-emoji').textContent=q.emoji||'⚽';
+        const _ei=document.getElementById('tv-q-emoji');_ei.textContent=q.emoji||'⚽';twparse(_ei);
         document.getElementById('tv-q-text').textContent=q.text;
         document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
         document.getElementById('tv-q-game').textContent=fbSess.game||selectedGame;
-        q.options.forEach((o,i)=>{document.getElementById('tv-ot'+i).textContent=o;});
+        q.options.forEach((o,i)=>{const _ot=document.getElementById('tv-ot'+i);_ot.textContent=o;twparse(_ot);});
         if(q.startAt){startTvTimer(q.startAt,q.timeLimit||20);}
       }
     } else if(fbSess.state==='reveal'){
