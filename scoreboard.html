@@ -42,26 +42,36 @@
     .rank-section{padding:0 28px 40px;}
     .rank-title{font-size:11px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:14px;}
     .rank-list{display:flex;flex-direction:column;gap:8px;}
-    .rank-item{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:16px 18px;transition:border-color .4s,background .4s;}
+    .rank-item{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:16px 18px;transition:border-color .4s,background .4s,transform .4s,box-shadow .4s;}
     .rank-item.prize-winner{border-color:rgba(255,215,0,.22);background:linear-gradient(135deg,rgba(255,215,0,.04),var(--card));}
-    .rank-item.r1{border-color:rgba(255,215,0,.35);background:rgba(255,215,0,.04);}
-    .rank-item.r2{border-color:rgba(192,192,192,.25);}
-    .rank-item.r3{border-color:rgba(205,127,50,.25);}
+    .rank-item.r1{border-color:rgba(255,215,0,.5);background:linear-gradient(135deg,rgba(255,215,0,.10),rgba(255,215,0,.03));box-shadow:0 0 32px rgba(255,215,0,.12);padding:22px 22px;}
+    .rank-item.r2{border-color:rgba(192,192,192,.4);background:linear-gradient(135deg,rgba(192,192,192,.07),rgba(192,192,192,.01));padding:19px 20px;}
+    .rank-item.r3{border-color:rgba(205,127,50,.4);background:linear-gradient(135deg,rgba(205,127,50,.07),rgba(205,127,50,.01));padding:18px 19px;}
     .rank-item.new-entry{animation:slideIn .45s cubic-bezier(.34,1.56,.64,1);}
     .rank-item.score-updated{animation:scoreFlash .6s ease;}
     @keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
-    @keyframes scoreFlash{0%,100%{background:var(--card)}40%{background:rgba(255,215,0,.1)}}
-    .rank-num{font-family:'Black Han Sans',sans-serif;font-size:22px;width:34px;text-align:center;flex-shrink:0;}
-    .r1 .rank-num{color:var(--gold);}
-    .r2 .rank-num{color:var(--silver);}
-    .r3 .rank-num{color:var(--bronze);}
+    @keyframes scoreFlash{0%,100%{background:var(--card)}40%{background:rgba(255,215,0,.12)}}
+    .rank-num{font-family:'Black Han Sans',sans-serif;font-size:22px;width:36px;text-align:center;flex-shrink:0;}
+    .r1 .rank-num{color:var(--gold);font-size:30px;}
+    .r2 .rank-num{color:var(--silver);font-size:26px;}
+    .r3 .rank-num{color:var(--bronze);font-size:24px;}
     .rank-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;color:#000;}
+    .r1 .rank-avatar{width:54px;height:54px;font-size:18px;box-shadow:0 0 16px rgba(255,215,0,.35);}
+    .r2 .rank-avatar{width:50px;height:50px;font-size:17px;}
+    .r3 .rank-avatar{width:46px;height:46px;}
     .rank-info{flex:1;min-width:0;}
     .rank-name{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+    .r1 .rank-name{font-size:22px;}
+    .r2 .rank-name{font-size:19px;}
+    .r3 .rank-name{font-size:17px;}
     .rank-sub{font-size:11px;color:var(--muted2);margin-top:3px;}
     .rank-bar-wrap{width:100%;height:4px;background:rgba(255,255,255,.05);border-radius:100px;margin-top:7px;}
+    .r1 .rank-bar-wrap{height:6px;}
     .rank-bar{height:100%;border-radius:100px;transition:width .8s cubic-bezier(.34,1.56,.64,1);}
     .rank-score{font-family:'Black Han Sans',sans-serif;font-size:26px;color:var(--gold);flex-shrink:0;text-align:right;}
+    .r1 .rank-score{font-size:38px;}
+    .r2 .rank-score{font-size:32px;}
+    .r3 .rank-score{font-size:29px;}
     .rank-score small{font-size:12px;color:var(--muted2);font-family:'Noto Sans KR',sans-serif;font-weight:400;}
     .prize-tag{font-size:10px;padding:2px 8px;border-radius:100px;font-weight:700;background:rgba(255,215,0,.15);color:var(--gold);}
     .rank-delta{font-size:11px;font-weight:700;padding:2px 6px;border-radius:100px;}
@@ -93,6 +103,23 @@
     .go-crown{font-size:40px;}
     .go-winner-name{font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--gold);}
     .go-winner-score{font-size:14px;color:var(--muted2);margin-top:2px;}
+    /* ── TV MODE ── */
+    body.tv-mode .stats-row{display:none;}
+    body.tv-mode .prize-section{display:none;}
+    body.tv-mode .rank-section{padding:0 20px 20px;}
+    body.tv-mode .rank-item{padding:12px 16px;}
+    body.tv-mode .r1{padding:20px 18px!important;}
+    body.tv-mode .r2{padding:16px 18px!important;}
+    body.tv-mode .r3{padding:14px 18px!important;}
+    body.tv-mode .rank-name{font-size:20px!important;}
+    body.tv-mode .r1 .rank-name{font-size:28px!important;}
+    body.tv-mode .rank-score{font-size:32px!important;}
+    body.tv-mode .r1 .rank-score{font-size:46px!important;}
+    body.tv-mode .r1 .rank-avatar{width:64px!important;height:64px!important;font-size:22px!important;}
+    body.tv-mode header{padding:10px 20px;}
+    .tv-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:7px 16px;color:var(--muted2);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+    .tv-btn:hover,.tv-btn.active{color:#fff;border-color:var(--gold);background:rgba(255,215,0,.08);}
+
     @media(max-width:640px){
       header{padding:14px 16px;}
       .stats-row{grid-template-columns:1fr 1fr;padding:16px;}
@@ -109,6 +136,7 @@
   <div class="hdr-right">
     <div class="update-time" id="upd-time">—</div>
     <a href="index.html" class="hdr-link">🎮 게임 허브</a>
+    <button class="tv-btn" id="tv-mode-btn" onclick="toggleTvMode()">🖥️ TV 모드</button>
     <span class="hdr-link" onclick="exportCSV()">📥 CSV 내보내기</span>
   </div>
 </header>
@@ -345,6 +373,16 @@ function setStatAnimated(id, value){
     el.textContent = value >= 1000 ? (value/1000).toFixed(1)+'k' : value;
   }
   statPrev[id] = value;
+}
+
+// ── TV Mode toggle ─────────────────────────────────────────────────
+let tvMode = false;
+function toggleTvMode(){
+  tvMode = !tvMode;
+  document.body.classList.toggle('tv-mode', tvMode);
+  const btn = document.getElementById('tv-mode-btn');
+  btn.classList.toggle('active', tvMode);
+  btn.textContent = tvMode ? '🖥️ TV 모드 켜짐' : '🖥️ TV 모드';
 }
 
 // ── Export CSV ─────────────────────────────────────────────────────
