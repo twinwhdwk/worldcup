@@ -268,8 +268,8 @@ function floatScore(text, color='#FFD700'){
 }
 
 // ── Firebase ──────────────────────────────────────────────────────
-async function fbPut(p,d){await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}
-async function fbGet(p){const r=await fetch(FB+p+'.json');return r.json();}
+async function fbPut(p,d){try{await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(e){console.warn('fbPut failed',p,e);}}
+async function fbGet(p){try{const r=await fetch(FB+p+'.json');return r.json();}catch(e){return null;}}
 
 // ── Join ──────────────────────────────────────────────────────────
 let joined=false;
