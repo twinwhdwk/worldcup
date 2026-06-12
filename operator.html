@@ -694,6 +694,7 @@ function startListening(){
   };
   playersES.addEventListener('put',e=>{const d=JSON.parse(e.data);onPlayers(d.data||{});});
   playersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);Object.assign(currentPlayers,d.data||{});onPlayers(currentPlayers);});
+  playersES.onerror=()=>{toast('⚠️ Firebase 연결 불안정 — 재연결 시도 중...');setTimeout(startListening,4000);};
 
   if(answersES){try{answersES.close();}catch{}}
   answersES=new EventSource(FB+'/answers.json');
