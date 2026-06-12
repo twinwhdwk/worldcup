@@ -289,7 +289,7 @@ function join(){
   joined=true;
   const t=document.getElementById('aj-toast');if(t)t.remove();
   getAC(); // unlock audio on user gesture
-  const n=document.getElementById('name-in').value.trim();
+  const n=document.getElementById('name-in').value.trim().slice(0,12);
   if(!n){joined=false;document.getElementById('name-in').focus();return;}
   if(!USE_FB){joined=false;setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
   myName=n;myJoinedAt=Date.now();localStorage.setItem('wc_player_name',n);

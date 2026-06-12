@@ -640,6 +640,7 @@ let beepedSeconds = new Set();
 
 // ── Utils ──────────────────────────────────────────────────────────
 function enc(n){return n.replace(/[.#$[\]]/g,'_');}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'#ef4444':'var(--green)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 function tvShow(id){
   ['tv-lobby','tv-question','tv-reveal'].forEach(x=>{const el=document.getElementById(x);if(el)el.style.display=x===id?'flex':'none';});
@@ -736,7 +737,7 @@ function startListening(){
       if(n>0){
         wrap.style.display='block';
         const names=Object.values(currentPlayers).filter(p=>p&&typeof p==='object'&&p.name).map(p=>p.name);
-        chips.innerHTML=names.map(name=>`<div class="player-chip">${name}</div>`).join('');
+        chips.innerHTML=names.map(name=>`<div class="player-chip">${esc(name)}</div>`).join('');
       } else {wrap.style.display='none';}
     }
   };
@@ -910,7 +911,7 @@ async function revealAnswer(){
     const name=currentAnswers[k]?.name||k;
     const newStreak=(currentScores[k]?.streak)||0;
     const fire=newStreak>=5?'🔥🔥':newStreak>=3?'🔥':'';
-    return `<div class="sc-chip" style="animation-delay:${i*.08}s">+${g}점 ${name}${fire}</div>`;
+    return `<div class="sc-chip" style="animation-delay:${i*.08}s">+${g}점 ${esc(name)}${fire}</div>`;
   }).join('');
 
   [0,1,2,3].forEach(i=>{
@@ -941,7 +942,7 @@ async function revealAnswer(){
     document.getElementById('tv-mini-rows').innerHTML=top5.map((p,i)=>
       `<div class="tv-mini-row ${rowClasses[i]}">
         <div class="tv-mini-rank">${medals[i]}</div>
-        <div class="tv-mini-name">${p.name||'?'}</div>
+        <div class="tv-mini-name">${esc(p.name||'?')}</div>
         <div class="tv-mini-score">${(p.total||0).toLocaleString()}점</div>
       </div>`
     ).join('');
@@ -971,7 +972,7 @@ async function endSession(){
     finalRows.innerHTML=top10.map((p,i)=>`
       <div style="display:flex;align-items:center;gap:12px;background:${i<3?'rgba(255,215,0,.08)':'rgba(255,255,255,.03)'};border:1px solid ${i<3?'rgba(255,215,0,.25)':'rgba(255,255,255,.06)'};border-radius:12px;padding:10px 20px;">
         <span style="font-size:22px;width:36px;text-align:center;">${prizeIcons[i]}</span>
-        <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;flex:1;text-align:left;">${p.name||'?'}</span>
+        <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;flex:1;text-align:left;">${esc(p.name||'?')}</span>
         <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--gold);">${(p.total||0).toLocaleString()}점</span>
         <span style="font-size:14px;">🎁</span>
       </div>`).join('');
@@ -1053,10 +1054,11 @@ function renderLeaderboard(){
     const prize=i<PRIZE_COUNT;
     const streak=p.streak||0;
     const streakBadge=streak>=5?'🔥🔥':streak>=3?'🔥':'';
+    const safeName=esc(p.name||'?');
     return `<div class="lb-item${prize?' prize':''}">
       <div class="lb-rank">${medals[i]}</div>
-      <div class="lb-avatar" style="background:${col}">${(p.name||'?').slice(0,2)}</div>
-      <div class="lb-name">${p.name||'?'}${prize?'&nbsp;🎁':''}${streakBadge?'&nbsp;<span style="font-size:13px">'+streakBadge+'</span>':''}</div>
+      <div class="lb-avatar" style="background:${col}">${esc((p.name||'?').slice(0,2))}</div>
+      <div class="lb-name">${safeName}${prize?'&nbsp;🎁':''}${streakBadge?'&nbsp;<span style="font-size:13px">'+streakBadge+'</span>':''}</div>
       <div class="lb-score">${p.total||0}</div>
     </div>`;
   }).join('');

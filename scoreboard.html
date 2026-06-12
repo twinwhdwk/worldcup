@@ -216,6 +216,7 @@ const USE_FB = FIREBASE_URL.startsWith('https://');
 const AVATAR_COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#a855f7','#ec4899','#14b8a6','#f43f5e'];
 const PRIZE_COUNT = 10;
 const MEDALS = ['🥇','🥈','🥉','4','5','6','7','8','9','10'];
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 if(!USE_FB) document.getElementById('setup-banner').classList.remove('hidden');
 
@@ -288,7 +289,7 @@ function render(){
   pg.innerHTML = sorted.slice(0,PRIZE_COUNT).map((p,i)=>`
     <div class="pe">
       <span class="pe-rank">${prizeIcons[i]}</span>
-      <span class="pe-name">${p.name}</span>
+      <span class="pe-name">${esc(p.name)}</span>
       <span class="pe-score">${(p.total||0).toLocaleString()}</span>
     </div>`).join('') || '<div style="color:var(--muted2);font-size:13px;grid-column:1/-1;">아직 기록 없음</div>';
 
@@ -342,11 +343,11 @@ function render(){
       scoreChanged && !isFirstRender ? 'score-updated' : ''
     ].filter(Boolean).join(' ');
 
-    return `<div class="${entryClass}" data-name="${p.name}">
+    return `<div class="${entryClass}" data-name="${esc(p.name)}">
       <div class="rank-num">${MEDALS[i]||r}</div>
-      <div class="rank-avatar" style="background:${col}">${p.name.slice(0,2)}</div>
+      <div class="rank-avatar" style="background:${col}">${esc(p.name.slice(0,2))}</div>
       <div class="rank-info">
-        <div class="rank-name">${p.name} ${deltaHtml} ${prizeTag} ${streakFire}</div>
+        <div class="rank-name">${esc(p.name)} ${deltaHtml} ${prizeTag} ${streakFire}</div>
         <div class="rank-sub">정답 ${p.correct||0}개 · 연속 ${p.streak||0}회</div>
         <div class="rank-bar-wrap"><div class="rank-bar" style="width:${bw}%;background:${col}"></div></div>
       </div>
@@ -502,7 +503,7 @@ function onSession(s){
     document.getElementById('go-winners-grid').innerHTML=winners.map((p,i)=>`
       <div class="go-winner-row" style="animation-delay:${i*80}ms">
         <span class="gwr-rank">${prizeIcons[i]}</span>
-        <span class="gwr-name">${p.name}</span>
+        <span class="gwr-name">${esc(p.name)}</span>
         <span class="gwr-score">${(p.total||0).toLocaleString()}</span>
         <span class="gwr-prize">🎁</span>
       </div>`).join('');
