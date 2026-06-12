@@ -82,6 +82,9 @@
     .wd:nth-child(2){animation-delay:.15s;}
     .wd:nth-child(3){animation-delay:.3s;}
     @keyframes wdot{0%,80%,100%{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:1}}
+    .wait-fact{margin-top:22px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px 18px;max-width:310px;text-align:center;font-size:13px;color:var(--muted2);line-height:1.5;animation:factIn .5s ease;min-height:56px;}
+    .wait-fact-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#4b5563;margin-bottom:6px;}
+    @keyframes factIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
     /* ── REVEAL ── */
     #s-reveal{background:var(--dark);}
@@ -184,6 +187,7 @@
   <div class="wait-sub" id="wait-sub">정답 발표를 기다리세요...</div>
   <div class="ans-preview" id="wait-prev">—</div>
   <div class="wait-dots"><div class="wd"></div><div class="wd"></div><div class="wd"></div></div>
+  <div class="wait-fact" id="wait-fact"><div class="wait-fact-label">⚽ 축구 상식</div><div id="wait-fact-text">로딩 중...</div></div>
 </div>
 
 <!-- DONE -->
@@ -360,9 +364,9 @@ function onSession(s){
   const qId=(s.questionIdx||0)+'_'+(s.game||'');
   if(s.state==='question'){
     if(qId!==lastQId){lastQId=qId;myAnswerIdx=-1;renderQ(s);}
-    else if(myAnswerIdx>=0){show('s-wait');}
+    else if(myAnswerIdx>=0){show('s-wait');startFactRotation();}
   } else if(s.state==='reveal'){
-    showReveal(s);
+    stopFactRotation();showReveal(s);
   }
 }
 
@@ -433,7 +437,7 @@ async function answer(idx){
   document.getElementById('wait-prev').textContent=LETTERS[idx]+' — '+(txtEl?txtEl.textContent:'?');
   await fbPut('/answers/'+enc(myName),{idx,at:Date.now(),name:myName});
   if(navigator.vibrate)navigator.vibrate(40);
-  show('s-wait');
+  show('s-wait');startFactRotation();
   snd(440,.08);
 }
 
@@ -515,6 +519,41 @@ function prizeCelebration(){
   document.body.appendChild(b);
   setTimeout(()=>b.remove(),2200);
 }
+
+// ── Wait Screen Trivia ────────────────────────────────────────────
+const FOOTBALL_FACTS=[
+  '펠레는 1958년 17세 239일에 월드컵 골을 넣어 역대 최연소 기록을 보유하고 있습니다.',
+  '1954년 월드컵은 경기당 평균 5.38골로 역대 가장 많은 골이 터진 대회입니다.',
+  '네덜란드는 1974, 1978, 2010년 세 차례 결승에 올랐지만 모두 준우승에 그쳤습니다.',
+  '마라도나의 "신의 손" 골은 1986년 멕시코 월드컵 잉글랜드와의 8강전에서 나왔습니다.',
+  '브라질은 1950년 홈 개최 대회에서 우루과이에 패한 충격을 "마라카나조"라 부릅니다.',
+  '클로제는 4번의 월드컵에서 통산 16골을 기록, 역대 최다 득점 기록을 보유하고 있습니다.',
+  '크로아티아의 모드리치는 2018년 준우승팀 소속임에도 황금공(MVP)을 수상했습니다.',
+  '2014 브라질 월드컵에서 개최국 브라질은 독일에 1-7로 패했습니다 (미네이랑의 비극).',
+  '호날두는 2018 러시아 월드컵 스페인전에서 혼자 3골을 넣어 3-3 무승부를 이끌었습니다.',
+  '1930년 첫 월드컵 개최국이자 우승국은 우루과이였습니다.',
+  '메시는 2022 카타르 월드컵까지 5번의 대회, 26경기 출전으로 역대 최다 출전 기록을 세웠습니다.',
+  '라민 야말은 2006년생으로 유로 2024에서 스페인 우승을 이끈 최연소 스타입니다.',
+  '2026 월드컵은 미국, 캐나다, 멕시코 3개국이 공동 개최하는 역대 최초의 3국 공동 개최입니다.',
+  '2026 월드컵부터 참가팀이 32팀에서 48팀으로 확대됩니다.',
+  '주드 벨링엄은 레알 마드리드에서 UCL 결승골을 넣으며 세계 최고의 선수로 자리매김했습니다.',
+  '한국은 2002년 홈 월드컵에서 4강까지 진출, 아시아 최고 성적을 기록했습니다.',
+  '손흥민은 프리미어리그에서 100골 이상을 기록한 아시아 최초의 선수입니다.',
+];
+let _factIdx=0,_factTimer=null;
+function startFactRotation(){
+  const el=document.getElementById('wait-fact-text');
+  if(!el)return;
+  _factIdx=~~(Math.random()*FOOTBALL_FACTS.length);
+  el.textContent=FOOTBALL_FACTS[_factIdx];
+  clearInterval(_factTimer);
+  _factTimer=setInterval(()=>{
+    _factIdx=(_factIdx+1)%FOOTBALL_FACTS.length;
+    const fEl=document.getElementById('wait-fact-text');
+    if(fEl){fEl.style.opacity='0';setTimeout(()=>{fEl.textContent=FOOTBALL_FACTS[_factIdx];fEl.style.opacity='1';fEl.style.transition='opacity .4s';},300);}
+  },5000);
+}
+function stopFactRotation(){clearInterval(_factTimer);_factTimer=null;}
 
 // ── Confetti ──────────────────────────────────────────────────────
 function confetti(){
