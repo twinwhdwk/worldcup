@@ -174,6 +174,19 @@
   <div class="wait-dots"><div class="wd"></div><div class="wd"></div><div class="wd"></div></div>
 </div>
 
+<!-- DONE -->
+<div class="screen hidden" id="s-done" style="background:radial-gradient(ellipse at 50% 20%,rgba(255,215,0,.12),transparent 65%),var(--dark);">
+  <div style="font-size:90px;animation:popIn .6s cubic-bezier(.34,1.56,.64,1);">🏆</div>
+  <div style="font-family:'Black Han Sans',sans-serif;font-size:32px;margin:10px 0 6px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">게임 종료!</div>
+  <div style="font-size:14px;color:var(--muted2);margin-bottom:24px;">고생하셨습니다 🎉</div>
+  <div style="background:var(--card);border:2px solid rgba(255,215,0,.2);border-radius:20px;padding:20px 40px;text-align:center;margin-bottom:20px;">
+    <div style="font-size:11px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">최종 점수</div>
+    <div style="font-family:'Black Han Sans',sans-serif;font-size:56px;color:var(--gold);" id="done-score">0</div>
+    <div style="font-size:13px;color:var(--muted2);margin-top:4px;" id="done-rank"></div>
+  </div>
+  <a id="done-sb-link" href="scoreboard.html" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;text-decoration:none;border-radius:14px;padding:14px 28px;font-family:'Black Han Sans',sans-serif;font-size:17px;letter-spacing:1px;">📊 최종 랭킹 보기</a>
+</div>
+
 <!-- REVEAL -->
 <div class="screen hidden" id="s-reveal">
   <div class="rv-icon" id="rv-icon">✅</div>
@@ -281,9 +294,25 @@ function listen(){
 
 // ── Session handler ───────────────────────────────────────────────
 function onSession(s){
-  if(!s||s.state==='lobby'||s.state==='done'){
+  if(!s||s.state==='lobby'){
     show('s-lobby');
     document.getElementById('lb-score').textContent=myScore;
+    return;
+  }
+  if(s.state==='done'){
+    // Show final game-over screen
+    document.getElementById('done-score').textContent=myScore.toLocaleString();
+    const rankEl=document.getElementById('done-rank');
+    if(s.allRanks&&s.allRanks[enc(myName)]){
+      const r=s.allRanks[enc(myName)];
+      rankEl.textContent=r+'위'+(r<=10?' 🎁 상품 대상!':'');
+      rankEl.style.color=r<=10?'var(--gold)':'';
+    } else {rankEl.textContent='';}
+    // Set scoreboard link with db param
+    const sbLink=document.getElementById('done-sb-link');
+    if(USE_FB)sbLink.href='scoreboard.html?db='+btoa(FIREBASE_URL);
+    show('s-done');
+    setTimeout(confetti,300);
     return;
   }
   const qId=(s.questionIdx||0)+'_'+(s.game||'');
