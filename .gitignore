@@ -1,0 +1,8 @@
+improve_*.py
+improve_*.sh
+improve_*.txt
+improve_*.log
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
