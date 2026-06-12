@@ -70,7 +70,9 @@
     .nav-item.active{color:var(--gold);}
     .nav-icon{font-size:20px;}
     @media(max-width:480px){.options{gap:8px;}.opt-btn{padding:13px 6px;font-size:14px;}}
+    .big-flag img.emoji{height:1em;width:1em;vertical-align:middle;}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="splash" id="splash">
@@ -234,7 +236,9 @@ function setQuestion(){
   if(timeLeft<=0)return;
   answered=false;qStartTime=Date.now();qNum++;
   current=getFlag();totalQ++;
-  document.getElementById('big-flag').textContent=current.flag;
+  const flagEl=document.getElementById('big-flag');
+  flagEl.textContent=current.flag;
+  if(typeof twemoji!=='undefined')twemoji.parse(flagEl);
   document.getElementById('q-num').textContent=`문제 ${qNum}`;
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
@@ -277,6 +281,7 @@ function answer(btn,sel){
     document.querySelectorAll('.opt-btn').forEach(b=>{if(b.textContent.trim()===current.name)b.classList.add('correct');});
     fb.className='feedback wrong';
     fb.textContent=`❌ 정답: ${current.flag} ${current.name}`;
+    if(typeof twemoji!=='undefined')twemoji.parse(fb);
     document.getElementById('combo-bar').textContent='';
   }
   document.getElementById('score-val').textContent=score;

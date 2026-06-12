@@ -119,6 +119,7 @@
     .nav-item:hover { color: #fff; }
     .nav-icon { font-size: 20px; }
 
+    .opt-btn .flag img.emoji{height:1em;width:1em;vertical-align:middle;}
     @media (max-width: 480px) {
       body { padding: 12px 12px 80px; }
       .options { gap: 8px; }
@@ -126,6 +127,7 @@
       .q-card { padding: 24px 16px; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -394,6 +396,7 @@ function setQuestion(){
       <span class="flag">${flag}</span>${name}
     </button>`;
   }).join('');
+  if(typeof twemoji!=='undefined')twemoji.parse(optEl);
 }
 
 function answer(btn, selected){
@@ -433,6 +436,7 @@ function answer(btn, selected){
     });
     fb.className='feedback wrong';
     fb.textContent=`❌ 오답! 정답: ${currentPlayer.flag} ${currentPlayer.country.replace(/^\S+\s*/,'')}`;
+    if(typeof twemoji!=='undefined')twemoji.parse(fb);
     document.getElementById('combo-banner').textContent='';
   }
   document.getElementById('score-val').textContent=score;

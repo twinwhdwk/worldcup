@@ -85,7 +85,9 @@
     .nav-icon{font-size:20px;}
 
     @media(max-width:480px){.options{grid-template-columns:repeat(3,1fr);}.opt-btn{padding:16px 6px;font-size:28px;}}
+    .country-flag img.emoji{height:1em;width:1em;vertical-align:middle;}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -235,7 +237,9 @@ function setQuestion(){
   currentC=getCountry();
   totalQ++;
 
-  document.getElementById('c-flag').textContent=currentC.flag;
+  const cfEl=document.getElementById('c-flag');
+  cfEl.textContent=currentC.flag;
+  if(typeof twemoji!=='undefined')twemoji.parse(cfEl);
   document.getElementById('c-name').textContent=currentC.name;
   document.getElementById('c-hint').textContent=currentC.hint;
   document.getElementById('trophy-tally').innerHTML=makeTally(currentC.wins);
