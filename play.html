@@ -653,6 +653,7 @@ const FOOTBALL_FACTS=[
 ];
 let _factIdx=0,_factTimer=null;
 function startFactRotation(){
+  if(_factTimer)return; // already running
   const el=document.getElementById('wait-fact-text');
   if(!el)return;
   _factIdx=~~(Math.random()*FOOTBALL_FACTS.length);
