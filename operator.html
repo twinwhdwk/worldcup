@@ -835,7 +835,7 @@ async function nextQuestion(){
   await fbPatch('/session',{
     state:'question',
     questionIdx:currentQIdx,
-    question:{...q,timeLimit:limit,startAt,correctIdx:undefined},
+    question:{...q,timeLimit:limit,startAt,correctIdx:null},
     scoreGains:{}
   });
 

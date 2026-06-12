@@ -243,8 +243,9 @@ function countUp(el, from, to, duration=700){
 }
 
 // ── Firebase SSE ───────────────────────────────────────────────────
-let _scoresES = null;
+let _scoresES = null, _scoresTimer = null;
 function startStream(){
+  clearTimeout(_scoresTimer);_scoresTimer=null;
   if(_scoresES){try{_scoresES.close();}catch{}}
   _scoresES = new EventSource(FB+'/scores.json');
   _scoresES.addEventListener('put', e=>{
@@ -260,7 +261,7 @@ function startStream(){
     else{const k=d.path.replace(/^\//,'').split('/')[0];if(k&&d.data)allScores[k]=d.data;}
     render();
   });
-  _scoresES.onerror = ()=>{setTimeout(startStream, 3000);};
+  _scoresES.onerror = ()=>{if(_scoresTimer)return;_scoresTimer=setTimeout(startStream, 3000);};
 }
 
 // ── Render ─────────────────────────────────────────────────────────
@@ -472,9 +473,10 @@ function confetti(count=50){
 // ── Session state listener (shows game-over banner) ────────────────
 let gameOverShown = false;
 let _sessState = null;
-let _sessionES = null;
+let _sessionES = null, _sessionTimer = null;
 function listenSession(){
   if(!USE_FB)return;
+  clearTimeout(_sessionTimer);_sessionTimer=null;
   if(_sessionES){try{_sessionES.close();}catch{}}
   _sessionES=new EventSource(FB+'/session.json');
   _sessionES.addEventListener('put',e=>{_sessState=JSON.parse(e.data).data;onSession(_sessState);});
@@ -483,7 +485,7 @@ function listenSession(){
     _sessState=Object.assign(_sessState||{},d.data||{});
     onSession(_sessState);
   });
-  _sessionES.onerror=()=>{setTimeout(listenSession, 3000);};
+  _sessionES.onerror=()=>{if(_sessionTimer)return;_sessionTimer=setTimeout(listenSession, 3000);};
 }
 function onSession(s){
   if(!s)return;
