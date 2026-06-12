@@ -169,7 +169,7 @@
 <div class="screen hidden" id="s-wait">
   <div class="wait-icon">✋</div>
   <div class="wait-title">제출 완료!</div>
-  <div class="wait-sub">정답 발표를 기다리세요...</div>
+  <div class="wait-sub" id="wait-sub">정답 발표를 기다리세요...</div>
   <div class="ans-preview" id="wait-prev">—</div>
   <div class="wait-dots"><div class="wd"></div><div class="wd"></div><div class="wd"></div></div>
 </div>
@@ -285,11 +285,23 @@ function listen(){
     if(d){myScore=d.total||0;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;document.getElementById('q-score').textContent=myScore+'점';}
   });
 
-  // Player count stream (for lobby)
+  // Player + answer count streams (for lobby and wait screen)
   const pES=new EventSource(FB+'/players.json');
-  pES.addEventListener('put',e=>{const d=JSON.parse(e.data).data||{};updatePlayerCount(d);});
-  pES.addEventListener('patch',e=>{});// no need to track full
-  function updatePlayerCount(players){const n=Object.keys(players).length;document.getElementById('lb-count').textContent=n>0?n+'명이 대기중':'waiting...';}
+  let totalPlayers=0;
+  pES.addEventListener('put',e=>{const d=JSON.parse(e.data).data||{};totalPlayers=Object.keys(d).length;updatePlayerCount();});
+  function updatePlayerCount(){document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명이 대기중':'';}
+
+  const aES=new EventSource(FB+'/answers.json');
+  let answerCount=0;
+  function updateWaitSub(){
+    const el=document.getElementById('wait-sub');
+    if(el&&totalPlayers>0&&answerCount>0){
+      const remaining=totalPlayers-answerCount;
+      el.textContent=remaining>0?`${answerCount}/${totalPlayers}명 응답 · ${remaining}명 대기중`:'✅ 전원 응답! 곧 공개됩니다...';
+    }
+  }
+  aES.addEventListener('put',e=>{const d=JSON.parse(e.data).data||{};answerCount=Object.keys(d).length;updateWaitSub();});
+  aES.addEventListener('patch',e=>{const d=JSON.parse(e.data).data||{};answerCount=Math.max(answerCount,Object.keys({...d}).length);updateWaitSub();});
 }
 
 // ── Session handler ───────────────────────────────────────────────
@@ -370,6 +382,7 @@ async function answer(idx){
   const txtEl=document.getElementById('ot'+idx);
   document.getElementById('wait-prev').textContent=LETTERS[idx]+' — '+(txtEl?txtEl.textContent:'?');
   await fbPut('/answers/'+enc(myName),{idx,at:Date.now(),name:myName});
+  if(navigator.vibrate)navigator.vibrate(40);
   show('s-wait');
   snd(440,.08);
 }
@@ -406,10 +419,12 @@ function showReveal(s){
 
   if(correct){
     sndCorrect();
+    if(navigator.vibrate)navigator.vibrate([50,30,80]);
     if(gain>0)floatScore('+'+gain+'점','#FFD700');
     setTimeout(confetti,200);
   } else {
     sndWrong();
+    if(navigator.vibrate)navigator.vibrate(200);
   }
 }
 
