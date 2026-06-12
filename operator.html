@@ -668,6 +668,7 @@ async function startSession(){
   sessionActive=true;
   revealInProgress=false;
   allAnsweredPending=false;
+  localStorage.setItem('wc_op_session',JSON.stringify({qs,game:selectedGame,qIdx:-1}));
 
   await fbPut('/session',{state:'lobby',game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
   await fbDelete('/answers');
@@ -729,6 +730,7 @@ async function nextQuestion(){
   revealInProgress=false;
   currentQIdx++;
   if(currentQIdx>=sessionQuestions.length){await endSession();return;}
+  try{const s=JSON.parse(localStorage.getItem('wc_op_session')||'{}');s.qIdx=currentQIdx;localStorage.setItem('wc_op_session',JSON.stringify(s));}catch{}
 
   const q=sessionQuestions[currentQIdx];
   const limit=parseInt(document.getElementById('qlimit').value)||20;
@@ -918,6 +920,7 @@ async function revealAnswer(){
 async function endSession(){
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
   sessionActive=false;
+  localStorage.removeItem('wc_op_session');
   await fbPatch('/session',{state:'done',question:null});
   document.getElementById('active-ctrl').style.display='none';
   document.getElementById('game-setup').style.display='block';
@@ -1058,6 +1061,51 @@ function confetti(count=40){
 (function(){const pool=QB[selectedGame]?QB[selectedGame]().length:0;const info=document.getElementById('qbank-info');if(info)info.textContent=`문제 풀: ${pool}개 (최대 ${Math.min(pool,20)}문제 선택 가능)`;})();
 tvShow('tv-lobby');
 if(USE_FB)startListening();
+
+// ── Session recovery after page reload ────────────────────────────
+(async function(){
+  if(!USE_FB)return;
+  const saved=localStorage.getItem('wc_op_session');
+  if(!saved)return;
+  try{
+    const {qs,game,qIdx}=JSON.parse(saved);
+    if(!qs||!qs.length)return;
+    const fbSess=await fetch(FB+'/session.json').then(r=>r.json()).catch(()=>null);
+    if(!fbSess||fbSess.state==='done'||fbSess.state==='lobby'){localStorage.removeItem('wc_op_session');return;}
+    // Active session found — restore state
+    sessionQuestions=qs;
+    currentQIdx=qIdx>=0?qIdx:0;
+    selectedGame=game||selectedGame;
+    sessionActive=true;
+    document.getElementById('game-setup').style.display='none';
+    document.getElementById('active-ctrl').style.display='block';
+    document.getElementById('ans-dist-section').style.display='block';
+    document.getElementById('st-q').textContent=(currentQIdx+1)+'/'+sessionQuestions.length;
+    document.getElementById('st-state').textContent=fbSess.state==='reveal'?'정답 공개':'문제 진행중';
+    if(fbSess.state==='question'){
+      document.getElementById('btn-reveal').style.display='block';
+      document.getElementById('btn-nextq').style.display='none';
+      document.getElementById('btn-cont').style.display='none';
+      document.getElementById('btn-skip').style.display='block';
+      const q=fbSess.question||sessionQuestions[currentQIdx];
+      if(q){
+        tvShow('tv-question');
+        document.getElementById('tv-q-emoji').textContent=q.emoji||'⚽';
+        document.getElementById('tv-q-text').textContent=q.text;
+        document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
+        document.getElementById('tv-q-game').textContent=fbSess.game||selectedGame;
+        q.options.forEach((o,i)=>{document.getElementById('tv-ot'+i).textContent=o;});
+        if(q.startAt){startTvTimer(q.startAt,q.timeLimit||20);}
+      }
+    } else if(fbSess.state==='reveal'){
+      document.getElementById('btn-reveal').style.display='none';
+      document.getElementById('btn-cont').style.display='block';
+      document.getElementById('btn-nextq').style.display='none';
+      document.getElementById('btn-skip').style.display='none';
+    }
+    toast('🔄 세션 복구됨 — 문제 '+(currentQIdx+1)+'/'+sessionQuestions.length);
+  }catch(e){localStorage.removeItem('wc_op_session');}
+})();
 
 // ── Keyboard shortcuts ─────────────────────────────────────────────
 document.addEventListener('keydown',e=>{
