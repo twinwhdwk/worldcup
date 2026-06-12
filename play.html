@@ -301,10 +301,12 @@ function join(){
 }
 
 // ── Listen ────────────────────────────────────────────────────────
+let _sessState=null;
 function listen(){
   if(sessionES){try{sessionES.close();}catch{}}
   sessionES=new EventSource(FB+'/session.json');
-  sessionES.addEventListener('put',e=>{const d=JSON.parse(e.data);onSession(d.data);});
+  sessionES.addEventListener('put',e=>{const d=JSON.parse(e.data);_sessState=d.data;onSession(_sessState);});
+  sessionES.addEventListener('patch',e=>{const d=JSON.parse(e.data);_sessState=Object.assign(_sessState||{},d.data);onSession(_sessState);});
   sessionES.onerror=()=>{setStatus('⚠️ 연결 끊김, 재연결 중...','err');setTimeout(listen,3000);};
   sessionES.onopen=()=>setStatus('✅ 연결됨','ok');
 
