@@ -234,6 +234,11 @@
       <div class="tv-lobby-sub" id="tv-lobby-sub">참가하세요!</div>
       <div class="tv-lobby-count" id="tv-lobby-count"></div>
       <div class="tv-lobby-main">
+        <div class="qr-big" id="qr-wrap" style="display:none;">
+          <img id="qr-img" src="" alt="QR" width="220" height="220" style="background:#fff;padding:6px;">
+          <div class="qr-label" id="qr-label">📱 스캔해서 참가</div>
+          <div class="qr-url" id="qr-url"></div>
+        </div>
         <div id="player-chips-wrap" style="display:none;">
           <div class="player-chips-title">참가자 목록</div>
           <div class="player-chips" id="player-chips"></div>
@@ -453,7 +458,21 @@ if(USE_FB){
   document.getElementById('sb-link').href = BASE_URL + '/scoreboard.html?db=' + btoa(FIREBASE_URL);
 }
 
-function updateQR(){}
+// Show play QR on load (after updateQR is defined, called at end of script init)
+
+function updateQR(url, label){
+  const wrap=document.getElementById('qr-wrap');
+  const img=document.getElementById('qr-img');
+  const urlEl=document.getElementById('qr-url');
+  const lblEl=document.getElementById('qr-label');
+  if(!wrap)return;
+  const target=url||getPlayUrl();
+  if(!target){wrap.style.display='none';return;}
+  img.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(target);
+  if(urlEl)urlEl.textContent=target.length>60?target.slice(0,57)+'...':target;
+  if(lblEl&&label)lblEl.textContent=label;
+  wrap.style.display='flex';
+}
 
 // ── Sound Effects (Web Audio API) ────────────────────────────────
 let AC = null;
@@ -724,10 +743,7 @@ function selectGame(name,el){
 // ── Start session ──────────────────────────────────────────────────
 async function startSession(){
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
-  // Restore play QR (in case previous session swapped it to scoreboard)
-  updateQR();
-  const qrLabel=document.querySelector('.qr-label');
-  if(qrLabel)qrLabel.textContent='📱 스캔해서 참가';
+  updateQR(getPlayUrl(),'📱 스캔해서 참가');
   const n=parseInt(document.getElementById('qcount').value);
   const qs=QB[selectedGame]().slice(0,n).map(shuffleOptions);
   sessionQuestions=qs;
@@ -1057,6 +1073,9 @@ async function endSession(){
     const pcw=document.getElementById('player-chips-wrap');
     if(pcw)pcw.style.display='none';
   }
+  // Swap QR to scoreboard so players can scan to see final ranking
+  const sbUrl=USE_FB?BASE_URL+'/scoreboard.html?db='+btoa(FIREBASE_URL):BASE_URL+'/scoreboard.html';
+  updateQR(sbUrl,'🏆 순위 보기');
   toast('🏁 세션 종료!');
   confetti(60);
 }
@@ -1243,6 +1262,9 @@ if(USE_FB)startListening();
     toast('🔄 세션 복구됨 — 문제 '+(currentQIdx+1)+'/'+sessionQuestions.length);
   }catch(e){localStorage.removeItem('wc_op_session');}
 })();
+
+// ── Initial QR display ────────────────────────────────────────────
+if(USE_FB) updateQR(getPlayUrl(),'📱 스캔해서 참가');
 
 // ── Keyboard shortcuts ─────────────────────────────────────────────
 document.addEventListener('keydown',e=>{
