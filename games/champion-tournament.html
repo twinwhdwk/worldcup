@@ -219,10 +219,12 @@ const BOSS_QUESTIONS = [
 ];
 
 const ALL_COUNTRIES = [
-  {name:"🇺🇾 우루과이",flag:"🇺🇾"},{name:"🇧🇷 브라질",flag:"🇧🇷"},{name:"🇩🇪 서독",flag:"🇩🇪"},{name:"🇩🇪 독일",flag:"🇩🇪"},
-  {name:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},{name:"🇦🇷 아르헨티나",flag:"🇦🇷"},{name:"🇮🇹 이탈리아",flag:"🇮🇹"},{name:"🇫🇷 프랑스",flag:"🇫🇷"},
-  {name:"🇪🇸 스페인",flag:"🇪🇸"},{name:"🇳🇱 네덜란드",flag:"🇳🇱"},{name:"🇵🇹 포르투갈",flag:"🇵🇹"},{name:"🇭🇷 크로아티아",flag:"🇭🇷"},
+  {name:"🇺🇾 우루과이",flag:"🇺🇾",code:"uy"},{name:"🇧🇷 브라질",flag:"🇧🇷",code:"br"},{name:"🇩🇪 서독",flag:"🇩🇪",code:"de"},{name:"🇩🇪 독일",flag:"🇩🇪",code:"de"},
+  {name:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",code:"gb-eng"},{name:"🇦🇷 아르헨티나",flag:"🇦🇷",code:"ar"},{name:"🇮🇹 이탈리아",flag:"🇮🇹",code:"it"},{name:"🇫🇷 프랑스",flag:"🇫🇷",code:"fr"},
+  {name:"🇪🇸 스페인",flag:"🇪🇸",code:"es"},{name:"🇳🇱 네덜란드",flag:"🇳🇱",code:"nl"},{name:"🇵🇹 포르투갈",flag:"🇵🇹",code:"pt"},{name:"🇭🇷 크로아티아",flag:"🇭🇷",code:"hr"},
 ];
+const FLAG_CODE_CT = {'🇺🇾':'uy','🇧🇷':'br','🇩🇪':'de','🏴󠁧󠁢󠁥󠁮󠁧󠁿':'gb-eng','🇦🇷':'ar','🇮🇹':'it','🇫🇷':'fr','🇪🇸':'es','🇳🇱':'nl','🇵🇹':'pt','🇭🇷':'hr'};
+function flagImg(code,h=22){return `<img src="https://flagcdn.com/w40/${code}.png" style="height:${h}px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`;};
 
 const TOTAL=10;
 let score=0,correctCount=0,currentQ=0,questions=[],history=[],hintRevealed=false,bossUsed=false;
@@ -274,8 +276,9 @@ function startQTimer(){
         const q=questions[currentQ];
         document.querySelectorAll('.opt-btn').forEach(b=>{if(b.textContent.includes(q.winner.replace(/^\S+\s*/,'')))b.classList.add('correct');});
         const fb=document.getElementById('feedback');
-        fb.className='feedback-area wrong'; fb.textContent=`⏰ 시간 초과! 정답: ${q.winner}`;
-        if(typeof twemoji!=='undefined')twemoji.parse(fb);
+        fb.className='feedback-area wrong';
+        const _tfc=FLAG_CODE_CT[q.flag];
+        fb.innerHTML=`⏰ 시간 초과! 정답: ${_tfc?flagImg(_tfc):q.flag}${q.winner.replace(/^\S+\s*/,'')}`;
         sfxWrong();
         history.push({year:q.year,winner:q.winner,correct:false,timeout:true});
         currentQ++; updateHUD();
@@ -317,11 +320,11 @@ function setQuestion(){
   const wrongs=shuffle(wrongPool).slice(0,3);
   const opts=shuffle([{name:q.winner,flag:q.flag},...wrongs]);
   const optEl2=document.getElementById('options');
-  optEl2.innerHTML=opts.map(o=>`
-    <button class="opt-btn" onclick="answer(this,'${o.name.replace(/'/g,"\\'")}')">
-      <span class="flag">${o.flag}</span>${o.name.replace(/^\S+\s*/,'')}
-    </button>`).join('');
-  if(typeof twemoji!=='undefined')twemoji.parse(optEl2);
+  optEl2.innerHTML=opts.map(o=>{
+    const fc=o.code||FLAG_CODE_CT[o.flag];
+    const fi=fc?flagImg(fc):`<span class="flag">${o.flag}</span>`;
+    return `<button class="opt-btn" onclick="answer(this,'${o.name.replace(/'/g,"\\'")}'">${fi}${o.name.replace(/^\S+\s*/,'')}</button>`;
+  }).join('');
 }
 
 function revealExtra(){
@@ -350,8 +353,8 @@ function answer(btn,selected){
     document.querySelectorAll('.opt-btn').forEach(b=>{if(b.textContent.includes(q.winner.replace(/^\S+\s*/,'')))b.classList.add('correct');});
     btn.classList.add('wrong');
     fb.className='feedback-area wrong';
-    fb.textContent=`❌ 오답! 정답: ${q.winner}`;
-    if(typeof twemoji!=='undefined')twemoji.parse(fb);
+    const _wfc=FLAG_CODE_CT[q.flag];
+    fb.innerHTML=`❌ 오답! 정답: ${_wfc?flagImg(_wfc):q.flag}${q.winner.replace(/^\S+\s*/,'')}`;
     sfxWrong();
     history.push({year:q.year,winner:q.winner,correct:false});
   }
@@ -377,13 +380,12 @@ function showResult(){
   document.getElementById('result-score').textContent=score.toLocaleString()+'점';
   document.getElementById('result-msg').textContent=gr.m+` (${correctCount}/${TOTAL} 정답)`;
   const hlEl=document.getElementById('history-list');
-  hlEl.innerHTML=history.map(h=>`
-    <div class="rh-item">
-      <span class="rh-year">${h.year}년</span>
-      <span class="rh-win">${h.winner}${h.boss?' 🔥':''}</span>
-      <span>${h.timeout?'⏰':h.correct?'✅':'❌'}</span>
-    </div>`).join('');
-  if(typeof twemoji!=='undefined')twemoji.parse(hlEl);
+  hlEl.innerHTML=history.map(h=>{
+    const wf=(h.winner.match(/^(\S+)/)||[])[1]||'';
+    const hfc=FLAG_CODE_CT[wf];
+    const hfi=hfc?flagImg(hfc):wf;
+    return `<div class="rh-item"><span class="rh-year">${h.year}년</span><span class="rh-win">${hfi}${h.winner.replace(/^\S+\s*/,'')}${h.boss?' 🔥':''}</span><span>${h.timeout?'⏰':h.correct?'✅':'❌'}</span></div>`;
+  }).join('');
 }
 
 setTimeout(()=>{const s=document.getElementById('splash');s.classList.add('out');setTimeout(()=>s.remove(),400);},900);

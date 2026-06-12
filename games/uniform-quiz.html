@@ -340,6 +340,11 @@ const TEAMS = [
    clues:["빨간 단색","아틀라스 사자","아프리카 최강"],decoy:["🇩🇰 덴마크","🇹🇳 튀니지","🇪🇬 이집트"]},
 ];
 
+const UQ_FC = {
+  '🇧🇷':'br','🇩🇪':'de','🇦🇷':'ar','🇫🇷':'fr','🇮🇹':'it','🇪🇸':'es','🇳🇱':'nl','🇵🇹':'pt',
+  '🇰🇷':'kr','🇯🇵':'jp','🇧🇪':'be','🇲🇽':'mx','🇳🇬':'ng','🇸🇳':'sn','🇩🇰':'dk','🇺🇾':'uy',
+  '🇭🇷':'hr','🇬🇭':'gh','🇮🇷':'ir','🇸🇦':'sa','🇨🇲':'cm','🇸🇪':'se','🇦🇺':'au','🇲🇦':'ma',
+};
 let score=0,timeLeft=30,qNum=0,totalQ=0,correctQ=0,streak=0,bestStreak=0,wrongStreak=0;
 let timerInterval,usedIdx=[],currentTeam=null,answered=false,showAway=false;
 
@@ -390,9 +395,10 @@ function setQuestion(){
   uOptEl.innerHTML=opts.map(o=>{
     const f=o.match(/^(\S+)/)?.[1]||'';
     const n=o.replace(/^\S+\s*/,'');
-    return `<button class="opt-btn" onclick="answer(this,'${o.replace(/'/g,"\\'")}')"><span class="flag">${f}</span>${n}</button>`;
+    const fc=UQ_FC[f];
+    const fi=fc?`<img src="https://flagcdn.com/w40/${fc}.png" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`:( f?`<span class="flag">${f}</span>`:'');
+    return `<button class="opt-btn" onclick="answer(this,'${o.replace(/'/g,"\\'")}'">${fi}${n}</button>`;
   }).join('');
-  if(typeof twemoji!=='undefined')twemoji.parse(uOptEl);
 }
 
 function answer(btn,selected){
@@ -418,8 +424,8 @@ function answer(btn,selected){
       if(b.textContent.trim().includes(currentTeam.name.replace(/^\S+\s*/,''))) b.classList.add('correct');
     });
     fb.className='feedback wrong';
-    fb.textContent=`❌ 오답! 정답: ${currentTeam.flag} ${currentTeam.name.replace(/^\S+\s*/,'')}`;
-    if(typeof twemoji!=='undefined')twemoji.parse(fb);
+    const _ufc=UQ_FC[currentTeam.flag];
+    fb.innerHTML=`❌ 오답! 정답: ${_ufc?`<img src="https://flagcdn.com/w40/${_ufc}.png" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`:currentTeam.flag}${currentTeam.name.replace(/^\S+\s*/,'')}`;
     document.getElementById('streak-bar').textContent='';
     // Auto hint on 2 consecutive wrong
     if(wrongStreak>=2){

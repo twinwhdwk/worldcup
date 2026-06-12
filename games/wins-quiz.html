@@ -176,30 +176,30 @@ function bigConfetti(){for(let i=0;i<5;i++)setTimeout(()=>confetti(Math.random()
 // ── Countries data ────────────────────────────────
 // wins = actual World Cup wins, decoys = plausible wrong answers
 const COUNTRIES = [
-  {flag:'🇧🇷',name:'브라질',    wins:5, hint:'남미 최강, 삼바의 나라',       decoys:[4,3,6,2]},
-  {flag:'🇩🇪',name:'독일',     wins:4, hint:'게르만 정밀 축구',              decoys:[3,5,2,6]},
-  {flag:'🇮🇹',name:'이탈리아', wins:4, hint:'카테나치오 수비 전술',          decoys:[3,5,2,6]},
-  {flag:'🇦🇷',name:'아르헨티나',wins:3,hint:'마라도나·메시의 나라',          decoys:[2,4,1,5]},
-  {flag:'🇫🇷',name:'프랑스',   wins:2, hint:'레 블뢰, 지단의 나라',          decoys:[1,3,4,0]},
-  {flag:'🇺🇾',name:'우루과이', wins:2, hint:'첫 번째 월드컵 우승국',         decoys:[1,3,0,4]},
-  {flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'잉글랜드', wins:1, hint:'1966년 홈에서 단 한 번',      decoys:[0,2,3,4]},
-  {flag:'🇪🇸',name:'스페인',   wins:1, hint:'2010 남아공, 패싱 축구',        decoys:[0,2,3,4]},
-  {flag:'🇵🇹',name:'포르투갈', wins:0, hint:'유럽 챔피언, 월드컵 우승 없음', decoys:[1,2,3,4]},
-  {flag:'🇳🇱',name:'네덜란드', wins:0, hint:'오렌지 군단, 준우승 3회',       decoys:[1,2,3,4]},
-  {flag:'🇧🇪',name:'벨기에',   wins:0, hint:'레 디아블 루쥬',               decoys:[1,2,3,4]},
-  {flag:'🇰🇷',name:'대한민국', wins:0, hint:'2002 4강 신화',                decoys:[1,2,3,4]},
-  {flag:'🇯🇵',name:'일본',     wins:0, hint:'사무라이 블루, 아시아 강호',    decoys:[1,2,3,4]},
-  {flag:'🇲🇽',name:'멕시코',   wins:0, hint:'2회 개최국, 엘 트리',          decoys:[1,2,3,4]},
-  {flag:'🇨🇭',name:'스위스',   wins:0, hint:'알프스 요새, 중립국',           decoys:[1,2,3,4]},
-  {flag:'🇭🇷',name:'크로아티아',wins:0,hint:'체크무늬, 모드리치',            decoys:[1,2,3,4]},
-  {flag:'🇩🇰',name:'덴마크',   wins:0, hint:'에릭센의 나라',                decoys:[1,2,3,4]},
-  {flag:'🇸🇪',name:'스웨덴',   wins:0, hint:'이브라히모비치의 나라',         decoys:[1,2,3,4]},
-  {flag:'🇺🇸',name:'미국',     wins:0, hint:'2026 개최국',                  decoys:[1,2,3,4]},
-  {flag:'🇨🇦',name:'캐나다',   wins:0, hint:'2026 공동 개최국',             decoys:[1,2,3,4]},
-  {flag:'🇦🇺',name:'호주',     wins:0, hint:'사커루, 아시아 소속',           decoys:[1,2,3,4]},
-  {flag:'🇳🇬',name:'나이지리아',wins:0,hint:'슈퍼 이글스',                   decoys:[1,2,3,4]},
-  {flag:'🇨🇲',name:'카메룬',   wins:0, hint:'불굴의 사자',                   decoys:[1,2,3,4]},
-  {flag:'🇸🇳',name:'세네갈',   wins:0, hint:'마네의 나라, 아프리카 사자',    decoys:[1,2,3,4]},
+  {code:'br', flag:'🇧🇷',name:'브라질',    wins:5, hint:'남미 최강, 삼바의 나라',       decoys:[4,3,6,2]},
+  {code:'de', flag:'🇩🇪',name:'독일',     wins:4, hint:'게르만 정밀 축구',              decoys:[3,5,2,6]},
+  {code:'it', flag:'🇮🇹',name:'이탈리아', wins:4, hint:'카테나치오 수비 전술',          decoys:[3,5,2,6]},
+  {code:'ar', flag:'🇦🇷',name:'아르헨티나',wins:3,hint:'마라도나·메시의 나라',          decoys:[2,4,1,5]},
+  {code:'fr', flag:'🇫🇷',name:'프랑스',   wins:2, hint:'레 블뢰, 지단의 나라',          decoys:[1,3,4,0]},
+  {code:'uy', flag:'🇺🇾',name:'우루과이', wins:2, hint:'첫 번째 월드컵 우승국',         decoys:[1,3,0,4]},
+  {code:'gb-eng',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'잉글랜드', wins:1, hint:'1966년 홈에서 단 한 번',      decoys:[0,2,3,4]},
+  {code:'es', flag:'🇪🇸',name:'스페인',   wins:1, hint:'2010 남아공, 패싱 축구',        decoys:[0,2,3,4]},
+  {code:'pt', flag:'🇵🇹',name:'포르투갈', wins:0, hint:'유럽 챔피언, 월드컵 우승 없음', decoys:[1,2,3,4]},
+  {code:'nl', flag:'🇳🇱',name:'네덜란드', wins:0, hint:'오렌지 군단, 준우승 3회',       decoys:[1,2,3,4]},
+  {code:'be', flag:'🇧🇪',name:'벨기에',   wins:0, hint:'레 디아블 루쥬',               decoys:[1,2,3,4]},
+  {code:'kr', flag:'🇰🇷',name:'대한민국', wins:0, hint:'2002 4강 신화',                decoys:[1,2,3,4]},
+  {code:'jp', flag:'🇯🇵',name:'일본',     wins:0, hint:'사무라이 블루, 아시아 강호',    decoys:[1,2,3,4]},
+  {code:'mx', flag:'🇲🇽',name:'멕시코',   wins:0, hint:'2회 개최국, 엘 트리',          decoys:[1,2,3,4]},
+  {code:'ch', flag:'🇨🇭',name:'스위스',   wins:0, hint:'알프스 요새, 중립국',           decoys:[1,2,3,4]},
+  {code:'hr', flag:'🇭🇷',name:'크로아티아',wins:0,hint:'체크무늬, 모드리치',            decoys:[1,2,3,4]},
+  {code:'dk', flag:'🇩🇰',name:'덴마크',   wins:0, hint:'에릭센의 나라',                decoys:[1,2,3,4]},
+  {code:'se', flag:'🇸🇪',name:'스웨덴',   wins:0, hint:'이브라히모비치의 나라',         decoys:[1,2,3,4]},
+  {code:'us', flag:'🇺🇸',name:'미국',     wins:0, hint:'2026 개최국',                  decoys:[1,2,3,4]},
+  {code:'ca', flag:'🇨🇦',name:'캐나다',   wins:0, hint:'2026 공동 개최국',             decoys:[1,2,3,4]},
+  {code:'au', flag:'🇦🇺',name:'호주',     wins:0, hint:'사커루, 아시아 소속',           decoys:[1,2,3,4]},
+  {code:'ng', flag:'🇳🇬',name:'나이지리아',wins:0,hint:'슈퍼 이글스',                   decoys:[1,2,3,4]},
+  {code:'cm', flag:'🇨🇲',name:'카메룬',   wins:0, hint:'불굴의 사자',                   decoys:[1,2,3,4]},
+  {code:'sn', flag:'🇸🇳',name:'세네갈',   wins:0, hint:'마네의 나라, 아프리카 사자',    decoys:[1,2,3,4]},
 ];
 
 const TOTAL_TIME = 60;
@@ -238,8 +238,7 @@ function setQuestion(){
   totalQ++;
 
   const cfEl=document.getElementById('c-flag');
-  cfEl.textContent=currentC.flag;
-  if(typeof twemoji!=='undefined')twemoji.parse(cfEl);
+  cfEl.innerHTML=`<img src="https://flagcdn.com/w160/${currentC.code}.png" style="height:80px;width:auto;max-width:120px;object-fit:contain;border-radius:4px;display:block;margin:0 auto;" alt="${currentC.name}" onerror="this.parentNode.textContent='${currentC.flag}'">`;
   document.getElementById('c-name').textContent=currentC.name;
   document.getElementById('c-hint').textContent=currentC.hint;
   document.getElementById('trophy-tally').innerHTML=makeTally(currentC.wins);

@@ -309,6 +309,13 @@ const PLAYERS = [
 ];
 
 const ALL_COUNTRIES = [...new Set(PLAYERS.map(p=>p.country))];
+const FLAG_CODE_PC = {
+  '🇦🇷':'ar','🇵🇹':'pt','🇫🇷':'fr','🇧🇷':'br','🇰🇷':'kr','🇳🇴':'no','🇧🇪':'be','🇪🇬':'eg',
+  '🇳🇱':'nl','🇭🇷':'hr','🇵🇱':'pl','🏴󠁧󠁢󠁥󠁮󠁧󠁿':'gb-eng','🇪🇸':'es','🏴󠁧󠁢󠁷󠁬󠁳󠁿':'gb-wls',
+  '🇩🇰':'dk','🇮🇹':'it','🇩🇪':'de','🇳🇬':'ng','🇸🇳':'sn','🇩🇿':'dz','🇲🇦':'ma','🇨🇲':'cm',
+  '🇯🇵':'jp','🇺🇾':'uy','🇲🇽':'mx','🇨🇭':'ch','🇺🇸':'us','🇷🇸':'rs','🇬🇭':'gh','🇸🇦':'sa',
+};
+function pcFlagImg(code){return `<img src="https://flagcdn.com/w40/${code}.png" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`;};
 
 let score=0, timeLeft=20, streak=0, bestStreak=0, totalQ=0, correctQ=0;
 let timerInterval, currentPlayer=null, answered=false;
@@ -389,14 +396,11 @@ function setQuestion(){
   const opts=getOptions(currentPlayer.country);
   const optEl=document.getElementById('options');
   optEl.innerHTML=opts.map(o=>{
-    const flagMatch=o.match(/^(\S+)/);
-    const flag=flagMatch?flagMatch[1]:'';
+    const fe=(o.match(/^(\S+)/)||[])[1]||'';
     const name=o.replace(/^\S+\s*/,'');
-    return `<button class="opt-btn" onclick="answer(this,'${o.replace(/'/g,"\\'")}')">
-      <span class="flag">${flag}</span>${name}
-    </button>`;
+    const fc=FLAG_CODE_PC[fe];
+    return `<button class="opt-btn" onclick="answer(this,'${o.replace(/'/g,"\\'")}'">${fc?pcFlagImg(fc):`<span class="flag">${fe}</span>`}${name}</button>`;
   }).join('');
-  if(typeof twemoji!=='undefined')twemoji.parse(optEl);
 }
 
 function answer(btn, selected){
@@ -435,8 +439,8 @@ function answer(btn, selected){
       if(t.includes(currentPlayer.country.replace(/^\S+\s*/,''))) b.classList.add('correct');
     });
     fb.className='feedback wrong';
-    fb.textContent=`❌ 오답! 정답: ${currentPlayer.flag} ${currentPlayer.country.replace(/^\S+\s*/,'')}`;
-    if(typeof twemoji!=='undefined')twemoji.parse(fb);
+    const _pfc=FLAG_CODE_PC[currentPlayer.flag];
+    fb.innerHTML=`❌ 오답! 정답: ${_pfc?pcFlagImg(_pfc):currentPlayer.flag}${currentPlayer.country.replace(/^\S+\s*/,'')}`;
     document.getElementById('combo-banner').textContent='';
   }
   document.getElementById('score-val').textContent=score;
