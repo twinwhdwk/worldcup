@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>👑 운영자 컨트롤 — 월드컵 퀴즈</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{--dark:#06060f;--card:#0f1020;--card2:#171829;--green:#00843D;--gold:#FFD700;--text:#f0f0f0;--muted:#444;--muted2:#777;}
+    body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+    /* ── TOP BAR ── */
+    .topbar{background:#08090f;border-bottom:1px solid rgba(255,255,255,.05);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .topbar-title{font-family:'Black Han Sans',sans-serif;font-size:22px;display:flex;align-items:center;gap:10px;}
+    .live-pill{background:#ef4444;color:#fff;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 9px;border-radius:100px;animation:pulse 1.5s infinite;-webkit-text-fill-color:#fff;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+    .topbar-links{display:flex;gap:10px;align-items:center;}
+    .topbar-link{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:6px 14px;color:var(--muted2);font-size:12px;text-decoration:none;font-weight:700;transition:all .2s;cursor:pointer;}
+    .topbar-link:hover{color:var(--text);border-color:rgba(255,255,255,.2);}
+
+    /* ── FIREBASE SETUP BANNER ── */
+    .setup-banner{background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 20px;margin:16px 24px;display:flex;align-items:flex-start;gap:14px;}
+    .setup-banner.hidden{display:none;}
+    .sb-icon{font-size:24px;flex-shrink:0;margin-top:2px;}
+    .sb-text{font-size:13px;line-height:1.6;}
+    .sb-text strong{color:#fcd34d;}
+    .sb-text code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-size:12px;}
+
+    /* ── MAIN LAYOUT ── */
+    .main{display:flex;flex:1;overflow:hidden;gap:0;}
+
+    /* ── LEFT: TV DISPLAY ── */
+    .tv-panel{flex:1;min-width:0;display:flex;flex-direction:column;padding:24px;overflow-y:auto;}
+
+    /* State screens */
+    .tv-lobby{display:flex;flex-direction:column;align-items:center;justify-content:center;height:400px;text-align:center;}
+    .tv-ball{font-size:100px;animation:spin 8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .tv-lobby-title{font-family:'Black Han Sans',sans-serif;font-size:48px;margin:16px 0 8px;}
+    .tv-lobby-sub{font-size:18px;color:var(--muted2);}
+    .qr-big{margin-top:24px;}
+    .qr-big img{width:140px;height:140px;border-radius:8px;}
+
+    /* Question display (TV view) */
+    .tv-question{display:none;flex-direction:column;align-items:center;}
+    .tv-q-header{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .tv-q-game{font-size:14px;font-weight:700;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;}
+    .tv-q-num{font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--gold);}
+    .tv-timer-wrap{width:100%;height:12px;background:rgba(255,255,255,.06);border-radius:100px;margin-bottom:20px;overflow:hidden;}
+    #tv-tbar{height:100%;border-radius:100px;transition:width .5s linear,background .3s;background:var(--green);}
+    .tv-q-card{width:100%;background:var(--card);border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:36px 32px;text-align:center;margin-bottom:20px;}
+    .tv-q-emoji{font-size:80px;display:block;margin-bottom:14px;}
+    .tv-q-text{font-family:'Black Han Sans',sans-serif;font-size:clamp(22px,3.5vw,40px);line-height:1.3;}
+    .tv-options{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .tv-opt{border-radius:18px;padding:22px 20px;font-family:'Black Han Sans',sans-serif;font-size:clamp(16px,2.5vw,26px);display:flex;align-items:center;gap:14px;color:#fff;transition:opacity .3s;}
+    .tv-opt.a{background:#c9003b;}
+    .tv-opt.b{background:#1050c0;}
+    .tv-opt.c{background:#c08000;}
+    .tv-opt.d{background:#008542;}
+    .tv-opt.correct{background:#22c55e!important;box-shadow:0 0 30px rgba(34,197,94,.4);animation:correctGlow .5s ease;}
+    .tv-opt.wrong{opacity:.3!important;}
+    @keyframes correctGlow{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+    .tv-opt-letter{font-size:28px;opacity:.6;flex-shrink:0;}
+    .tv-opt-text{font-size:clamp(15px,2.5vw,24px);line-height:1.3;}
+
+    /* Reveal overlay */
+    .tv-reveal{display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;}
+    .tv-rv-icon{font-size:100px;animation:popIn .5s ease;margin-bottom:20px;}
+    @keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+    .tv-rv-text{font-family:'Black Han Sans',sans-serif;font-size:40px;margin-bottom:12px;}
+    .tv-rv-sub{font-size:20px;color:var(--muted2);}
+    .score-changes{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;max-width:600px;}
+    .sc-chip{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);border-radius:100px;padding:8px 18px;font-family:'Black Han Sans',sans-serif;font-size:16px;color:var(--gold);animation:chipIn .3s ease both;}
+    @keyframes chipIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+
+    /* ── RIGHT: CONTROL PANEL ── */
+    .ctrl-panel{width:340px;flex-shrink:0;background:#08090f;border-left:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;overflow-y:auto;padding:20px 18px;}
+
+    .ctrl-section{margin-bottom:20px;}
+    .ctrl-title{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;font-weight:700;}
+
+    /* Stats */
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+    .stat{background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:10px;text-align:center;}
+    .stat-val{font-family:'Black Han Sans',sans-serif;font-size:24px;color:var(--gold);}
+    .stat-lbl{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+    /* Game selector */
+    .game-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+    .game-sel-btn{background:var(--card);border:1.5px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;font-family:'Noto Sans KR',sans-serif;}
+    .game-sel-btn:hover{border-color:rgba(255,255,255,.2);}
+    .game-sel-btn.active{background:rgba(0,132,61,.15);border-color:var(--green);}
+    .game-sel-icon{font-size:22px;display:block;margin-bottom:4px;}
+    .game-sel-name{font-size:11px;font-weight:700;color:var(--muted2);}
+    .game-sel-btn.active .game-sel-name{color:var(--green);}
+
+    /* Q count */
+    .q-count-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+    .q-count-lbl{font-size:12px;color:var(--muted2);}
+    .q-count-val{font-family:'Black Han Sans',sans-serif;font-size:20px;color:var(--gold);}
+    input[type=range]{flex:1;accent-color:var(--green);}
+
+    /* Controls */
+    .ctrl-btn{width:100%;border:none;border-radius:14px;padding:16px;font-size:18px;font-family:'Black Han Sans',sans-serif;cursor:pointer;transition:opacity .2s,transform .1s;margin-bottom:10px;letter-spacing:1px;-webkit-tap-highlight-color:transparent;}
+    .ctrl-btn:active{transform:scale(0.97);}
+    .btn-start{background:var(--green);color:#fff;}
+    .btn-reveal{background:#f59e0b;color:#000;}
+    .btn-next{background:#3b82f6;color:#fff;}
+    .btn-lobby{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted2);}
+    .ctrl-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+    /* Answer distribution */
+    .ans-dist{display:flex;flex-direction:column;gap:8px;}
+    .ad-row{display:flex;align-items:center;gap:8px;}
+    .ad-letter{font-family:'Black Han Sans',sans-serif;font-size:16px;width:22px;text-align:center;flex-shrink:0;}
+    .ad-bar-bg{flex:1;height:22px;background:rgba(255,255,255,.04);border-radius:6px;overflow:hidden;}
+    .ad-bar{height:100%;border-radius:6px;transition:width .4s ease;display:flex;align-items:center;padding-left:8px;}
+    .ad-cnt{font-size:12px;font-weight:700;color:rgba(255,255,255,.8);}
+    .ad-row.a .ad-bar{background:#c9003b;}
+    .ad-row.b .ad-bar{background:#1050c0;}
+    .ad-row.c .ad-bar{background:#c08000;}
+    .ad-row.d .ad-bar{background:#008542;}
+    .ad-row.correct-row .ad-bar{background:#22c55e!important;}
+    .ans-total{font-size:12px;color:var(--muted2);text-align:right;margin-top:4px;}
+
+    /* Leaderboard */
+    .lb-list{display:flex;flex-direction:column;gap:6px;}
+    .lb-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:8px 12px;font-size:13px;}
+    .lb-rank{font-family:'Black Han Sans',sans-serif;font-size:16px;width:28px;text-align:center;flex-shrink:0;}
+    .lb-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:#000;}
+    .lb-name{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .lb-score{font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--gold);}
+    .lb-item.prize{border:1px solid rgba(255,215,0,.2);}
+
+    /* Toast */
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#fff;padding:10px 22px;border-radius:100px;font-weight:700;font-size:13px;transition:transform .3s;z-index:999;pointer-events:none;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+
+    @media(max-width:900px){.main{flex-direction:column-reverse;}.ctrl-panel{width:100%;border-left:none;border-top:1px solid rgba(255,255,255,.05);}.tv-panel{padding:16px;}}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">👑 운영자 컨트롤 <span class="live-pill">LIVE</span></div>
+  <div class="topbar-links">
+    <a href="play.html" class="topbar-link" target="_blank">📱 참가자 링크</a>
+    <a href="scoreboard.html" class="topbar-link" target="_blank">🏆 스코어보드</a>
+  </div>
+</div>
+
+<!-- Firebase setup banner -->
+<div class="setup-banner" id="setup-banner">
+  <div class="sb-icon">⚡</div>
+  <div class="sb-text">
+    <strong>Firebase 설정 필요</strong> — 아래 단계를 따라 30명 실시간 공유를 활성화하세요:<br>
+    ① <a href="https://console.firebase.google.com" target="_blank" style="color:#60a5fa;">console.firebase.google.com</a> → 새 프로젝트 생성<br>
+    ② Realtime Database → 만들기 → 테스트 모드 선택<br>
+    ③ 데이터베이스 URL 복사 → 이 파일과 play.html의 <code>FIREBASE_URL</code> 변수에 붙여넣기
+  </div>
+</div>
+
+<div class="main">
+  <!-- ── LEFT: TV DISPLAY ── -->
+  <div class="tv-panel">
+
+    <!-- LOBBY STATE -->
+    <div class="tv-lobby" id="tv-lobby">
+      <div class="tv-ball">⚽</div>
+      <div class="tv-lobby-title">월드컵 QUIZ</div>
+      <div class="tv-lobby-sub">운영자가 게임을 시작하길 기다리는 중...</div>
+      <div class="qr-big">
+        <img id="qr-img" src="" alt="QR">
+        <p style="font-size:12px;color:var(--muted2);margin-top:8px;text-align:center;">참가자 접속 QR</p>
+      </div>
+    </div>
+
+    <!-- QUESTION STATE -->
+    <div class="tv-question" id="tv-question">
+      <div class="tv-q-header">
+        <div class="tv-q-game" id="tv-q-game">선수퀴즈</div>
+        <div class="tv-q-num" id="tv-q-num">문제 1 / 10</div>
+      </div>
+      <div class="tv-timer-wrap"><div id="tv-tbar" style="width:100%"></div></div>
+      <div class="tv-q-card">
+        <span class="tv-q-emoji" id="tv-q-emoji">⚽</span>
+        <div class="tv-q-text" id="tv-q-text">문제 로딩 중...</div>
+      </div>
+      <div class="tv-options">
+        <div class="tv-opt a" id="tv-o0"><span class="tv-opt-letter">A</span><span class="tv-opt-text" id="tv-ot0">—</span></div>
+        <div class="tv-opt b" id="tv-o1"><span class="tv-opt-letter">B</span><span class="tv-opt-text" id="tv-ot1">—</span></div>
+        <div class="tv-opt c" id="tv-o2"><span class="tv-opt-letter">C</span><span class="tv-opt-text" id="tv-ot2">—</span></div>
+        <div class="tv-opt d" id="tv-o3"><span class="tv-opt-letter">D</span><span class="tv-opt-text" id="tv-ot3">—</span></div>
+      </div>
+    </div>
+
+    <!-- REVEAL STATE -->
+    <div class="tv-reveal" id="tv-reveal">
+      <div class="tv-rv-icon" id="tv-rv-icon">🎉</div>
+      <div class="tv-rv-text" id="tv-rv-text">정답은...</div>
+      <div class="tv-rv-sub" id="tv-rv-sub">정답 옵션</div>
+      <div class="score-changes" id="score-changes"></div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT: CONTROLS ── -->
+  <div class="ctrl-panel">
+
+    <!-- Stats -->
+    <div class="ctrl-section">
+      <div class="ctrl-title">📊 현황</div>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-val" id="st-players">0</div><div class="stat-lbl">참가자</div></div>
+        <div class="stat"><div class="stat-val" id="st-answered">0</div><div class="stat-lbl">응답함</div></div>
+        <div class="stat"><div class="stat-val" id="st-q">—</div><div class="stat-lbl">현재 문제</div></div>
+        <div class="stat"><div class="stat-val" id="st-state">대기</div><div class="stat-lbl">상태</div></div>
+      </div>
+    </div>
+
+    <!-- Game selector -->
+    <div class="ctrl-section" id="game-setup">
+      <div class="ctrl-title">🎮 게임 선택</div>
+      <div class="game-select-grid">
+        <div class="game-sel-btn active" onclick="selectGame('선수퀴즈',this)">
+          <span class="game-sel-icon">🕵️</span>
+          <div class="game-sel-name">선수 국적</div>
+        </div>
+        <div class="game-sel-btn" onclick="selectGame('국기퀴즈',this)">
+          <span class="game-sel-icon">🚩</span>
+          <div class="game-sel-name">국기 맞추기</div>
+        </div>
+        <div class="game-sel-btn" onclick="selectGame('우승국퀴즈',this)">
+          <span class="game-sel-icon">🏆</span>
+          <div class="game-sel-name">우승국 퀴즈</div>
+        </div>
+        <div class="game-sel-btn" onclick="selectGame('기록퀴즈',this)">
+          <span class="game-sel-icon">📊</span>
+          <div class="game-sel-name">기록 퀴즈</div>
+        </div>
+        <div class="game-sel-btn" onclick="selectGame('우승횟수퀴즈',this)">
+          <span class="game-sel-icon">⚡</span>
+          <div class="game-sel-name">우승 횟수</div>
+        </div>
+      </div>
+      <div class="q-count-row">
+        <div class="q-count-lbl">문제 수:</div>
+        <div class="q-count-val" id="qcount-val">10</div>
+        <input type="range" id="qcount" min="5" max="20" value="10" oninput="document.getElementById('qcount-val').textContent=this.value">
+      </div>
+      <div class="q-count-row">
+        <div class="q-count-lbl">시간 제한:</div>
+        <div class="q-count-val" id="qlimit-val">20초</div>
+        <input type="range" id="qlimit" min="10" max="40" step="5" value="20" oninput="document.getElementById('qlimit-val').textContent=this.value+'초'">
+      </div>
+      <button class="ctrl-btn btn-start" onclick="startSession()">🚀 새 세션 시작</button>
+    </div>
+
+    <!-- Active controls -->
+    <div class="ctrl-section" id="active-ctrl" style="display:none">
+      <div class="ctrl-title">⚡ 컨트롤</div>
+      <button class="ctrl-btn btn-start" id="btn-nextq" onclick="nextQuestion()">▶ 다음 문제 시작</button>
+      <button class="ctrl-btn btn-reveal" id="btn-reveal" onclick="revealAnswer()" style="display:none">🎯 정답 공개</button>
+      <button class="ctrl-btn btn-next" id="btn-cont" onclick="nextQuestion()" style="display:none">➡ 다음 문제</button>
+      <button class="ctrl-btn btn-lobby" onclick="endSession()">🏁 세션 종료</button>
+    </div>
+
+    <!-- Answer distribution -->
+    <div class="ctrl-section" id="ans-dist-section" style="display:none">
+      <div class="ctrl-title">📊 응답 분포</div>
+      <div class="ans-dist">
+        <div class="ad-row a"><div class="ad-letter">A</div><div class="ad-bar-bg"><div class="ad-bar" id="abar0" style="width:0%"><span class="ad-cnt" id="acnt0">0</span></div></div></div>
+        <div class="ad-row b"><div class="ad-letter">B</div><div class="ad-bar-bg"><div class="ad-bar" id="abar1" style="width:0%"><span class="ad-cnt" id="acnt1">0</span></div></div></div>
+        <div class="ad-row c"><div class="ad-letter">C</div><div class="ad-bar-bg"><div class="ad-bar" id="abar2" style="width:0%"><span class="ad-cnt" id="acnt2">0</span></div></div></div>
+        <div class="ad-row d"><div class="ad-letter">D</div><div class="ad-bar-bg"><div class="ad-bar" id="abar3" style="width:0%"><span class="ad-cnt" id="acnt3">0</span></div></div></div>
+      </div>
+      <div class="ans-total" id="ans-total">0 / 0 응답</div>
+    </div>
+
+    <!-- Leaderboard (TOP 10) -->
+    <div class="ctrl-section">
+      <div class="ctrl-title">🏆 실시간 TOP 10</div>
+      <div class="lb-list" id="lb-list">
+        <div style="color:var(--muted2);font-size:13px;text-align:center;padding:20px;">아직 기록 없음</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   ★ FIREBASE URL — 여기에 본인의 RTDB URL을 입력!
+
+   play.html의 FIREBASE_URL도 동일하게 변경하세요.
+   ═══════════════════════════════════════════════════ */
+const FIREBASE_URL = 'YOUR_FIREBASE_URL';
+
+const FB = FIREBASE_URL + '/wc_live';
+const USE_FB = FIREBASE_URL.startsWith('https://') && !FIREBASE_URL.includes('YOUR');
+const GAME_URL = 'https://twinwhdwk.github.io/worldcup_minigame/play.html';
+const AVATAR_COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#a855f7','#ec4899','#14b8a6','#84cc16'];
+const PRIZE_COUNT = 10;
+
+if(USE_FB) document.getElementById('setup-banner').classList.add('hidden');
+
+// ── QUESTION BANKS ────────────────────────────────
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+
+const QB = {
+  '선수퀴즈': ()=>shuffle([
+    {emoji:'🐐',text:'리오넬 메시의 국적은?',options:['🇦🇷 아르헨티나','🇧🇷 브라질','🇫🇷 프랑스','🇵🇹 포르투갈'],correct:0},
+    {emoji:'💪',text:'크리스티아누 호날두의 국적은?',options:['🇪🇸 스페인','🇧🇷 브라질','🇵🇹 포르투갈','🇮🇹 이탈리아'],correct:2},
+    {emoji:'⚡',text:'킬리안 음바페의 국적은?',options:['🇧🇪 벨기에','🇫🇷 프랑스','🇸🇳 세네갈','🇲🇦 모로코'],correct:1},
+    {emoji:'🎪',text:'네이마르의 국적은?',options:['🇦🇷 아르헨티나','🇨🇴 콜롬비아','🇧🇷 브라질','🇺🇾 우루과이'],correct:2},
+    {emoji:'🦁',text:'손흥민의 국적은?',options:['🇯🇵 일본','🇨🇳 중국','🇦🇺 호주','🇰🇷 대한민국'],correct:3},
+    {emoji:'🤖',text:'엘링 홀란의 국적은?',options:['🇸🇪 스웨덴','🇩🇰 덴마크','🇳🇴 노르웨이','🇫🇮 핀란드'],correct:2},
+    {emoji:'🎯',text:'케빈 데 브루이너의 국적은?',options:['🇳🇱 네덜란드','🇧🇪 벨기에','🇩🇪 독일','🇫🇷 프랑스'],correct:1},
+    {emoji:'🌙',text:'모하메드 살라의 국적은?',options:['🇳🇬 나이지리아','🇲🇦 모로코','🇸🇳 세네갈','🇪🇬 이집트'],correct:3},
+    {emoji:'🌟',text:'루카 모드리치의 국적은?',options:['🇸🇮 슬로베니아','🇧🇦 보스니아','🇷🇸 세르비아','🇭🇷 크로아티아'],correct:3},
+    {emoji:'🎭',text:'페드리의 국적은?',options:['🇵🇹 포르투갈','🇫🇷 프랑스','🇪🇸 스페인','🇮🇹 이탈리아'],correct:2},
+    {emoji:'💃',text:'비니시우스 주니오르의 국적은?',options:['🇦🇷 아르헨티나','🇧🇷 브라질','🇺🇾 우루과이','🇨🇴 콜롬비아'],correct:1},
+    {emoji:'⚽',text:'이강인의 국적은?',options:['🇨🇳 중국','🇯🇵 일본','🇰🇷 대한민국','🇦🇺 호주'],correct:2},
+    {emoji:'🛡️',text:'로드리의 국적은?',options:['🇵🇹 포르투갈','🇫🇷 프랑스','🇩🇪 독일','🇪🇸 스페인'],correct:3},
+    {emoji:'💫',text:'필 포든의 국적은?',options:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드','🏴󠁧󠁢󠁳󠁣󠁴󠁿 스코틀랜드','🇮🇪 아일랜드','🏴󠁧󠁢󠁷󠁬󠁳󠁿 웨일스'],correct:0},
+    {emoji:'🌟',text:'펠레의 국적은?',options:['🇦🇷 아르헨티나','🇧🇷 브라질','🇺🇾 우루과이','🇨🇴 콜롬비아'],correct:1},
+    {emoji:'🤌',text:'디에고 마라도나의 국적은?',options:['🇧🇷 브라질','🇨🇱 칠레','🇦🇷 아르헨티나','🇺🇾 우루과이'],correct:2},
+    {emoji:'💫',text:'지네딘 지단의 국적은?',options:['🇧🇪 벨기에','🇲🇦 모로코','🇩🇿 알제리','🇫🇷 프랑스'],correct:3},
+    {emoji:'😁',text:'호나우지뉴의 국적은?',options:['🇦🇷 아르헨티나','🇧🇷 브라질','🇵🇹 포르투갈','🇨🇴 콜롬비아'],correct:1},
+    {emoji:'👑',text:'티에리 앙리의 국적은?',options:['🇧🇪 벨기에','🇨🇮 코트디부아르','🇫🇷 프랑스','🇬🇧 영국'],correct:2},
+    {emoji:'💪',text:'크리스티안 에릭센의 국적은?',options:['🇸🇪 스웨덴','🇫🇮 핀란드','🇳🇴 노르웨이','🇩🇰 덴마크'],correct:3},
+  ]),
+  '국기퀴즈': ()=>shuffle([
+    {emoji:'🇧🇷',text:'이 국기는 어느 나라?',options:['콜롬비아','베네수엘라','에콰도르','브라질'],correct:3},
+    {emoji:'🇩🇪',text:'이 국기는 어느 나라?',options:['오스트리아','스위스','독일','벨기에'],correct:2},
+    {emoji:'🇦🇷',text:'이 국기는 어느 나라?',options:['우루과이','파라과이','칠레','아르헨티나'],correct:3},
+    {emoji:'🇫🇷',text:'이 국기는 어느 나라?',options:['벨기에','룩셈부르크','모나코','프랑스'],correct:3},
+    {emoji:'🇮🇹',text:'이 국기는 어느 나라?',options:['스페인','포르투갈','이탈리아','그리스'],correct:2},
+    {emoji:'🇪🇸',text:'이 국기는 어느 나라?',options:['포르투갈','이탈리아','스페인','안도라'],correct:2},
+    {emoji:'🇵🇹',text:'이 국기는 어느 나라?',options:['스페인','포르투갈','브라질','앙골라'],correct:1},
+    {emoji:'🇳🇱',text:'이 국기는 어느 나라?',options:['벨기에','룩셈부르크','독일','네덜란드'],correct:3},
+    {emoji:'🇰🇷',text:'이 국기는 어느 나라?',options:['일본','중국','북한','대한민국'],correct:3},
+    {emoji:'🇯🇵',text:'이 국기는 어느 나라?',options:['대한민국','중국','대만','일본'],correct:3},
+    {emoji:'🇧🇪',text:'이 국기는 어느 나라?',options:['네덜란드','프랑스','룩셈부르크','벨기에'],correct:3},
+    {emoji:'🇺🇸',text:'이 국기는 어느 나라?',options:['캐나다','호주','영국','미국'],correct:3},
+    {emoji:'🇲🇽',text:'이 국기는 어느 나라?',options:['과테말라','온두라스','코스타리카','멕시코'],correct:3},
+    {emoji:'🇨🇦',text:'이 국기는 어느 나라?',options:['미국','호주','뉴질랜드','캐나다'],correct:3},
+    {emoji:'🇦🇺',text:'이 국기는 어느 나라?',options:['뉴질랜드','캐나다','아일랜드','호주'],correct:3},
+    {emoji:'🇳🇴',text:'이 국기는 어느 나라?',options:['스웨덴','덴마크','아이슬란드','노르웨이'],correct:3},
+    {emoji:'🇸🇪',text:'이 국기는 어느 나라?',options:['노르웨이','덴마크','핀란드','스웨덴'],correct:3},
+    {emoji:'🇵🇱',text:'이 국기는 어느 나라?',options:['체코','슬로바키아','우크라이나','폴란드'],correct:3},
+    {emoji:'🇭🇷',text:'이 국기는 어느 나라?',options:['세르비아','슬로베니아','보스니아','크로아티아'],correct:3},
+    {emoji:'🇸🇦',text:'이 국기는 어느 나라?',options:['아랍에미리트','카타르','쿠웨이트','사우디아라비아'],correct:3},
+    {emoji:'🇲🇦',text:'이 국기는 어느 나라?',options:['알제리','튀니지','리비아','모로코'],correct:3},
+    {emoji:'🇬🇭',text:'이 국기는 어느 나라?',options:['토고','베냉','코트디부아르','가나'],correct:3},
+    {emoji:'🇨🇲',text:'이 국기는 어느 나라?',options:['나이지리아','가나','코트디부아르','카메룬'],correct:3},
+    {emoji:'🇹🇷',text:'이 국기는 어느 나라?',options:['아제르바이잔','카자흐스탄','우즈베키스탄','튀르키예'],correct:3},
+    {emoji:'🇷🇺',text:'이 국기는 어느 나라?',options:['우크라이나','벨라루스','세르비아','러시아'],correct:3},
+  ]),
+  '우승국퀴즈': ()=>shuffle([
+    {emoji:'🏆',text:'1930년 첫 번째 월드컵 우승국은?',options:['브라질','아르헨티나','우루과이','이탈리아'],correct:2},
+    {emoji:'🏆',text:'1958년 월드컵 우승국은? (17세 펠레 데뷔)',options:['우루과이','아르헨티나','이탈리아','브라질'],correct:3},
+    {emoji:'🏆',text:'1966년 잉글랜드에서 열린 월드컵 우승국은?',options:['서독','잉글랜드','브라질','포르투갈'],correct:1},
+    {emoji:'🏆',text:'1986년 "신의 손" 골이 나온 대회 우승국은?',options:['브라질','우루과이','독일','아르헨티나'],correct:3},
+    {emoji:'🏆',text:'1998년 프랑스 월드컵 우승국은?',options:['이탈리아','스페인','브라질','프랑스'],correct:3},
+    {emoji:'🏆',text:'2002년 한·일 월드컵 우승국은?',options:['한국','독일','아르헨티나','브라질'],correct:3},
+    {emoji:'🏆',text:'2006년 독일 월드컵 우승국은?',options:['독일','브라질','이탈리아','프랑스'],correct:2},
+    {emoji:'🏆',text:'2010년 남아공 월드컵 우승국은?',options:['이탈리아','독일','네덜란드','스페인'],correct:3},
+    {emoji:'🏆',text:'2014년 "미네이랑의 비극" 대회 우승국은?',options:['브라질','이탈리아','아르헨티나','독일'],correct:3},
+    {emoji:'🏆',text:'2018년 러시아 월드컵 우승국은?',options:['크로아티아','벨기에','잉글랜드','프랑스'],correct:3},
+    {emoji:'🏆',text:'2022년 카타르 월드컵 우승국은?',options:['프랑스','크로아티아','모로코','아르헨티나'],correct:3},
+    {emoji:'🏆',text:'역대 월드컵 가장 많이 우승한 나라는?',options:['독일 (4회)','이탈리아 (4회)','아르헨티나 (3회)','브라질 (5회)'],correct:3},
+    {emoji:'🏆',text:'아프리카 최초 월드컵 개최국은?',options:['이집트','나이지리아','모로코','남아프리카공화국'],correct:3},
+    {emoji:'🏆',text:'2026 월드컵 공동 개최국 3나라는?',options:['미국·캐나다·멕시코','미국·브라질·캐나다','미국·멕시코·콜롬비아','캐나다·멕시코·쿠바'],correct:0},
+    {emoji:'🏆',text:'역대 결승전 준우승 최다 기록 나라는?',options:['독일 (3회)','이탈리아 (3회)','아르헨티나 (3회)','네덜란드 (3회)'],correct:3},
+  ]),
+  '기록퀴즈': ()=>shuffle([
+    {emoji:'📊',text:'역대 단일 대회 최다 득점 선수는?',options:['게르트 뮐러 (14골)','호나우두 (15골)','펠레 (12골)','저스트 퐁테인 (13골)'],correct:3},
+    {emoji:'📊',text:'역대 월드컵 통산 최다 득점 선수는?',options:['호나우두 (15골)','미로슬라프 클로제 (16골)','게르트 뮐러 (14골)','리오넬 메시 (13골)'],correct:1},
+    {emoji:'📊',text:'2022 카타르 월드컵 득점왕은?',options:['리오넬 메시 (7골)','킬리안 음바페 (8골)','줄리앙 알바레즈 (4골)','해리 케인 (3골)'],correct:1},
+    {emoji:'📊',text:'"신의 손" 골을 기록한 선수는?',options:['펠레','호나우지뉴','마라도나','호나우두'],correct:2},
+    {emoji:'📊',text:'2014년 준결승 브라질 대 독일 최종 스코어는?',options:['브라질 3-4 독일','브라질 1-7 독일','브라질 2-5 독일','브라질 0-4 독일'],correct:1},
+    {emoji:'📊',text:'2018 러시아 월드컵 황금공(MVP) 수상자는?',options:['리오넬 메시','해리 케인','루카 모드리치','킬리안 음바페'],correct:2},
+    {emoji:'📊',text:'역대 가장 어린 나이에 월드컵 골을 넣은 선수는?',options:['호날두 (17세)','음바페 (19세)','펠레 (17세)','마이클 오웬 (18세)'],correct:2},
+    {emoji:'📊',text:'월드컵에 가장 많이 출전한 선수는?',options:['로타어 마테우스 (25경기)','안토니오 카르바할 (25경기)','라파엘 마르케스 (25경기)','리오넬 메시 (26경기)'],correct:3},
+    {emoji:'📊',text:'역대 최다 득점 대회(평균 5.38골)는?',options:['1930 우루과이','1954 스위스','1970 멕시코','1958 스웨덴'],correct:1},
+    {emoji:'📊',text:'2026 월드컵부터 참가팀 수는?',options:['32팀 → 36팀','32팀 → 40팀','32팀 → 48팀','24팀 → 32팀'],correct:2},
+    {emoji:'📊',text:'카메룬의 최고령 월드컵 출전 선수(42세)는?',options:['사뮈엘 에투','로저 밀라','마하마두 살리','엠바 무아셈'],correct:1},
+    {emoji:'📊',text:'2022년 카타르 월드컵이 처음으로 한 것은?',options:['최초 아시아 개최','최초 겨울+중동 개최','최초 48팀 참가','최초 VAR 사용'],correct:1},
+    {emoji:'📊',text:'1954 스위스 대회의 기록은?',options:['역대 최저 득점','역대 최다 득점 (5.38골/경기)','첫 TV 중계','최초 카드 사용'],correct:1},
+    {emoji:'📊',text:'이탈리아의 월드컵 우승 횟수는?',options:['3회','4회','5회','2회'],correct:1},
+    {emoji:'📊',text:'스페인의 유일한 월드컵 우승 연도는?',options:['2006년','2014년','2002년','2010년'],correct:3},
+  ]),
+  '우승횟수퀴즈': ()=>shuffle([
+    {emoji:'🇧🇷',text:'브라질의 월드컵 우승 횟수는?',options:['3회','4회','5회','6회'],correct:2},
+    {emoji:'🇩🇪',text:'독일(서독 포함)의 월드컵 우승 횟수는?',options:['3회','4회','5회','2회'],correct:1},
+    {emoji:'🇮🇹',text:'이탈리아의 월드컵 우승 횟수는?',options:['3회','4회','5회','2회'],correct:1},
+    {emoji:'🇦🇷',text:'아르헨티나의 월드컵 우승 횟수는?',options:['1회','2회','3회','4회'],correct:2},
+    {emoji:'🇫🇷',text:'프랑스의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:2},
+    {emoji:'🇺🇾',text:'우루과이의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:2},
+    {emoji:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',text:'잉글랜드의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:1},
+    {emoji:'🇪🇸',text:'스페인의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:1},
+    {emoji:'🇵🇹',text:'포르투갈의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:0},
+    {emoji:'🇳🇱',text:'네덜란드의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:0},
+    {emoji:'🇰🇷',text:'대한민국의 월드컵 우승 횟수는?',options:['0회','1회','2회','4강(2002)'],correct:0},
+    {emoji:'🇯🇵',text:'일본의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:0},
+    {emoji:'🇧🇪',text:'벨기에의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:0},
+    {emoji:'🇭🇷',text:'크로아티아의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:0},
+    {emoji:'🇲🇽',text:'멕시코의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:0},
+  ]),
+};
+
+// ── State ─────────────────────────────────────────
+let selectedGame = '선수퀴즈';
+let sessionQuestions = [];
+let currentQIdx = -1;
+let sessionActive = false;
+let tvTimerInt = null;
+let answersES = null;
+let scoresES = null;
+let playersES = null;
+let currentAnswers = {};
+let currentScores = {};
+let currentPlayers = {};
+
+// ── Utils ─────────────────────────────────────────
+function enc(n){return n.replace(/[.#$[\]]/g,'_');}
+function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'#ef4444':'var(--green)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function tvShow(id){['tv-lobby','tv-question','tv-reveal'].forEach(x=>{const el=document.getElementById(x);if(el){el.style.display=x===id?'flex':'none';}});}
+
+// ── Firebase ──────────────────────────────────────
+async function fbPut(p,d){await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}
+async function fbPatch(p,d){await fetch(FB+p+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}
+async function fbDelete(p){await fetch(FB+p+'.json',{method:'DELETE'});}
+
+// ── Game select ───────────────────────────────────
+function selectGame(name,el){
+  selectedGame=name;
+  document.querySelectorAll('.game-sel-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── Start session ─────────────────────────────────
+async function startSession(){
+  if(!USE_FB){toast('⚠️ Firebase URL을 먼저 설정하세요!',true);return;}
+  const n=parseInt(document.getElementById('qcount').value);
+  const limit=parseInt(document.getElementById('qlimit').value);
+  const qs=QB[selectedGame]().slice(0,n);
+  sessionQuestions=qs;
+  currentQIdx=-1;
+  sessionActive=true;
+
+  // Reset answers and setup session
+  await fbPut('/session',{state:'lobby',game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
+  await fbDelete('/answers');
+
+  document.getElementById('game-setup').style.display='none';
+  document.getElementById('active-ctrl').style.display='block';
+  document.getElementById('btn-nextq').style.display='block';
+  document.getElementById('btn-reveal').style.display='none';
+  document.getElementById('btn-cont').style.display='none';
+  document.getElementById('ans-dist-section').style.display='block';
+  document.getElementById('st-state').textContent='대기중';
+  tvShow('tv-lobby');
+  startListening();
+  toast('✅ 세션 시작! 참가자들이 접속하고 있습니다.');
+}
+
+// ── Listen ────────────────────────────────────────
+function startListening(){
+  // Players
+  if(playersES){try{playersES.close();}catch{}}
+  playersES=new EventSource(FB+'/players.json');
+  playersES.addEventListener('put',e=>{
+    const d=JSON.parse(e.data);
+    currentPlayers=d.data||{};
+    document.getElementById('st-players').textContent=Object.keys(currentPlayers).length;
+  });
+  playersES.addEventListener('patch',e=>{
+    const d=JSON.parse(e.data);
+    Object.assign(currentPlayers,d.data||{});
+    document.getElementById('st-players').textContent=Object.keys(currentPlayers).length;
+  });
+
+  // Answers
+  if(answersES){try{answersES.close();}catch{}}
+  answersES=new EventSource(FB+'/answers.json');
+  answersES.addEventListener('put',e=>{
+    const d=JSON.parse(e.data);
+    currentAnswers=d.data||{};
+    renderAnswerDist();
+  });
+  answersES.addEventListener('patch',e=>{
+    const d=JSON.parse(e.data);
+    Object.assign(currentAnswers,d.data||{});
+    renderAnswerDist();
+  });
+
+  // Scores
+  if(scoresES){try{scoresES.close();}catch{}}
+  scoresES=new EventSource(FB+'/scores.json');
+  scoresES.addEventListener('put',e=>{
+    const d=JSON.parse(e.data);
+    currentScores=d.data||{};
+    renderLeaderboard();
+  });
+  scoresES.addEventListener('patch',e=>{
+    const d=JSON.parse(e.data);
+    Object.assign(currentScores,d.data||{});
+    renderLeaderboard();
+  });
+}
+
+// ── Next question ─────────────────────────────────
+async function nextQuestion(){
+  currentQIdx++;
+  if(currentQIdx>=sessionQuestions.length){
+    await endSession(); return;
+  }
+
+  const q=sessionQuestions[currentQIdx];
+  const limit=parseInt(document.getElementById('qlimit').value)||20;
+  const startAt=Date.now()+1500; // 1.5s delay so everyone can see it
+
+  currentAnswers={};
+  await fbDelete('/answers');
+  await fbPatch('/session',{
+    state:'question',
+    questionIdx:currentQIdx,
+    question:{...q,timeLimit:limit,startAt,correctIdx:undefined}, // don't reveal correct yet
+    scoreGains:{}
+  });
+
+  // Render TV
+  tvShow('tv-question');
+  document.getElementById('tv-q-game').textContent=selectedGame;
+  document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
+  document.getElementById('tv-q-emoji').textContent=q.emoji||'⚽';
+  document.getElementById('tv-q-text').textContent=q.text;
+  q.options.forEach((o,i)=>{
+    document.getElementById('tv-ot'+i).textContent=o;
+    document.getElementById('tv-o'+i).className='tv-opt '+['a','b','c','d'][i];
+  });
+  startTvTimer(startAt,limit);
+
+  document.getElementById('st-q').textContent=(currentQIdx+1)+'/'+sessionQuestions.length;
+  document.getElementById('st-state').textContent='문제 진행중';
+  document.getElementById('btn-nextq').style.display='none';
+  document.getElementById('btn-reveal').style.display='block';
+  document.getElementById('btn-cont').style.display='none';
+  renderAnswerDist();
+}
+
+function startTvTimer(startAt,limit){
+  clearInterval(tvTimerInt);
+  const bar=document.getElementById('tv-tbar');
+  const run=()=>{
+    const rem=Math.max(0,limit-(Date.now()-startAt)/1000);
+    bar.style.width=(rem/limit*100)+'%';
+    bar.style.background=rem<5?'#ef4444':rem<10?'#f59e0b':'var(--green)';
+    if(rem<=0)clearInterval(tvTimerInt);
+  };
+  run();tvTimerInt=setInterval(run,250);
+}
+
+// ── Reveal answer ─────────────────────────────────
+async function revealAnswer(){
+  clearInterval(tvTimerInt);
+  const q=sessionQuestions[currentQIdx];
+  const ci=q.correct;
+
+  // Calculate score gains
+  const gains={};
+  const playerNames=Object.values(currentPlayers).map(p=>p.name||'');
+  let correctCount=0;
+  const answerAt={};
+  Object.entries(currentAnswers).forEach(([k,v])=>{if(v&&v.idx===ci){correctCount++;answerAt[k]=v.at||Date.now();}});
+
+  // Sort by speed for bonus
+  const speedRanking=Object.entries(answerAt).sort((a,b)=>a[1]-b[1]);
+
+  for(const[encName,ans] of Object.entries(currentAnswers)){
+    if(!ans)continue;
+    const q2=sessionQuestions[currentQIdx];
+    let gain=0;
+    if(ans.idx===ci){
+      gain=100;
+      const rank=speedRanking.findIndex(([k])=>k===encName);
+      if(rank<3)gain+=50; // top 3 speed bonus
+      else if(rank<Math.ceil(Object.keys(currentAnswers).length/2))gain+=20;
+    }
+    gains[encName]=gain;
+  }
+
+  // Update scores
+  const scoreUpdates={};
+  for(const[encName,gain] of Object.entries(gains)){
+    const cur=currentScores[encName]||{total:0,streak:0,correct:0};
+    const newTotal=cur.total+gain;
+    const newStreak=gain>0?(cur.streak||0)+1:0;
+    const newCorrect=(cur.correct||0)+(gain>0?1:0);
+    scoreUpdates[encName]={total:newTotal,streak:newStreak,correct:newCorrect,name:currentAnswers[encName]?.name||encName};
+    currentScores[encName]=scoreUpdates[encName];
+  }
+
+  // Write to Firebase
+  await fbPatch('/session',{
+    state:'reveal',
+    question:{...q,correctIdx:ci},
+    scoreGains:gains
+  });
+  if(Object.keys(scoreUpdates).length>0){
+    await fbPatch('/scores',scoreUpdates);
+  }
+
+  // TV reveal
+  tvShow('tv-reveal');
+  ['tv-lobby','tv-question'].forEach(x=>document.getElementById(x).style.display='none');
+  document.getElementById('tv-reveal').style.display='flex';
+  document.getElementById('tv-rv-icon').textContent='🎯';
+  document.getElementById('tv-rv-text').textContent='정답은... '+q.options[ci]+'!';
+  document.getElementById('tv-rv-sub').textContent=`정답자 ${correctCount}명 / ${Object.keys(currentAnswers).length}명 응답`;
+
+  // Show top score gains
+  const topGainers=Object.entries(gains).filter(([,g])=>g>0).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const sc=document.getElementById('score-changes');
+  sc.innerHTML=topGainers.map(([k,g],i)=>{
+    const name=currentAnswers[k]?.name||k;
+    return `<div class="sc-chip" style="animation-delay:${i*.1}s">+${g} ${name}</div>`;
+  }).join('');
+
+  // Highlight correct option on TV question view
+  [0,1,2,3].forEach(i=>{
+    const el=document.getElementById('tv-o'+i);
+    if(i===ci)el.classList.add('correct');
+    else el.classList.add('wrong');
+  });
+
+  document.getElementById('st-state').textContent='정답 공개';
+  document.getElementById('btn-reveal').style.display='none';
+  document.getElementById('btn-cont').style.display=currentQIdx+1<sessionQuestions.length?'block':'none';
+  if(currentQIdx+1>=sessionQuestions.length){
+    // Last question
+    setTimeout(endSession,3000);
+  }
+  renderLeaderboard();
+}
+
+// ── End session ───────────────────────────────────
+async function endSession(){
+  clearInterval(tvTimerInt);
+  sessionActive=false;
+  await fbPatch('/session',{state:'done',question:null});
+  document.getElementById('active-ctrl').style.display='none';
+  document.getElementById('game-setup').style.display='block';
+  document.getElementById('ans-dist-section').style.display='none';
+  document.getElementById('st-state').textContent='종료';
+  tvShow('tv-lobby');
+  toast('🏁 세션 종료! 최종 결과는 스코어보드를 확인하세요.');
+}
+
+// ── Answer distribution ───────────────────────────
+function renderAnswerDist(){
+  const counts=[0,0,0,0];
+  Object.values(currentAnswers).forEach(a=>{if(a&&a.idx>=0&&a.idx<4)counts[a.idx]++;});
+  const total=counts.reduce((a,b)=>a+b,0);
+  const max=Math.max(...counts,1);
+  [0,1,2,3].forEach(i=>{
+    document.getElementById('abar'+i).style.width=(counts[i]/max*100)+'%';
+    document.getElementById('acnt'+i).textContent=counts[i];
+  });
+  const playerCount=Object.keys(currentPlayers).length;
+  document.getElementById('ans-total').textContent=total+' / '+playerCount+' 응답';
+  document.getElementById('st-answered').textContent=total;
+}
+
+// ── Leaderboard ───────────────────────────────────
+function renderLeaderboard(){
+  const sorted=Object.values(currentScores).sort((a,b)=>b.total-a.total).slice(0,10);
+  const lb=document.getElementById('lb-list');
+  if(!sorted.length){lb.innerHTML='<div style="color:var(--muted2);font-size:13px;text-align:center;padding:16px;">아직 기록 없음</div>';return;}
+  const medals=['🥇','🥈','🥉','4','5','6','7','8','9','10'];
+  lb.innerHTML=sorted.map((p,i)=>{
+    const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
+    const prize=i<PRIZE_COUNT;
+    return `<div class="lb-item ${prize?'prize':''}">
+      <div class="lb-rank">${medals[i]}</div>
+      <div class="lb-avatar" style="background:${col}">${(p.name||'?').slice(0,2)}</div>
+      <div class="lb-name">${p.name||'?'}${prize?'&nbsp;<span style="font-size:10px;color:var(--gold)">🎁</span>':''}</div>
+      <div class="lb-score">${p.total||0}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── QR ────────────────────────────────────────────
+document.getElementById('qr-img').src=`https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(GAME_URL)}&chs=280x280&chld=L|0`;
+
+// ── Init ──────────────────────────────────────────
+tvShow('tv-lobby');
+if(!USE_FB){
+  document.querySelector('.setup-banner').classList.remove('hidden');
+  document.getElementById('st-state').textContent='미설정';
+}
+// Start listening for players/scores even before session starts
+if(USE_FB)startListening();
+</script>
+</body>
+</html>
