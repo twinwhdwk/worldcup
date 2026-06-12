@@ -330,6 +330,7 @@
           <div class="game-sel-name">2026 월드컵</div>
         </div>
       </div>
+      <div style="font-size:11px;color:var(--muted2);margin-bottom:8px;text-align:center;" id="qbank-info">문제 풀: — 개</div>
       <div class="q-count-row">
         <div class="q-count-lbl">문제 수:</div>
         <div class="q-count-val" id="qcount-val">10</div>
@@ -635,6 +636,12 @@ function selectGame(name,el){
   selectedGame=name;
   document.querySelectorAll('.game-sel-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
+  const pool=QB[name]?QB[name]().length:0;
+  const info=document.getElementById('qbank-info');
+  if(info)info.textContent=`문제 풀: ${pool}개 (최대 ${Math.min(pool,20)}문제 선택 가능)`;
+  // Update max of qcount slider to pool size
+  const slider=document.getElementById('qcount');
+  if(slider){slider.max=Math.min(pool,20);if(parseInt(slider.value)>pool){slider.value=pool;document.getElementById('qcount-val').textContent=pool;}}
 }
 
 // ── Start session ──────────────────────────────────────────────────
@@ -1009,6 +1016,8 @@ function confetti(count=40){
   document.getElementById('qcount').addEventListener('input',function(){localStorage.setItem('wc_op_qcount',this.value);});
   document.getElementById('qlimit').addEventListener('input',function(){localStorage.setItem('wc_op_qlimit',this.value);});
 })();
+// Show initial QB info
+(function(){const pool=QB[selectedGame]?QB[selectedGame]().length:0;const info=document.getElementById('qbank-info');if(info)info.textContent=`문제 풀: ${pool}개 (최대 ${Math.min(pool,20)}문제 선택 가능)`;})();
 tvShow('tv-lobby');
 if(USE_FB)startListening();
 </script>
