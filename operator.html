@@ -999,6 +999,15 @@ function confetti(count=40){
 }
 
 // ── Init ───────────────────────────────────────────────────────────
+// Restore saved settings
+(function(){
+  const savedQ=localStorage.getItem('wc_op_qcount');
+  const savedL=localStorage.getItem('wc_op_qlimit');
+  if(savedQ){document.getElementById('qcount').value=savedQ;document.getElementById('qcount-val').textContent=savedQ;}
+  if(savedL){document.getElementById('qlimit').value=savedL;document.getElementById('qlimit-val').textContent=savedL+'초';}
+  document.getElementById('qcount').addEventListener('input',function(){localStorage.setItem('wc_op_qcount',this.value);});
+  document.getElementById('qlimit').addEventListener('input',function(){localStorage.setItem('wc_op_qlimit',this.value);});
+})();
 tvShow('tv-lobby');
 if(USE_FB)startListening();
 </script>
