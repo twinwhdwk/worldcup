@@ -462,6 +462,44 @@ function sndStart(){snd(440,.08);setTimeout(()=>snd(550,.08),110);setTimeout(()=
 function sndReveal(){snd(392,.1);setTimeout(()=>snd(523,.1),120);setTimeout(()=>snd(659,.1),240);setTimeout(()=>snd(784,.3),360);}
 function sndJoin(){snd(660,.06,'sine',.12);}
 
+// ── SVG Jersey Generator (for 유니폼퀴즈) ─────────────────────────
+function makeJersey(colors, pattern='solid', num='10', id='op') {
+  const [main, second, accent=second] = colors;
+  let overlay = '';
+  if (pattern==='stripes') {
+    overlay=`<rect x="60" y="0" width="24" height="145" fill="${second}" opacity="0.9"/><rect x="108" y="0" width="24" height="145" fill="${second}" opacity="0.9"/>`;
+  } else if (pattern==='half') {
+    overlay=`<rect x="96" y="0" width="110" height="145" fill="${second}"/>`;
+  } else if (pattern==='sash') {
+    overlay=`<polygon points="52,0 108,0 68,145 30,145" fill="${second}" opacity="0.9"/>`;
+  } else if (pattern==='collar-stripe') {
+    overlay=`<rect x="52" y="0" width="92" height="18" fill="${second}" opacity="0.8"/><rect x="52" y="128" width="92" height="12" fill="${second}" opacity="0.5"/>`;
+  } else if (pattern==='chevron') {
+    overlay=`<polygon points="52,45 98,76 144,45 144,0 98,32 52,0" fill="${second}" opacity="0.85"/>`;
+  } else if (pattern==='panel') {
+    overlay=`<rect x="52" y="0" width="28" height="145" fill="${second}" opacity="0.7"/><rect x="116" y="0" width="28" height="145" fill="${second}" opacity="0.7"/>`;
+  } else if (pattern==='checkerboard') {
+    const cw=22,ch=30;
+    for(let r=0;r<5;r++) for(let c=0;c<4;c++) {
+      if((r+c)%2===0) overlay+=`<rect x="${52+c*cw}" y="${r*ch}" width="${cw}" height="${ch}" fill="${second}" opacity="0.9"/>`;
+    }
+  } else if (pattern==='hoops') {
+    [0,30,60,90,120].forEach(y=>{ overlay+=`<rect x="0" y="${y}" width="200" height="14" fill="${second}" opacity="0.85"/>`; });
+  } else if (pattern==='diagonal') {
+    overlay=`<polygon points="0,0 80,0 0,145" fill="${second}" opacity="0.7"/>`;
+  }
+  return `<svg viewBox="0 0 200 175" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="clip-${id}"><path d="M38,18 L0,56 L27,72 L27,155 L173,155 L173,72 L200,56 L162,18 Q135,36 100,36 Q65,36 38,18 Z"/></clipPath><filter id="drop-${id}"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="rgba(0,0,0,0.45)"/></filter><linearGradient id="shine-${id}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.08)"/><stop offset="100%" style="stop-color:rgba(0,0,0,0.08)"/></linearGradient></defs><path d="M38,18 L0,56 L27,72 L27,155 L173,155 L173,72 L200,56 L162,18 Q135,36 100,36 Q65,36 38,18 Z" fill="rgba(0,0,0,0.25)" transform="translate(3,6)" filter="url(#drop-${id})"/><path d="M38,18 L0,56 L27,72 L27,155 L173,155 L173,72 L200,56 L162,18 Q135,36 100,36 Q65,36 38,18 Z" fill="${main}"/><g clip-path="url(#clip-${id})">${overlay}</g><path d="M38,18 L0,56 L27,72 L42,64 Z" fill="rgba(0,0,0,0.14)"/><path d="M162,18 L200,56 L173,72 L158,64 Z" fill="rgba(0,0,0,0.14)"/><path d="M38,18 L0,56 L27,72 L27,155 L173,155 L173,72 L200,56 L162,18 Q135,36 100,36 Q65,36 38,18 Z" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/><path d="M76,36 Q100,50 124,36 Q118,18 100,18 Q82,18 76,36 Z" fill="${second||main}"/><path d="M76,36 Q100,50 124,36 Q118,18 100,18 Q82,18 76,36 Z" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1"/><path d="M38,18 L0,56 L27,72 L27,155 L173,155 L173,72 L200,56 L162,18 Q135,36 100,36 Q65,36 38,18 Z" fill="url(#shine-${id})"/><text x="100" y="118" text-anchor="middle" font-size="38" font-weight="900" fill="${second||'#ffffff'}" opacity="0.85" font-family="Arial Black,sans-serif" stroke="rgba(0,0,0,0.2)" stroke-width="1">${num}</text></svg>`;
+}
+let _jerseyCache={};
+function jerseyImg(colors, pattern, num='10'){
+  const key=colors.join()+pattern+num;
+  if(!_jerseyCache[key]){
+    const svg=makeJersey(colors,pattern,num,'op'+Object.keys(_jerseyCache).length);
+    _jerseyCache[key]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  }
+  return _jerseyCache[key];
+}
+
 // ── QUESTION BANKS ────────────────────────────────────────────────
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 function shuffleOptions(q){const items=q.options.map((o,i)=>({o,c:i===q.correct}));for(let i=items.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]];}return{...q,options:items.map(x=>x.o),correct:items.findIndex(x=>x.c)};}
@@ -586,26 +624,26 @@ const QB = {
     {emoji:'🇲🇽',img:'https://flagcdn.com/w160/mx.png',text:'멕시코의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:0},
   ]),
   '유니폼퀴즈': ()=>shuffle([
-    {emoji:'👕',text:'아르헨티나 홈 유니폼의 특징은?',options:['하늘색·흰색 세로줄무늬','노란색·초록색','빨간색·흰색','남색 단색'],correct:0},
-    {emoji:'👕',text:'브라질 홈 유니폼 상의 색상은?',options:['초록색','빨간색','노란색','흰색'],correct:2},
-    {emoji:'👕',text:'독일 홈 유니폼의 전통 색상은?',options:['검정색','빨간색','흰색','파란색'],correct:2},
-    {emoji:'👕',text:'프랑스 홈 유니폼의 색상은?',options:['흰색','남색(진파랑)','빨간색','하늘색'],correct:1},
-    {emoji:'👕',text:'스페인 홈 유니폼의 색상은?',options:['빨간색','노란색','파란색','흰색'],correct:0},
-    {emoji:'👕',text:'"아주리"로 불리는 이탈리아 유니폼 색상은?',options:['초록색','빨간색','흰색','파란색'],correct:3},
-    {emoji:'👕',text:'잉글랜드 홈 유니폼의 전통 색상은?',options:['빨간색','파란색','흰색','노란색'],correct:2},
-    {emoji:'👕',text:'포르투갈 홈 유니폼의 색상은?',options:['빨간색','파란색','흰색','초록색'],correct:0},
-    {emoji:'👕',text:'"오란예(Oranje)"로 유명한 네덜란드 유니폼 색상은?',options:['노란색','빨간색','파란색','주황색'],correct:3},
-    {emoji:'👕',text:'대한민국 홈 유니폼 색상은?',options:['빨간색','파란색','흰색','초록색'],correct:0},
-    {emoji:'👕',text:'크로아티아 유니폼의 특징적인 패턴은?',options:['별무늬','세로줄무늬','빨간·흰 체크무늬','삼각형 패턴'],correct:2},
-    {emoji:'👕',text:'우루과이 홈 유니폼의 색상은?',options:['흰색·파란색','빨간색','하늘색','초록색'],correct:2},
-    {emoji:'👕',text:'멕시코 홈 유니폼의 색상은?',options:['흰색','파란색','초록색','빨간색'],correct:2},
-    {emoji:'👕',text:'나이지리아 유니폼의 주요 색상은?',options:['빨간색','초록색','파란색','노란색'],correct:1},
-    {emoji:'👕',text:'덴마크 홈 유니폼의 색상 조합은?',options:['파란색·흰색','빨간색·흰색','초록색·흰색','노란색·빨간색'],correct:1},
-    {emoji:'👕',text:'폴란드 홈 유니폼의 색상은?',options:['빨간색','파란색','흰색','노란색'],correct:2},
-    {emoji:'👕',text:'벨기에 홈 유니폼의 특징 색상은?',options:['파란색','노란색','빨간색·검정색','초록색'],correct:2},
-    {emoji:'👕',text:'세네갈 홈 유니폼의 주요 색상은?',options:['초록색·노란색·빨간색','파란색','흰색','빨간색'],correct:2},
-    {emoji:'👕',text:'모로코 홈 유니폼의 색상은?',options:['파란색','노란색','흰색','빨간색'],correct:3},
-    {emoji:'👕',text:'일본 홈 유니폼의 전통 색상은?',options:['흰색','빨간색','파란색(사무라이 블루)','초록색'],correct:2},
+    {get img(){return jerseyImg(['#74ACDF','#ffffff','#74ACDF'],'stripes')},emoji:'👕',text:'아르헨티나 홈 유니폼의 특징은?',options:['하늘색·흰색 세로줄무늬','노란색·초록색','빨간색·흰색','남색 단색'],correct:0},
+    {get img(){return jerseyImg(['#FFD700','#009c3b','#009c3b'],'solid')},emoji:'👕',text:'브라질 홈 유니폼 상의 색상은?',options:['초록색','빨간색','노란색','흰색'],correct:2},
+    {get img(){return jerseyImg(['#ffffff','#000000','#cc0000'],'collar-stripe')},emoji:'👕',text:'독일 홈 유니폼의 전통 색상은?',options:['검정색','빨간색','흰색','파란색'],correct:2},
+    {get img(){return jerseyImg(['#003189','#ff0000','#ffffff'],'solid')},emoji:'👕',text:'프랑스 홈 유니폼의 색상은?',options:['흰색','남색(진파랑)','빨간색','하늘색'],correct:1},
+    {get img(){return jerseyImg(['#c60b1e','#ffc400','#c60b1e'],'collar-stripe')},emoji:'👕',text:'스페인 홈 유니폼의 색상은?',options:['빨간색','노란색','파란색','흰색'],correct:0},
+    {get img(){return jerseyImg(['#0066CC','#ffffff','#ffffff'],'solid')},emoji:'👕',text:'"아주리"로 불리는 이탈리아 유니폼 색상은?',options:['초록색','빨간색','흰색','파란색'],correct:3},
+    {get img(){return jerseyImg(['#ffffff','#1D3461','#CC0000'],'collar-stripe')},emoji:'👕',text:'잉글랜드 홈 유니폼의 전통 색상은?',options:['빨간색','파란색','흰색','노란색'],correct:2},
+    {get img(){return jerseyImg(['#006600','#ff0000','#006600'],'half')},emoji:'👕',text:'포르투갈 홈 유니폼의 색상은?',options:['빨간색','파란색','흰색','초록색'],correct:0},
+    {get img(){return jerseyImg(['#FF6600','#ffffff','#ffffff'],'solid')},emoji:'👕',text:'"오란예(Oranje)"로 유명한 네덜란드 유니폼 색상은?',options:['노란색','빨간색','파란색','주황색'],correct:3},
+    {get img(){return jerseyImg(['#C60C30','#003478','#ffffff'],'solid')},emoji:'👕',text:'대한민국 홈 유니폼 색상은?',options:['빨간색','파란색','흰색','초록색'],correct:0},
+    {get img(){return jerseyImg(['#FF0000','#ffffff','#FF0000'],'checkerboard')},emoji:'👕',text:'크로아티아 유니폼의 특징적인 패턴은?',options:['별무늬','세로줄무늬','빨간·흰 체크무늬','삼각형 패턴'],correct:2},
+    {get img(){return jerseyImg(['#5EB6E4','#000000','#5EB6E4'],'solid')},emoji:'👕',text:'우루과이 홈 유니폼의 색상은?',options:['흰색·파란색','빨간색','하늘색','초록색'],correct:2},
+    {get img(){return jerseyImg(['#006847','#ffffff','#ffffff'],'collar-stripe')},emoji:'👕',text:'멕시코 홈 유니폼의 색상은?',options:['흰색','파란색','초록색','빨간색'],correct:2},
+    {get img(){return jerseyImg(['#008751','#ffffff','#008751'],'stripes')},emoji:'👕',text:'나이지리아 유니폼의 주요 색상은?',options:['빨간색','초록색','파란색','노란색'],correct:1},
+    {get img(){return jerseyImg(['#C60C30','#ffffff','#C60C30'],'collar-stripe')},emoji:'👕',text:'덴마크 홈 유니폼의 색상 조합은?',options:['파란색·흰색','빨간색·흰색','초록색·흰색','노란색·빨간색'],correct:1},
+    {get img(){return jerseyImg(['#ffffff','#DC143C','#DC143C'],'collar-stripe')},emoji:'👕',text:'폴란드 홈 유니폼의 색상은?',options:['빨간색','파란색','흰색','노란색'],correct:2},
+    {get img(){return jerseyImg(['#ED2939','#000000','#FAE042'],'sash')},emoji:'👕',text:'벨기에 홈 유니폼의 특징 색상은?',options:['파란색','노란색','빨간색·검정색','초록색'],correct:2},
+    {get img(){return jerseyImg(['#ffffff','#00853F','#FDEF42'],'sash')},emoji:'👕',text:'세네갈 홈 유니폼의 주요 색상은?',options:['초록색·노란색·빨간색','파란색','흰색','빨간색'],correct:2},
+    {get img(){return jerseyImg(['#C1272D','#006233','#C1272D'],'solid')},emoji:'👕',text:'모로코 홈 유니폼의 색상은?',options:['파란색','노란색','흰색','빨간색'],correct:3},
+    {get img(){return jerseyImg(['#1A2F5F','#CC0000','#ffffff'],'chevron')},emoji:'👕',text:'일본 홈 유니폼의 전통 색상은?',options:['흰색','빨간색','파란색(사무라이 블루)','초록색'],correct:2},
   ]),
   '2026퀴즈': ()=>shuffle([
     {emoji:'🌎',text:'2026 FIFA 월드컵의 참가팀 수는?',options:['32팀','40팀','48팀','56팀'],correct:2},
