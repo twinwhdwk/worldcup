@@ -241,7 +241,7 @@ const LETTERS = ['A','B','C','D'];
 let myName='', myScore=0, myStreak=0, myRank=0;
 let myAnswerIdx=-1, lastQId='', timerInt=null;
 let sessionES=null, beepedSecs=new Set();
-let myJoinedAt=0;
+let myJoinedAt=0, _pendingGain=0;
 
 // ── Sound Effects (Web Audio API) ─────────────────────────────────
 let AC=null;
@@ -335,11 +335,11 @@ function listen(){
   sessionES.onerror=()=>{setStatus('⚠️ 연결 끊김, 재연결 중...','err');setTimeout(listen,3000);};
   sessionES.onopen=()=>setStatus('✅ 연결됨','ok');
 
-  // My score stream
+  // My score stream — Firebase is authoritative; clear pending gain on arrival
   _sES=new EventSource(FB+'/scores/'+enc(myName)+'.json');
   _sES.addEventListener('put',e=>{
     const d=JSON.parse(e.data).data;
-    if(d){myScore=d.total||0;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;document.getElementById('q-score').textContent=myScore+'점';}
+    if(d){myScore=d.total||0;myStreak=d.streak||0;_pendingGain=0;document.getElementById('lb-score').textContent=myScore;document.getElementById('q-score').textContent=myScore+'점';}
   });
 
   // Player count stream (lobby)
@@ -387,8 +387,8 @@ function updateLobbyRank(){
 }
 function onSession(s){
   if(s&&s.lastClearedAt&&myJoinedAt>0&&s.lastClearedAt>myJoinedAt){
-    joined=false;myJoinedAt=0;myName='';myScore=0;myStreak=0;
-    clearInterval(timerInt);
+    joined=false;myJoinedAt=0;myName='';myScore=0;myStreak=0;_pendingGain=0;
+    clearInterval(timerInt);clearInterval(_pollInt);_pollInt=null;
     show('s-login');
     setStatus('운영자가 참가자 목록을 초기화했습니다. 다시 참가하세요.','warn');
     return;
@@ -519,7 +519,9 @@ function showReveal(s){
   const answered=myAnswerIdx>=0;
   const gain=s.scoreGains?.[enc(myName)]||0;
   const oldScore=myScore;
-  if(gain>0)myScore+=gain;
+  // Only add gain locally if Firebase score hasn't arrived yet (_pendingGain still set means
+  // we applied it last reveal and server hasn't confirmed; 0 means server confirmed or first reveal)
+  if(gain>0&&_pendingGain===0){myScore+=gain;_pendingGain=gain;}
   myStreak=correct?(myStreak+1):0;
 
   document.getElementById('rv-icon').textContent=!answered?'⏰':correct?'🎉':'❌';

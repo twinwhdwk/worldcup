@@ -700,9 +700,6 @@ async function startSession(){
 }
 
 // ── Firebase SSE patch helper ──────────────────────────────────────
-// Firebase patch events carry {path, data}: path="/" means root-level
-// merge; path="/{key}" means only that child changed. We must respect
-// the path so child writes don't splat their fields onto the parent.
 function applyFbPatch(obj, d){
   if(!d.path||d.path==='/'||d.path===''){
     Object.assign(obj, d.data||{});
@@ -710,6 +707,14 @@ function applyFbPatch(obj, d){
     const key=d.path.replace(/^\//,'').split('/')[0];
     if(key) obj[key]=d.data;
   }
+}
+
+// Debounce for startListening — prevents rapid-fire reconnect storms
+// when multiple SSE connections error at the same time
+let _listenDebounceTimer=null;
+function scheduleReconnect(){
+  if(_listenDebounceTimer)return; // already queued
+  _listenDebounceTimer=setTimeout(()=>{_listenDebounceTimer=null;startListening();},4500);
 }
 
 // ── Listening ──────────────────────────────────────────────────────
@@ -737,19 +742,19 @@ function startListening(){
   };
   playersES.addEventListener('put',e=>{const d=JSON.parse(e.data);onPlayers(d.data||{});});
   playersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentPlayers,d);onPlayers(currentPlayers);});
-  playersES.onerror=()=>{toast('⚠️ Firebase 연결 불안정 — 재연결 시도 중...');setTimeout(startListening,4000);};
+  playersES.onerror=()=>{toast('⚠️ Firebase 연결 불안정 — 재연결 시도 중...');scheduleReconnect();};
 
   if(answersES){try{answersES.close();}catch{}}
   answersES=new EventSource(FB+'/answers.json');
   answersES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentAnswers=d.data||{};renderAnswerDist();});
   answersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentAnswers,d);renderAnswerDist();});
-  answersES.onerror=()=>{setTimeout(()=>{if(answersES)answersES.close();answersES=null;startListening();},5000);};
+  answersES.onerror=()=>{scheduleReconnect();};
 
   if(scoresES){try{scoresES.close();}catch{}}
   scoresES=new EventSource(FB+'/scores.json');
   scoresES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentScores=d.data||{};renderLeaderboard();});
   scoresES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentScores,d);renderLeaderboard();});
-  scoresES.onerror=()=>{setTimeout(()=>{if(scoresES)scoresES.close();scoresES=null;startListening();},5000);};
+  scoresES.onerror=()=>{scheduleReconnect();};
 }
 
 // ── Next question ──────────────────────────────────────────────────
