@@ -473,11 +473,16 @@ function showReveal(s){
 
   // Rank display
   const rankEl=document.getElementById('rv-rank');
+  const prevRank=lastKnownRank;
   if(s.allRanks&&s.allRanks[enc(myName)]){
     const r=s.allRanks[enc(myName)];
     lastKnownRank=r;
     rankEl.textContent=r<=10?r+'위 🎁 상품권 확정!':r+'위';
     rankEl.style.color=r<=10?'var(--gold)':'var(--muted2)';
+    // Prize zone entry celebration
+    if(r<=10&&(prevRank>10||prevRank===0)){
+      setTimeout(prizeCelebration,400);
+    }
   } else {rankEl.textContent='';}
 
   document.getElementById('rv-streak').textContent=myStreak>=2?'🔥 '+myStreak+'연속 정답!':'';
@@ -492,6 +497,22 @@ function showReveal(s){
     sndWrong();
     if(navigator.vibrate)navigator.vibrate(200);
   }
+}
+
+function prizeCelebration(){
+  // Big confetti burst
+  confetti();setTimeout(confetti,150);setTimeout(confetti,300);
+  if(navigator.vibrate)navigator.vibrate([80,40,80,40,120]);
+  // Banner overlay
+  const b=document.createElement('div');
+  b.style.cssText='position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9000;pointer-events:none;';
+  b.innerHTML='<div style="background:linear-gradient(135deg,#FFD700,#f59e0b);color:#000;border-radius:24px;padding:28px 40px;text-align:center;animation:popIn .5s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 60px rgba(255,215,0,.6);">'
+    +'<div style="font-size:56px;margin-bottom:8px;">🎁</div>'
+    +'<div style="font-family:\'Black Han Sans\',sans-serif;font-size:28px;margin-bottom:4px;">상품권 획득!</div>'
+    +'<div style="font-size:15px;font-weight:700;">TOP 10 진입 축하합니다! 🎉</div>'
+    +'</div>';
+  document.body.appendChild(b);
+  setTimeout(()=>b.remove(),2200);
 }
 
 // ── Confetti ──────────────────────────────────────────────────────
