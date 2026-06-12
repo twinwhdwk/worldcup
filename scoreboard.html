@@ -102,12 +102,21 @@
     .game-over-banner.show{display:block;animation:goBannerIn .6s cubic-bezier(.34,1.56,.64,1);}
     @keyframes goBannerIn{from{transform:scale(.9) translateY(-20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
     .game-over-banner::before{content:'🏆';position:absolute;font-size:120px;opacity:.04;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
-    .go-title{font-family:'Black Han Sans',sans-serif;font-size:36px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
-    .go-sub{font-size:14px;color:var(--muted2);}
-    .go-winner{display:flex;align-items:center;gap:12px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:14px;padding:14px 20px;margin-top:16px;justify-content:center;}
+    .go-title{font-family:'Black Han Sans',sans-serif;font-size:36px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+    .go-sub{font-size:14px;color:var(--muted2);margin-bottom:16px;}
+    .go-winner{display:flex;align-items:center;gap:12px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:14px;padding:14px 20px;margin-bottom:16px;justify-content:center;}
     .go-crown{font-size:40px;}
     .go-winner-name{font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--gold);}
     .go-winner-score{font-size:14px;color:var(--muted2);margin-top:2px;}
+    .go-winners-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;text-align:left;}
+    @media(max-width:500px){.go-winners-grid{grid-template-columns:1fr;}}
+    .go-winner-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.12);border-radius:10px;animation:goRowIn .4s both;}
+    @keyframes goRowIn{from{transform:translateX(-10px);opacity:0}to{transform:translateX(0);opacity:1}}
+    .gwr-rank{font-size:16px;width:22px;flex-shrink:0;text-align:center;}
+    .gwr-name{flex:1;font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .gwr-score{font-family:'Black Han Sans',sans-serif;font-size:15px;color:var(--gold);flex-shrink:0;}
+    .gwr-prize{font-size:13px;flex-shrink:0;animation:prizeWiggle 1s ease infinite alternate;}
+    @keyframes prizeWiggle{from{transform:rotate(-8deg) scale(1)}to{transform:rotate(8deg) scale(1.15)}}
     /* ── TV MODE ── */
     body.tv-mode .stats-row{display:none;}
     body.tv-mode .prize-section{display:none;}
@@ -155,7 +164,7 @@
 <!-- Game Over Banner (shown when session state = done) -->
 <div class="game-over-banner" id="go-banner">
   <div class="go-title">🏆 최종 결과 발표!</div>
-  <div class="go-sub">모든 게임이 종료되었습니다. 최종 순위를 확인하세요!</div>
+  <div class="go-sub">🎁 아래 10명에게 상품이 수여됩니다!</div>
   <div class="go-winner" id="go-winner" style="display:none">
     <div class="go-crown">👑</div>
     <div>
@@ -163,6 +172,7 @@
       <div class="go-winner-score" id="go-winner-score"></div>
     </div>
   </div>
+  <div class="go-winners-grid" id="go-winners-grid"></div>
 </div>
 
 <!-- Stats -->
@@ -472,8 +482,19 @@ function onSession(s){
       document.getElementById('go-winner-name').textContent=sorted[0].name;
       document.getElementById('go-winner-score').textContent=(sorted[0].total||0).toLocaleString()+'점 · 최종 1위!';
     }
+    // Show all top 10 prize winners
+    const prizeIcons=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+    const winners=sorted.slice(0,Math.min(PRIZE_COUNT,sorted.length));
+    document.getElementById('go-winners-grid').innerHTML=winners.map((p,i)=>`
+      <div class="go-winner-row" style="animation-delay:${i*80}ms">
+        <span class="gwr-rank">${prizeIcons[i]}</span>
+        <span class="gwr-name">${p.name}</span>
+        <span class="gwr-score">${(p.total||0).toLocaleString()}</span>
+        <span class="gwr-prize">🎁</span>
+      </div>`).join('');
     setTimeout(()=>confetti(100),400);
     setTimeout(()=>confetti(80),1200);
+    setTimeout(()=>confetti(60),2200);
   } else if(s.state!=='done'){
     gameOverShown=false;
     document.getElementById('go-banner').classList.remove('show');

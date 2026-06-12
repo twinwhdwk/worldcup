@@ -191,14 +191,20 @@
 </div>
 
 <!-- DONE -->
-<div class="screen hidden" id="s-done" style="background:radial-gradient(ellipse at 50% 20%,rgba(255,215,0,.12),transparent 65%),var(--dark);">
-  <div style="font-size:90px;animation:popIn .6s cubic-bezier(.34,1.56,.64,1);">🏆</div>
+<div class="screen hidden" id="s-done" style="background:radial-gradient(ellipse at 50% 20%,rgba(255,215,0,.12),transparent 65%),var(--dark);overflow-y:auto;justify-content:flex-start;padding-top:32px;">
+  <div style="font-size:90px;animation:popIn .6s cubic-bezier(.34,1.56,.64,1);" id="done-emoji">🏆</div>
   <div style="font-family:'Black Han Sans',sans-serif;font-size:32px;margin:10px 0 6px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">게임 종료!</div>
-  <div style="font-size:14px;color:var(--muted2);margin-bottom:24px;">고생하셨습니다 🎉</div>
-  <div style="background:var(--card);border:2px solid rgba(255,215,0,.2);border-radius:20px;padding:20px 40px;text-align:center;margin-bottom:20px;">
+  <div style="font-size:14px;color:var(--muted2);margin-bottom:20px;">고생하셨습니다 🎉</div>
+  <!-- Prize winner banner (shown when top 10) -->
+  <div id="done-prize-banner" style="display:none;width:100%;max-width:320px;background:linear-gradient(135deg,#FFD700,#f59e0b);color:#000;border-radius:20px;padding:20px 24px;text-align:center;margin-bottom:18px;animation:popIn .6s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 40px rgba(255,215,0,.4);">
+    <div style="font-size:44px;margin-bottom:6px;">🎁</div>
+    <div style="font-family:'Black Han Sans',sans-serif;font-size:22px;margin-bottom:4px;">상품 수여 대상!</div>
+    <div style="font-size:13px;font-weight:700;">TOP 10 진입! 이벤트 상품을 받으세요 🎉</div>
+  </div>
+  <div style="background:var(--card);border:2px solid rgba(255,215,0,.2);border-radius:20px;padding:20px 40px;text-align:center;margin-bottom:20px;width:100%;max-width:320px;">
     <div style="font-size:11px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">최종 점수</div>
     <div style="font-family:'Black Han Sans',sans-serif;font-size:56px;color:var(--gold);" id="done-score">0</div>
-    <div style="font-size:13px;color:var(--muted2);margin-top:4px;" id="done-rank"></div>
+    <div style="font-size:15px;font-weight:700;margin-top:4px;" id="done-rank"></div>
   </div>
   <a id="done-sb-link" href="scoreboard.html" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;text-decoration:none;border-radius:14px;padding:14px 28px;font-family:'Black Han Sans',sans-serif;font-size:17px;letter-spacing:1px;">📊 최종 랭킹 보기</a>
 </div>
@@ -349,16 +355,24 @@ function onSession(s){
     // Show final game-over screen
     document.getElementById('done-score').textContent=myScore.toLocaleString();
     const rankEl=document.getElementById('done-rank');
+    const prizeBanner=document.getElementById('done-prize-banner');
+    const doneEmoji=document.getElementById('done-emoji');
     if(s.allRanks&&s.allRanks[enc(myName)]){
       const r=s.allRanks[enc(myName)];
-      rankEl.textContent=r+'위'+(r<=10?' 🎁 상품 대상!':'');
-      rankEl.style.color=r<=10?'var(--gold)':'';
+      const inPrize=r<=10;
+      rankEl.textContent=inPrize?`🏆 ${r}위 — 상품 확정!`:`${r}위`;
+      rankEl.style.color=inPrize?'var(--gold)':'var(--muted2)';
+      if(inPrize){
+        prizeBanner.style.display='block';
+        doneEmoji.textContent='🎁';
+        confetti();setTimeout(confetti,300);setTimeout(confetti,700);
+        if(navigator.vibrate)navigator.vibrate([80,50,80,50,200]);
+      }
     } else {rankEl.textContent='';}
-    // Set scoreboard link with db param
     const sbLink=document.getElementById('done-sb-link');
     if(USE_FB)sbLink.href='scoreboard.html?db='+btoa(FIREBASE_URL);
     show('s-done');
-    setTimeout(confetti,300);
+    setTimeout(confetti,400);
     return;
   }
   const qId=(s.questionIdx||0)+'_'+(s.game||'');
@@ -547,6 +561,15 @@ const FOOTBALL_FACTS=[
   '주드 벨링엄은 레알 마드리드에서 UCL 결승골을 넣으며 세계 최고의 선수로 자리매김했습니다.',
   '한국은 2002년 홈 월드컵에서 4강까지 진출, 아시아 최고 성적을 기록했습니다.',
   '손흥민은 프리미어리그에서 100골 이상을 기록한 아시아 최초의 선수입니다.',
+  '1998년 프랑스 월드컵에서 호나우두는 결승 전날 이상한 발작 증상을 겪고도 출전, 브라질은 0-3으로 패했습니다.',
+  '이탈리아와 브라질은 각각 2번씩 월드컵 우승을 지켜봤습니다. 두 나라 모두 4회 우승 클럽입니다.',
+  '가장 많은 관중이 입장한 월드컵 경기는 1950년 결정전으로, 리우 마라카나 경기장에 약 199,954명이 모였습니다.',
+  '2022 카타르 월드컵은 역대 최초로 중동에서 열린 월드컵이었습니다.',
+  '잠비아 국가대표팀은 1993년 아프리카 컵 결승에서 추락 사고로 18명의 선수를 잃었음에도 결승에 올랐습니다.',
+  '가장 짧은 시간 내에 월드컵 골을 넣은 선수는 호세 루이스 브라운으로, 킥오프 후 약 10초 만에 득점했습니다.',
+  '독일은 월드컵 3·4위 결정전에서 역대 가장 좋은 성적을 기록한 나라로, 4번 3위를 차지했습니다.',
+  '2026 FIFA 월드컵은 48개국이 참가하는 역대 최대 규모의 대회입니다.',
+  '메시의 아르헨티나는 2021 코파 아메리카 우승으로 28년 만에 트로피를 들었고, 이듬해 2022 월드컵도 우승했습니다.',
 ];
 let _factIdx=0,_factTimer=null;
 function startFactRotation(){

@@ -315,7 +315,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 // ── Firebase real-time stats ──────────────────────
-const fbUrl=localStorage.getItem('wc_fb_url')||'';
+const fbUrl=localStorage.getItem('wc_fb_url')||'https://worldcup-minigame-default-rtdb.firebaseio.com';
+localStorage.setItem('wc_fb_url',fbUrl);
 const USE_FB=fbUrl.startsWith('https://');
 let fbScores={};
 
