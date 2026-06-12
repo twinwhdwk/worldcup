@@ -854,8 +854,14 @@ async function revealAnswer(){
   const allRanks={};
   Object.entries(mergedScores).sort((a,b)=>b[1].total-a[1].total).forEach(([k,p],i)=>{allRanks[k]=i+1;});
 
-  await fbPatch('/session',{state:'reveal',question:{...q,correctIdx:ci},scoreGains:gains,allRanks});
-  if(Object.keys(scoreUpdates).length>0)await fbPatch('/scores',scoreUpdates);
+  try{
+    await fbPatch('/session',{state:'reveal',question:{...q,correctIdx:ci},scoreGains:gains,allRanks});
+    if(Object.keys(scoreUpdates).length>0)await fbPatch('/scores',scoreUpdates);
+  }catch(err){
+    revealInProgress=false;
+    toast('⚠️ Firebase 오류: '+err.message,true);
+    return;
+  }
 
   // TV reveal
   tvShow('tv-reveal');
