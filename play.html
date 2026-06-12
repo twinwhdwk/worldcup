@@ -321,10 +321,19 @@ function listen(){
 }
 
 // ── Session handler ───────────────────────────────────────────────
+let lastKnownRank=0;
+function updateLobbyRank(){
+  const el=document.getElementById('lb-rank');
+  if(el&&lastKnownRank>0){
+    el.textContent=lastKnownRank+'위'+(lastKnownRank<=10?' 🎁':'');
+    el.style.color=lastKnownRank<=10?'var(--gold)':'var(--muted2)';
+  }
+}
 function onSession(s){
   if(!s||s.state==='lobby'){
     show('s-lobby');
     document.getElementById('lb-score').textContent=myScore;
+    updateLobbyRank();
     return;
   }
   if(s.state==='done'){
@@ -446,6 +455,7 @@ function showReveal(s){
   const rankEl=document.getElementById('rv-rank');
   if(s.allRanks&&s.allRanks[enc(myName)]){
     const r=s.allRanks[enc(myName)];
+    lastKnownRank=r;
     rankEl.textContent=r<=10?r+'위 🎁 상품권 확정!':r+'위';
     rankEl.style.color=r<=10?'var(--gold)':'var(--muted2)';
   } else {rankEl.textContent='';}
