@@ -873,7 +873,9 @@ async function revealAnswer(){
   const sc=document.getElementById('score-changes');
   sc.innerHTML=topGainers.map(([k,g],i)=>{
     const name=currentAnswers[k]?.name||k;
-    return `<div class="sc-chip" style="animation-delay:${i*.08}s">+${g}점 ${name}</div>`;
+    const newStreak=(currentScores[k]?.streak)||0;
+    const fire=newStreak>=5?'🔥🔥':newStreak>=3?'🔥':'';
+    return `<div class="sc-chip" style="animation-delay:${i*.08}s">+${g}점 ${name}${fire}</div>`;
   }).join('');
 
   [0,1,2,3].forEach(i=>{
@@ -1020,10 +1022,12 @@ function renderLeaderboard(){
   lb.innerHTML=sorted.map((p,i)=>{
     const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
     const prize=i<PRIZE_COUNT;
+    const streak=p.streak||0;
+    const streakBadge=streak>=5?'🔥🔥':streak>=3?'🔥':'';
     return `<div class="lb-item${prize?' prize':''}">
       <div class="lb-rank">${medals[i]}</div>
       <div class="lb-avatar" style="background:${col}">${(p.name||'?').slice(0,2)}</div>
-      <div class="lb-name">${p.name||'?'}${prize?'&nbsp;🎁':''}</div>
+      <div class="lb-name">${p.name||'?'}${prize?'&nbsp;🎁':''}${streakBadge?'&nbsp;<span style="font-size:13px">'+streakBadge+'</span>':''}</div>
       <div class="lb-score">${p.total||0}</div>
     </div>`;
   }).join('');
