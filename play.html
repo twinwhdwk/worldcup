@@ -413,7 +413,15 @@ function onSession(s){
   } else if(s.state==='reveal'){
     stopFactRotation();
     const rqId=(s.questionIdx||0)+'_'+(s.game||'');
-    if(rqId!==_revealQId){_revealQId=rqId;showReveal(s);}
+    if(rqId!==_revealQId){
+      _revealQId=rqId;
+      // If myAnswerIdx is unknown (e.g. page refresh during reveal), restore from Firebase first
+      if(myAnswerIdx<0&&myName){
+        fbGet('/answers/'+enc(myName)).then(ans=>{if(ans&&ans.idx>=0)myAnswerIdx=ans.idx;showReveal(s);});
+      } else {
+        showReveal(s);
+      }
+    }
   }
 }
 

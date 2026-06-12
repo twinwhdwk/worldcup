@@ -868,12 +868,17 @@ async function nextQuestion(){
   if(tvBar2){tvBar2.style.width='0%';tvBar2.style.background='var(--green)';}
   if(tvLbl2){tvLbl2.textContent='0명 응답';}
   await fbDelete('/answers');
-  await fbPatch('/session',{
-    state:'question',
-    questionIdx:currentQIdx,
-    question:{...q,timeLimit:limit,startAt,correctIdx:null},
-    scoreGains:{}
-  });
+  try{
+    await fbPatch('/session',{
+      state:'question',
+      questionIdx:currentQIdx,
+      question:{...q,timeLimit:limit,startAt,correctIdx:null},
+      scoreGains:{}
+    });
+  }catch(err){
+    currentQIdx--;revealInProgress=false;
+    toast('⚠️ Firebase 오류: '+err.message,true);return;
+  }
 
   tvShow('tv-question');
   document.getElementById('tv-q-game').textContent=selectedGame;
