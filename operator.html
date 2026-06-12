@@ -23,9 +23,18 @@
     .setup-banner{background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 20px;margin:16px 24px;display:flex;align-items:flex-start;gap:14px;}
     .setup-banner.hidden{display:none;}
     .sb-icon{font-size:24px;flex-shrink:0;margin-top:2px;}
-    .sb-text{font-size:13px;line-height:1.6;}
+    .sb-body{flex:1;}
+    .sb-text{font-size:13px;line-height:1.6;margin-bottom:8px;}
     .sb-text strong{color:#fcd34d;}
+    .sb-text a{color:#60a5fa;}
     .sb-text code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-size:12px;}
+    .fb-input-row{display:flex;gap:8px;}
+    .fb-url-input{flex:1;background:#111;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;color:#fff;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;}
+    .fb-url-input:focus{border-color:#f59e0b;}
+    .fb-save-btn{background:#f59e0b;color:#000;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:12px;white-space:nowrap;transition:opacity .2s;}
+    .fb-save-btn:hover{opacity:.85;}
+    .fb-connected{background:linear-gradient(135deg,rgba(0,132,61,.12),rgba(0,132,61,.04));border:1px solid rgba(0,132,61,.25);border-radius:12px;padding:10px 20px;margin:8px 24px 0;font-size:12px;color:#4ade80;display:flex;align-items:center;gap:8px;}
+    .fb-connected.hidden{display:none;}
 
     /* ── MAIN LAYOUT ── */
     .main{display:flex;flex:1;overflow:hidden;gap:0;}
@@ -33,50 +42,55 @@
     /* ── LEFT: TV DISPLAY ── */
     .tv-panel{flex:1;min-width:0;display:flex;flex-direction:column;padding:24px;overflow-y:auto;}
 
-    /* State screens */
-    .tv-lobby{display:flex;flex-direction:column;align-items:center;justify-content:center;height:400px;text-align:center;}
+    /* LOBBY */
+    .tv-lobby{display:flex;flex-direction:column;align-items:center;justify-content:center;height:480px;text-align:center;}
     .tv-ball{font-size:100px;animation:spin 8s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .tv-lobby-title{font-family:'Black Han Sans',sans-serif;font-size:48px;margin:16px 0 8px;}
+    .tv-lobby-title{font-family:'Black Han Sans',sans-serif;font-size:48px;margin:16px 0 8px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
     .tv-lobby-sub{font-size:18px;color:var(--muted2);}
-    .qr-big{margin-top:24px;}
-    .qr-big img{width:140px;height:140px;border-radius:8px;}
+    .tv-lobby-count{margin-top:16px;font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--green);}
+    .qr-big{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+    .qr-big img{width:150px;height:150px;border-radius:8px;border:3px solid rgba(255,255,255,.1);}
+    .qr-label{font-size:12px;color:var(--muted2);}
+    .qr-url{font-size:10px;color:var(--muted2);word-break:break-all;max-width:200px;text-align:center;}
 
-    /* Question display (TV view) */
-    .tv-question{display:none;flex-direction:column;align-items:center;}
+    /* QUESTION (TV view) */
+    .tv-question{display:none;flex-direction:column;align-items:center;width:100%;}
     .tv-q-header{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
     .tv-q-game{font-size:14px;font-weight:700;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;}
     .tv-q-num{font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--gold);}
-    .tv-timer-wrap{width:100%;height:12px;background:rgba(255,255,255,.06);border-radius:100px;margin-bottom:20px;overflow:hidden;}
-    #tv-tbar{height:100%;border-radius:100px;transition:width .5s linear,background .3s;background:var(--green);}
+    .tv-timer-wrap{width:100%;height:12px;background:rgba(255,255,255,.06);border-radius:100px;margin-bottom:8px;overflow:hidden;}
+    #tv-tbar{height:100%;border-radius:100px;transition:width .3s linear,background .3s;background:var(--green);}
+    .tv-countdown{font-family:'Black Han Sans',sans-serif;font-size:20px;color:var(--muted2);text-align:right;margin-bottom:12px;min-height:26px;}
+    .tv-countdown.urgent{color:#ef4444;animation:cntPulse .4s ease infinite alternate;}
+    @keyframes cntPulse{from{transform:scale(1)}to{transform:scale(1.15)}}
     .tv-q-card{width:100%;background:var(--card);border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:36px 32px;text-align:center;margin-bottom:20px;}
     .tv-q-emoji{font-size:80px;display:block;margin-bottom:14px;}
     .tv-q-text{font-family:'Black Han Sans',sans-serif;font-size:clamp(22px,3.5vw,40px);line-height:1.3;}
     .tv-options{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    .tv-opt{border-radius:18px;padding:22px 20px;font-family:'Black Han Sans',sans-serif;font-size:clamp(16px,2.5vw,26px);display:flex;align-items:center;gap:14px;color:#fff;transition:opacity .3s;}
+    .tv-opt{border-radius:18px;padding:22px 20px;font-family:'Black Han Sans',sans-serif;font-size:clamp(16px,2.5vw,26px);display:flex;align-items:center;gap:14px;color:#fff;transition:opacity .3s,transform .3s;}
     .tv-opt.a{background:#c9003b;}
     .tv-opt.b{background:#1050c0;}
     .tv-opt.c{background:#c08000;}
     .tv-opt.d{background:#008542;}
-    .tv-opt.correct{background:#22c55e!important;box-shadow:0 0 30px rgba(34,197,94,.4);animation:correctGlow .5s ease;}
-    .tv-opt.wrong{opacity:.3!important;}
-    @keyframes correctGlow{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+    .tv-opt.correct{background:#22c55e!important;box-shadow:0 0 40px rgba(34,197,94,.5);animation:correctGlow .6s ease;}
+    .tv-opt.wrong{opacity:.25!important;transform:scale(0.97);}
+    @keyframes correctGlow{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
     .tv-opt-letter{font-size:28px;opacity:.6;flex-shrink:0;}
     .tv-opt-text{font-size:clamp(15px,2.5vw,24px);line-height:1.3;}
 
-    /* Reveal overlay */
-    .tv-reveal{display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;}
-    .tv-rv-icon{font-size:100px;animation:popIn .5s ease;margin-bottom:20px;}
-    @keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+    /* REVEAL (TV) */
+    .tv-reveal{display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;min-height:400px;}
+    .tv-rv-icon{font-size:110px;animation:popIn .5s ease;margin-bottom:18px;}
+    @keyframes popIn{from{transform:scale(0) rotate(-10deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
     .tv-rv-text{font-family:'Black Han Sans',sans-serif;font-size:40px;margin-bottom:12px;}
-    .tv-rv-sub{font-size:20px;color:var(--muted2);}
-    .score-changes{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;max-width:600px;}
-    .sc-chip{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);border-radius:100px;padding:8px 18px;font-family:'Black Han Sans',sans-serif;font-size:16px;color:var(--gold);animation:chipIn .3s ease both;}
-    @keyframes chipIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+    .tv-rv-sub{font-size:20px;color:var(--muted2);margin-bottom:28px;}
+    .score-changes{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:700px;}
+    .sc-chip{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);border-radius:100px;padding:8px 18px;font-family:'Black Han Sans',sans-serif;font-size:17px;color:var(--gold);animation:chipIn .35s ease both;}
+    @keyframes chipIn{from{transform:scale(.6) translateY(12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
 
-    /* ── RIGHT: CONTROL PANEL ── */
+    /* ── RIGHT CONTROLS ── */
     .ctrl-panel{width:340px;flex-shrink:0;background:#08090f;border-left:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;overflow-y:auto;padding:20px 18px;}
-
     .ctrl-section{margin-bottom:20px;}
     .ctrl-title{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;font-weight:700;}
 
@@ -88,26 +102,26 @@
 
     /* Game selector */
     .game-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
-    .game-sel-btn{background:var(--card);border:1.5px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;font-family:'Noto Sans KR',sans-serif;}
+    .game-sel-btn{background:var(--card);border:1.5px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;}
     .game-sel-btn:hover{border-color:rgba(255,255,255,.2);}
     .game-sel-btn.active{background:rgba(0,132,61,.15);border-color:var(--green);}
     .game-sel-icon{font-size:22px;display:block;margin-bottom:4px;}
     .game-sel-name{font-size:11px;font-weight:700;color:var(--muted2);}
     .game-sel-btn.active .game-sel-name{color:var(--green);}
 
-    /* Q count */
     .q-count-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
     .q-count-lbl{font-size:12px;color:var(--muted2);}
     .q-count-val{font-family:'Black Han Sans',sans-serif;font-size:20px;color:var(--gold);}
     input[type=range]{flex:1;accent-color:var(--green);}
 
-    /* Controls */
-    .ctrl-btn{width:100%;border:none;border-radius:14px;padding:16px;font-size:18px;font-family:'Black Han Sans',sans-serif;cursor:pointer;transition:opacity .2s,transform .1s;margin-bottom:10px;letter-spacing:1px;-webkit-tap-highlight-color:transparent;}
+    /* Buttons */
+    .ctrl-btn{width:100%;border:none;border-radius:14px;padding:16px;font-size:18px;font-family:'Black Han Sans',sans-serif;cursor:pointer;transition:opacity .2s,transform .1s;margin-bottom:10px;letter-spacing:1px;}
     .ctrl-btn:active{transform:scale(0.97);}
     .btn-start{background:var(--green);color:#fff;}
     .btn-reveal{background:#f59e0b;color:#000;}
     .btn-next{background:#3b82f6;color:#fff;}
-    .btn-lobby{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted2);}
+    .btn-skip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted2);font-size:14px;padding:10px;}
+    .btn-lobby{background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.25);color:#fca5a5;font-size:14px;padding:10px;}
     .ctrl-btn:disabled{opacity:.35;cursor:not-allowed;}
 
     /* Answer distribution */
@@ -115,7 +129,7 @@
     .ad-row{display:flex;align-items:center;gap:8px;}
     .ad-letter{font-family:'Black Han Sans',sans-serif;font-size:16px;width:22px;text-align:center;flex-shrink:0;}
     .ad-bar-bg{flex:1;height:22px;background:rgba(255,255,255,.04);border-radius:6px;overflow:hidden;}
-    .ad-bar{height:100%;border-radius:6px;transition:width .4s ease;display:flex;align-items:center;padding-left:8px;}
+    .ad-bar{height:100%;border-radius:6px;transition:width .5s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;padding-left:8px;min-width:0;}
     .ad-cnt{font-size:12px;font-weight:700;color:rgba(255,255,255,.8);}
     .ad-row.a .ad-bar{background:#c9003b;}
     .ad-row.b .ad-bar{background:#1050c0;}
@@ -126,17 +140,22 @@
 
     /* Leaderboard */
     .lb-list{display:flex;flex-direction:column;gap:6px;}
-    .lb-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:8px 12px;font-size:13px;}
+    .lb-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:8px 12px;font-size:13px;border:1px solid transparent;transition:border-color .3s;}
     .lb-rank{font-family:'Black Han Sans',sans-serif;font-size:16px;width:28px;text-align:center;flex-shrink:0;}
     .lb-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:#000;}
     .lb-name{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .lb-score{font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--gold);}
-    .lb-item.prize{border:1px solid rgba(255,215,0,.2);}
+    .lb-item.prize{border-color:rgba(255,215,0,.2);}
+
+    /* Sound toggle */
+    .sound-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2);cursor:pointer;padding:8px 0;margin-bottom:12px;}
+    .sound-toggle input{accent-color:var(--green);width:16px;height:16px;}
 
     /* Toast */
     .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#fff;padding:10px 22px;border-radius:100px;font-weight:700;font-size:13px;transition:transform .3s;z-index:999;pointer-events:none;}
     .toast.show{transform:translateX(-50%) translateY(0);}
 
+    @keyframes confettiFall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
     @media(max-width:900px){.main{flex-direction:column-reverse;}.ctrl-panel{width:100%;border-left:none;border-top:1px solid rgba(255,255,255,.05);}.tv-panel{padding:16px;}}
   </style>
 </head>
@@ -145,44 +164,57 @@
 <div class="topbar">
   <div class="topbar-title">👑 운영자 컨트롤 <span class="live-pill">LIVE</span></div>
   <div class="topbar-links">
-    <a href="play.html" class="topbar-link" target="_blank">📱 참가자 링크</a>
-    <a href="scoreboard.html" class="topbar-link" target="_blank">🏆 스코어보드</a>
+    <span class="topbar-link" onclick="openPlayLink()">📱 참가자 링크</span>
+    <a href="scoreboard.html" class="topbar-link" target="_blank" id="sb-link">🏆 스코어보드</a>
   </div>
 </div>
 
-<!-- Firebase setup banner -->
+<!-- Firebase setup banner (shown when not configured) -->
 <div class="setup-banner" id="setup-banner">
   <div class="sb-icon">⚡</div>
-  <div class="sb-text">
-    <strong>Firebase 설정 필요</strong> — 아래 단계를 따라 30명 실시간 공유를 활성화하세요:<br>
-    ① <a href="https://console.firebase.google.com" target="_blank" style="color:#60a5fa;">console.firebase.google.com</a> → 새 프로젝트 생성<br>
-    ② Realtime Database → 만들기 → 테스트 모드 선택<br>
-    ③ 데이터베이스 URL 복사 → 이 파일과 play.html의 <code>FIREBASE_URL</code> 변수에 붙여넣기
+  <div class="sb-body">
+    <div class="sb-text">
+      <strong>Firebase 설정 필요</strong> — RTDB URL을 입력하면 30명 실시간 공유가 활성화됩니다.<br>
+      <small>① <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → 새 프로젝트 → Realtime Database → 테스트 모드로 만들기 → URL 복사</small>
+    </div>
+    <div class="fb-input-row">
+      <input id="fb-url-in" class="fb-url-input" type="text" placeholder="https://your-project-default-rtdb.firebasedatabase.app">
+      <button class="fb-save-btn" onclick="saveFbUrl()">저장 & 재시작</button>
+    </div>
   </div>
+</div>
+
+<!-- Firebase connected notice -->
+<div class="fb-connected hidden" id="fb-connected">
+  ✅ Firebase 연결됨 &nbsp;|&nbsp; <span id="fb-url-display" style="opacity:.6;font-size:11px;"></span>
+  &nbsp;<span onclick="clearFbUrl()" style="cursor:pointer;text-decoration:underline;color:#fca5a5;font-size:11px;">연결 해제</span>
 </div>
 
 <div class="main">
   <!-- ── LEFT: TV DISPLAY ── -->
   <div class="tv-panel">
 
-    <!-- LOBBY STATE -->
+    <!-- LOBBY -->
     <div class="tv-lobby" id="tv-lobby">
       <div class="tv-ball">⚽</div>
       <div class="tv-lobby-title">월드컵 QUIZ</div>
-      <div class="tv-lobby-sub">운영자가 게임을 시작하길 기다리는 중...</div>
+      <div class="tv-lobby-sub" id="tv-lobby-sub">운영자가 게임을 시작하길 기다리는 중...</div>
+      <div class="tv-lobby-count" id="tv-lobby-count"></div>
       <div class="qr-big">
-        <img id="qr-img" src="" alt="QR">
-        <p style="font-size:12px;color:var(--muted2);margin-top:8px;text-align:center;">참가자 접속 QR</p>
+        <img id="qr-img" src="" alt="QR" onerror="this.style.display='none'">
+        <p class="qr-label">📱 스캔해서 참가</p>
+        <p class="qr-url" id="qr-url-text"></p>
       </div>
     </div>
 
-    <!-- QUESTION STATE -->
+    <!-- QUESTION -->
     <div class="tv-question" id="tv-question">
       <div class="tv-q-header">
         <div class="tv-q-game" id="tv-q-game">선수퀴즈</div>
         <div class="tv-q-num" id="tv-q-num">문제 1 / 10</div>
       </div>
       <div class="tv-timer-wrap"><div id="tv-tbar" style="width:100%"></div></div>
+      <div class="tv-countdown" id="tv-countdown"></div>
       <div class="tv-q-card">
         <span class="tv-q-emoji" id="tv-q-emoji">⚽</span>
         <div class="tv-q-text" id="tv-q-text">문제 로딩 중...</div>
@@ -195,7 +227,7 @@
       </div>
     </div>
 
-    <!-- REVEAL STATE -->
+    <!-- REVEAL -->
     <div class="tv-reveal" id="tv-reveal">
       <div class="tv-rv-icon" id="tv-rv-icon">🎉</div>
       <div class="tv-rv-text" id="tv-rv-text">정답은...</div>
@@ -205,16 +237,22 @@
 
   </div>
 
-  <!-- ── RIGHT: CONTROLS ── -->
+  <!-- ── RIGHT CONTROLS ── -->
   <div class="ctrl-panel">
+
+    <!-- Sound toggle -->
+    <label class="sound-toggle">
+      <input type="checkbox" id="snd-toggle" checked>
+      🔊 효과음 켜기
+    </label>
 
     <!-- Stats -->
     <div class="ctrl-section">
       <div class="ctrl-title">📊 현황</div>
       <div class="stats-grid">
         <div class="stat"><div class="stat-val" id="st-players">0</div><div class="stat-lbl">참가자</div></div>
-        <div class="stat"><div class="stat-val" id="st-answered">0</div><div class="stat-lbl">응답함</div></div>
-        <div class="stat"><div class="stat-val" id="st-q">—</div><div class="stat-lbl">현재 문제</div></div>
+        <div class="stat"><div class="stat-val" id="st-answered">0</div><div class="stat-lbl">응답</div></div>
+        <div class="stat"><div class="stat-val" id="st-q">—</div><div class="stat-lbl">문제</div></div>
         <div class="stat"><div class="stat-val" id="st-state">대기</div><div class="stat-lbl">상태</div></div>
       </div>
     </div>
@@ -250,7 +288,7 @@
         <input type="range" id="qcount" min="5" max="20" value="10" oninput="document.getElementById('qcount-val').textContent=this.value">
       </div>
       <div class="q-count-row">
-        <div class="q-count-lbl">시간 제한:</div>
+        <div class="q-count-lbl">제한 시간:</div>
         <div class="q-count-val" id="qlimit-val">20초</div>
         <input type="range" id="qlimit" min="10" max="40" step="5" value="20" oninput="document.getElementById('qlimit-val').textContent=this.value+'초'">
       </div>
@@ -259,10 +297,11 @@
 
     <!-- Active controls -->
     <div class="ctrl-section" id="active-ctrl" style="display:none">
-      <div class="ctrl-title">⚡ 컨트롤</div>
+      <div class="ctrl-title">⚡ 진행 컨트롤</div>
       <button class="ctrl-btn btn-start" id="btn-nextq" onclick="nextQuestion()">▶ 다음 문제 시작</button>
       <button class="ctrl-btn btn-reveal" id="btn-reveal" onclick="revealAnswer()" style="display:none">🎯 정답 공개</button>
       <button class="ctrl-btn btn-next" id="btn-cont" onclick="nextQuestion()" style="display:none">➡ 다음 문제</button>
+      <button class="ctrl-btn btn-skip" id="btn-skip" onclick="skipQuestion()" style="display:none">⏭ 문제 건너뛰기</button>
       <button class="ctrl-btn btn-lobby" onclick="endSession()">🏁 세션 종료</button>
     </div>
 
@@ -278,7 +317,7 @@
       <div class="ans-total" id="ans-total">0 / 0 응답</div>
     </div>
 
-    <!-- Leaderboard (TOP 10) -->
+    <!-- Leaderboard -->
     <div class="ctrl-section">
       <div class="ctrl-title">🏆 실시간 TOP 10</div>
       <div class="lb-list" id="lb-list">
@@ -292,22 +331,79 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════
-   ★ FIREBASE URL — 여기에 본인의 RTDB URL을 입력!
-
-   play.html의 FIREBASE_URL도 동일하게 변경하세요.
-   ═══════════════════════════════════════════════════ */
-const FIREBASE_URL = 'YOUR_FIREBASE_URL';
-
+// ── Firebase URL (from localStorage — no code editing needed!) ────
+const FIREBASE_URL = (()=>{
+  return localStorage.getItem('wc_fb_url') || '';
+})();
 const FB = FIREBASE_URL + '/wc_live';
-const USE_FB = FIREBASE_URL.startsWith('https://') && !FIREBASE_URL.includes('YOUR');
-const GAME_URL = 'https://twinwhdwk.github.io/worldcup_minigame/play.html';
-const AVATAR_COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#a855f7','#ec4899','#14b8a6','#84cc16'];
-const PRIZE_COUNT = 10;
+const USE_FB = FIREBASE_URL.startsWith('https://');
+const BASE_URL = 'https://twinwhdwk.github.io/worldcup_minigame';
 
-if(USE_FB) document.getElementById('setup-banner').classList.add('hidden');
+function saveFbUrl(){
+  const url = document.getElementById('fb-url-in').value.trim().replace(/\/$/, '');
+  if(!url.startsWith('https://')){alert('올바른 URL을 입력해주세요 (https://로 시작)');return;}
+  localStorage.setItem('wc_fb_url', url);
+  location.reload();
+}
+function clearFbUrl(){
+  if(confirm('Firebase 연결을 해제하겠습니까?')){localStorage.removeItem('wc_fb_url');location.reload();}
+}
 
-// ── QUESTION BANKS ────────────────────────────────
+// Init setup UI
+if(USE_FB){
+  document.getElementById('setup-banner').classList.add('hidden');
+  document.getElementById('fb-connected').classList.remove('hidden');
+  document.getElementById('fb-url-display').textContent = FIREBASE_URL;
+} else {
+  document.getElementById('fb-connected').classList.add('hidden');
+}
+
+// ── Play URL with encoded Firebase URL ───────────────────────────
+function getPlayUrl(){
+  if(!USE_FB) return BASE_URL + '/play.html';
+  return BASE_URL + '/play.html?db=' + btoa(FIREBASE_URL);
+}
+function openPlayLink(){
+  window.open(getPlayUrl(),'_blank');
+}
+
+// Update scoreboard link with db param
+if(USE_FB){
+  document.getElementById('sb-link').href = BASE_URL + '/scoreboard.html?db=' + btoa(FIREBASE_URL);
+}
+
+// ── QR Code ──────────────────────────────────────────────────────
+function updateQR(){
+  const url = getPlayUrl();
+  document.getElementById('qr-img').src = `https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(url)}&chs=300x300&chld=M|1`;
+  document.getElementById('qr-url-text').textContent = url.replace('https://','');
+}
+updateQR();
+
+// ── Sound Effects (Web Audio API) ────────────────────────────────
+let AC = null;
+function getAC(){
+  if(!AC){try{AC = new (window.AudioContext||window.webkitAudioContext)();}catch{}}
+  return AC;
+}
+function snd(freq, dur, type='sine', vol=0.28){
+  if(!document.getElementById('snd-toggle').checked) return;
+  const ac = getAC(); if(!ac) return;
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.connect(g); g.connect(ac.destination);
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+  o.start(); o.stop(ac.currentTime + dur);
+}
+function sndCorrect(){snd(523,.08);setTimeout(()=>snd(659,.08),90);setTimeout(()=>snd(784,.22),180);}
+function sndWrong(){snd(180,.4,'sawtooth',.18);}
+function sndTick(){snd(880,.05,'square',.08);}
+function sndUrgent(){snd(660,.06,'square',.12);}
+function sndStart(){snd(440,.08);setTimeout(()=>snd(550,.08),110);setTimeout(()=>snd(660,.2),220);}
+function sndReveal(){snd(392,.1);setTimeout(()=>snd(523,.1),120);setTimeout(()=>snd(659,.1),240);setTimeout(()=>snd(784,.3),360);}
+
+// ── QUESTION BANKS ────────────────────────────────────────────────
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 
 const QB = {
@@ -382,7 +478,7 @@ const QB = {
     {emoji:'📊',text:'역대 월드컵 통산 최다 득점 선수는?',options:['호나우두 (15골)','미로슬라프 클로제 (16골)','게르트 뮐러 (14골)','리오넬 메시 (13골)'],correct:1},
     {emoji:'📊',text:'2022 카타르 월드컵 득점왕은?',options:['리오넬 메시 (7골)','킬리안 음바페 (8골)','줄리앙 알바레즈 (4골)','해리 케인 (3골)'],correct:1},
     {emoji:'📊',text:'"신의 손" 골을 기록한 선수는?',options:['펠레','호나우지뉴','마라도나','호나우두'],correct:2},
-    {emoji:'📊',text:'2014년 준결승 브라질 대 독일 최종 스코어는?',options:['브라질 3-4 독일','브라질 1-7 독일','브라질 2-5 독일','브라질 0-4 독일'],correct:1},
+    {emoji:'📊',text:'2014년 준결승 브라질 vs 독일 최종 스코어는?',options:['브라질 3-4 독일','브라질 1-7 독일','브라질 2-5 독일','브라질 0-4 독일'],correct:1},
     {emoji:'📊',text:'2018 러시아 월드컵 황금공(MVP) 수상자는?',options:['리오넬 메시','해리 케인','루카 모드리치','킬리안 음바페'],correct:2},
     {emoji:'📊',text:'역대 가장 어린 나이에 월드컵 골을 넣은 선수는?',options:['호날두 (17세)','음바페 (19세)','펠레 (17세)','마이클 오웬 (18세)'],correct:2},
     {emoji:'📊',text:'월드컵에 가장 많이 출전한 선수는?',options:['로타어 마테우스 (25경기)','안토니오 카르바할 (25경기)','라파엘 마르케스 (25경기)','리오넬 메시 (26경기)'],correct:3},
@@ -413,47 +509,43 @@ const QB = {
   ]),
 };
 
-// ── State ─────────────────────────────────────────
+// ── State ──────────────────────────────────────────────────────────
 let selectedGame = '선수퀴즈';
 let sessionQuestions = [];
 let currentQIdx = -1;
 let sessionActive = false;
 let tvTimerInt = null;
-let answersES = null;
-let scoresES = null;
-let playersES = null;
-let currentAnswers = {};
-let currentScores = {};
-let currentPlayers = {};
+let cntdownInt = null;
+let answersES = null, scoresES = null, playersES = null;
+let currentAnswers = {}, currentScores = {}, currentPlayers = {};
+let beepedSeconds = new Set();
 
-// ── Utils ─────────────────────────────────────────
+// ── Utils ──────────────────────────────────────────────────────────
 function enc(n){return n.replace(/[.#$[\]]/g,'_');}
 function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'#ef4444':'var(--green)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-function tvShow(id){['tv-lobby','tv-question','tv-reveal'].forEach(x=>{const el=document.getElementById(x);if(el){el.style.display=x===id?'flex':'none';}});}
+function tvShow(id){['tv-lobby','tv-question','tv-reveal'].forEach(x=>{const el=document.getElementById(x);if(el)el.style.display=x===id?'flex':'none';});}
 
-// ── Firebase ──────────────────────────────────────
-async function fbPut(p,d){await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}
-async function fbPatch(p,d){await fetch(FB+p+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}
-async function fbDelete(p){await fetch(FB+p+'.json',{method:'DELETE'});}
+// ── Firebase ───────────────────────────────────────────────────────
+async function fbPut(p,d){if(!USE_FB)return;await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}
+async function fbPatch(p,d){if(!USE_FB)return;await fetch(FB+p+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}
+async function fbDelete(p){if(!USE_FB)return;await fetch(FB+p+'.json',{method:'DELETE'});}
 
-// ── Game select ───────────────────────────────────
+// ── Game select ────────────────────────────────────────────────────
 function selectGame(name,el){
   selectedGame=name;
   document.querySelectorAll('.game-sel-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
 }
 
-// ── Start session ─────────────────────────────────
+// ── Start session ──────────────────────────────────────────────────
 async function startSession(){
-  if(!USE_FB){toast('⚠️ Firebase URL을 먼저 설정하세요!',true);return;}
+  if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
   const n=parseInt(document.getElementById('qcount').value);
-  const limit=parseInt(document.getElementById('qlimit').value);
   const qs=QB[selectedGame]().slice(0,n);
   sessionQuestions=qs;
   currentQIdx=-1;
   sessionActive=true;
 
-  // Reset answers and setup session
   await fbPut('/session',{state:'lobby',game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
   await fbDelete('/answers');
 
@@ -462,79 +554,58 @@ async function startSession(){
   document.getElementById('btn-nextq').style.display='block';
   document.getElementById('btn-reveal').style.display='none';
   document.getElementById('btn-cont').style.display='none';
+  document.getElementById('btn-skip').style.display='none';
   document.getElementById('ans-dist-section').style.display='block';
   document.getElementById('st-state').textContent='대기중';
   tvShow('tv-lobby');
   startListening();
-  toast('✅ 세션 시작! 참가자들이 접속하고 있습니다.');
+  sndStart();
+  toast('✅ 세션 시작! QR을 스캔해서 참가하세요.');
 }
 
-// ── Listen ────────────────────────────────────────
+// ── Listening ──────────────────────────────────────────────────────
 function startListening(){
-  // Players
   if(playersES){try{playersES.close();}catch{}}
   playersES=new EventSource(FB+'/players.json');
-  playersES.addEventListener('put',e=>{
-    const d=JSON.parse(e.data);
-    currentPlayers=d.data||{};
-    document.getElementById('st-players').textContent=Object.keys(currentPlayers).length;
-  });
-  playersES.addEventListener('patch',e=>{
-    const d=JSON.parse(e.data);
-    Object.assign(currentPlayers,d.data||{});
-    document.getElementById('st-players').textContent=Object.keys(currentPlayers).length;
-  });
+  const onPlayers=d=>{
+    currentPlayers=d||{};
+    const n=Object.keys(currentPlayers).length;
+    document.getElementById('st-players').textContent=n;
+    document.getElementById('tv-lobby-count').textContent=n>0?n+'명 대기중':'';
+  };
+  playersES.addEventListener('put',e=>{const d=JSON.parse(e.data);onPlayers(d.data||{});});
+  playersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);Object.assign(currentPlayers,d.data||{});onPlayers(currentPlayers);});
 
-  // Answers
   if(answersES){try{answersES.close();}catch{}}
   answersES=new EventSource(FB+'/answers.json');
-  answersES.addEventListener('put',e=>{
-    const d=JSON.parse(e.data);
-    currentAnswers=d.data||{};
-    renderAnswerDist();
-  });
-  answersES.addEventListener('patch',e=>{
-    const d=JSON.parse(e.data);
-    Object.assign(currentAnswers,d.data||{});
-    renderAnswerDist();
-  });
+  answersES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentAnswers=d.data||{};renderAnswerDist();});
+  answersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);Object.assign(currentAnswers,d.data||{});renderAnswerDist();});
 
-  // Scores
   if(scoresES){try{scoresES.close();}catch{}}
   scoresES=new EventSource(FB+'/scores.json');
-  scoresES.addEventListener('put',e=>{
-    const d=JSON.parse(e.data);
-    currentScores=d.data||{};
-    renderLeaderboard();
-  });
-  scoresES.addEventListener('patch',e=>{
-    const d=JSON.parse(e.data);
-    Object.assign(currentScores,d.data||{});
-    renderLeaderboard();
-  });
+  scoresES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentScores=d.data||{};renderLeaderboard();});
+  scoresES.addEventListener('patch',e=>{const d=JSON.parse(e.data);Object.assign(currentScores,d.data||{});renderLeaderboard();});
 }
 
-// ── Next question ─────────────────────────────────
+// ── Next question ──────────────────────────────────────────────────
 async function nextQuestion(){
   currentQIdx++;
-  if(currentQIdx>=sessionQuestions.length){
-    await endSession(); return;
-  }
+  if(currentQIdx>=sessionQuestions.length){await endSession();return;}
 
   const q=sessionQuestions[currentQIdx];
   const limit=parseInt(document.getElementById('qlimit').value)||20;
-  const startAt=Date.now()+1500; // 1.5s delay so everyone can see it
+  const startAt=Date.now()+1500;
+  beepedSeconds=new Set();
 
   currentAnswers={};
   await fbDelete('/answers');
   await fbPatch('/session',{
     state:'question',
     questionIdx:currentQIdx,
-    question:{...q,timeLimit:limit,startAt,correctIdx:undefined}, // don't reveal correct yet
+    question:{...q,timeLimit:limit,startAt,correctIdx:undefined},
     scoreGains:{}
   });
 
-  // Render TV
   tvShow('tv-question');
   document.getElementById('tv-q-game').textContent=selectedGame;
   document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
@@ -551,45 +622,63 @@ async function nextQuestion(){
   document.getElementById('btn-nextq').style.display='none';
   document.getElementById('btn-reveal').style.display='block';
   document.getElementById('btn-cont').style.display='none';
+  document.getElementById('btn-skip').style.display='block';
   renderAnswerDist();
 }
 
 function startTvTimer(startAt,limit){
-  clearInterval(tvTimerInt);
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);
   const bar=document.getElementById('tv-tbar');
+  const cntEl=document.getElementById('tv-countdown');
   const run=()=>{
     const rem=Math.max(0,limit-(Date.now()-startAt)/1000);
-    bar.style.width=(rem/limit*100)+'%';
+    const pct=rem/limit*100;
+    bar.style.width=pct+'%';
     bar.style.background=rem<5?'#ef4444':rem<10?'#f59e0b':'var(--green)';
-    if(rem<=0)clearInterval(tvTimerInt);
+    const remSec=Math.ceil(rem);
+    cntEl.textContent=rem>0?remSec+'초':'⏰';
+    cntEl.className='tv-countdown'+(rem<6?' urgent':'');
+    if(rem<6&&rem>0&&!beepedSeconds.has(remSec)){beepedSeconds.add(remSec);sndUrgent();}
+    if(rem<=0){clearInterval(tvTimerInt);clearInterval(cntdownInt);cntEl.textContent='';}
   };
-  run();tvTimerInt=setInterval(run,250);
+  run();tvTimerInt=setInterval(run,200);
 }
 
-// ── Reveal answer ─────────────────────────────────
+// ── Skip question ──────────────────────────────────────────────────
+async function skipQuestion(){
+  if(!confirm('이 문제를 건너뛰겠습니까?'))return;
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);
+  document.getElementById('tv-countdown').textContent='';
+  await fbPatch('/session',{state:'lobby'});
+  document.getElementById('btn-reveal').style.display='none';
+  document.getElementById('btn-skip').style.display='none';
+  document.getElementById('btn-nextq').style.display='block';
+  document.getElementById('st-state').textContent='대기';
+  toast('⏭ 문제 건너뜀');
+  // adjust index so nextQuestion increments correctly
+  // (next call will do currentQIdx++ first)
+}
+
+// ── Reveal answer ──────────────────────────────────────────────────
 async function revealAnswer(){
-  clearInterval(tvTimerInt);
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);
+  document.getElementById('tv-countdown').textContent='';
   const q=sessionQuestions[currentQIdx];
   const ci=q.correct;
 
-  // Calculate score gains
   const gains={};
-  const playerNames=Object.values(currentPlayers).map(p=>p.name||'');
   let correctCount=0;
   const answerAt={};
   Object.entries(currentAnswers).forEach(([k,v])=>{if(v&&v.idx===ci){correctCount++;answerAt[k]=v.at||Date.now();}});
-
-  // Sort by speed for bonus
   const speedRanking=Object.entries(answerAt).sort((a,b)=>a[1]-b[1]);
 
   for(const[encName,ans] of Object.entries(currentAnswers)){
     if(!ans)continue;
-    const q2=sessionQuestions[currentQIdx];
     let gain=0;
     if(ans.idx===ci){
       gain=100;
       const rank=speedRanking.findIndex(([k])=>k===encName);
-      if(rank<3)gain+=50; // top 3 speed bonus
+      if(rank<3)gain+=50;
       else if(rank<Math.ceil(Object.keys(currentAnswers).length/2))gain+=20;
     }
     gains[encName]=gain;
@@ -606,63 +695,54 @@ async function revealAnswer(){
     currentScores[encName]=scoreUpdates[encName];
   }
 
-  // Write to Firebase
-  await fbPatch('/session',{
-    state:'reveal',
-    question:{...q,correctIdx:ci},
-    scoreGains:gains
-  });
-  if(Object.keys(scoreUpdates).length>0){
-    await fbPatch('/scores',scoreUpdates);
-  }
+  await fbPatch('/session',{state:'reveal',question:{...q,correctIdx:ci},scoreGains:gains});
+  if(Object.keys(scoreUpdates).length>0)await fbPatch('/scores',scoreUpdates);
 
   // TV reveal
   tvShow('tv-reveal');
-  ['tv-lobby','tv-question'].forEach(x=>document.getElementById(x).style.display='none');
-  document.getElementById('tv-reveal').style.display='flex';
   document.getElementById('tv-rv-icon').textContent='🎯';
   document.getElementById('tv-rv-text').textContent='정답은... '+q.options[ci]+'!';
-  document.getElementById('tv-rv-sub').textContent=`정답자 ${correctCount}명 / ${Object.keys(currentAnswers).length}명 응답`;
+  document.getElementById('tv-rv-sub').textContent=`✅ 정답자 ${correctCount}명 / 총 ${Object.keys(currentAnswers).length}명 응답`;
 
-  // Show top score gains
-  const topGainers=Object.entries(gains).filter(([,g])=>g>0).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const topGainers=Object.entries(gains).filter(([,g])=>g>0).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const sc=document.getElementById('score-changes');
   sc.innerHTML=topGainers.map(([k,g],i)=>{
     const name=currentAnswers[k]?.name||k;
-    return `<div class="sc-chip" style="animation-delay:${i*.1}s">+${g} ${name}</div>`;
+    return `<div class="sc-chip" style="animation-delay:${i*.08}s">+${g}점 ${name}</div>`;
   }).join('');
 
-  // Highlight correct option on TV question view
   [0,1,2,3].forEach(i=>{
     const el=document.getElementById('tv-o'+i);
-    if(i===ci)el.classList.add('correct');
-    else el.classList.add('wrong');
+    el.classList.add(i===ci?'correct':'wrong');
   });
 
   document.getElementById('st-state').textContent='정답 공개';
   document.getElementById('btn-reveal').style.display='none';
-  document.getElementById('btn-cont').style.display=currentQIdx+1<sessionQuestions.length?'block':'none';
-  if(currentQIdx+1>=sessionQuestions.length){
-    // Last question
-    setTimeout(endSession,3000);
-  }
+  document.getElementById('btn-skip').style.display='none';
+  const isLast=currentQIdx+1>=sessionQuestions.length;
+  document.getElementById('btn-cont').style.display=isLast?'none':'block';
+  if(isLast)setTimeout(endSession,4000);
+
+  sndReveal();
+  if(correctCount>0)setTimeout(()=>confetti(),400);
   renderLeaderboard();
 }
 
-// ── End session ───────────────────────────────────
+// ── End session ────────────────────────────────────────────────────
 async function endSession(){
-  clearInterval(tvTimerInt);
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);
   sessionActive=false;
   await fbPatch('/session',{state:'done',question:null});
   document.getElementById('active-ctrl').style.display='none';
   document.getElementById('game-setup').style.display='block';
   document.getElementById('ans-dist-section').style.display='none';
   document.getElementById('st-state').textContent='종료';
+  document.getElementById('tv-lobby-sub').textContent='게임 종료! 최종 스코어보드를 확인하세요.';
   tvShow('tv-lobby');
-  toast('🏁 세션 종료! 최종 결과는 스코어보드를 확인하세요.');
+  toast('🏁 세션 종료!');
 }
 
-// ── Answer distribution ───────────────────────────
+// ── Answer distribution ────────────────────────────────────────────
 function renderAnswerDist(){
   const counts=[0,0,0,0];
   Object.values(currentAnswers).forEach(a=>{if(a&&a.idx>=0&&a.idx<4)counts[a.idx]++;});
@@ -672,12 +752,14 @@ function renderAnswerDist(){
     document.getElementById('abar'+i).style.width=(counts[i]/max*100)+'%';
     document.getElementById('acnt'+i).textContent=counts[i];
   });
-  const playerCount=Object.keys(currentPlayers).length;
-  document.getElementById('ans-total').textContent=total+' / '+playerCount+' 응답';
+  document.getElementById('ans-total').textContent=total+' / '+Object.keys(currentPlayers).length+' 응답';
   document.getElementById('st-answered').textContent=total;
 }
 
-// ── Leaderboard ───────────────────────────────────
+// ── Leaderboard ────────────────────────────────────────────────────
+const AVATAR_COLORS=['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#a855f7','#ec4899','#14b8a6','#84cc16'];
+const PRIZE_COUNT=10;
+
 function renderLeaderboard(){
   const sorted=Object.values(currentScores).sort((a,b)=>b.total-a.total).slice(0,10);
   const lb=document.getElementById('lb-list');
@@ -686,25 +768,28 @@ function renderLeaderboard(){
   lb.innerHTML=sorted.map((p,i)=>{
     const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
     const prize=i<PRIZE_COUNT;
-    return `<div class="lb-item ${prize?'prize':''}">
+    return `<div class="lb-item${prize?' prize':''}">
       <div class="lb-rank">${medals[i]}</div>
       <div class="lb-avatar" style="background:${col}">${(p.name||'?').slice(0,2)}</div>
-      <div class="lb-name">${p.name||'?'}${prize?'&nbsp;<span style="font-size:10px;color:var(--gold)">🎁</span>':''}</div>
+      <div class="lb-name">${p.name||'?'}${prize?'&nbsp;🎁':''}</div>
       <div class="lb-score">${p.total||0}</div>
     </div>`;
   }).join('');
 }
 
-// ── QR ────────────────────────────────────────────
-document.getElementById('qr-img').src=`https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(GAME_URL)}&chs=280x280&chld=L|0`;
-
-// ── Init ──────────────────────────────────────────
-tvShow('tv-lobby');
-if(!USE_FB){
-  document.querySelector('.setup-banner').classList.remove('hidden');
-  document.getElementById('st-state').textContent='미설정';
+// ── Confetti ───────────────────────────────────────────────────────
+function confetti(count=40){
+  const colors=['#FFD700','#00843D','#ef4444','#3b82f6','#a855f7'];
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div');
+    el.style.cssText=`position:fixed;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${colors[~~(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};left:${Math.random()*100}%;top:-10px;pointer-events:none;z-index:9999;animation:confettiFall ${1.5+Math.random()*2}s linear ${Math.random()*.5}s forwards;`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
 }
-// Start listening for players/scores even before session starts
+
+// ── Init ───────────────────────────────────────────────────────────
+tvShow('tv-lobby');
 if(USE_FB)startListening();
 </script>
 </body>

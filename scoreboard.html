@@ -11,28 +11,30 @@
     body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;overflow-x:hidden;}
 
     /* ── HEADER ── */
-    header{background:#08090f;border-bottom:1px solid rgba(255,255,255,.05);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+    header{background:#08090f;border-bottom:1px solid rgba(255,255,255,.05);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;}
     .hdr-title{font-family:'Black Han Sans',sans-serif;font-size:26px;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
     .live-pill{background:#ef4444;color:#fff;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:100px;animation:pulse 1.5s infinite;-webkit-text-fill-color:#fff;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-    .hdr-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-    .hdr-link{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:7px 16px;color:var(--muted2);font-size:12px;text-decoration:none;font-weight:700;transition:all .2s;}
+    .hdr-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .hdr-link{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:7px 16px;color:var(--muted2);font-size:12px;text-decoration:none;font-weight:700;transition:all .2s;cursor:pointer;white-space:nowrap;}
     .hdr-link:hover{color:var(--text);border-color:rgba(255,255,255,.2);}
     .update-time{font-size:12px;color:var(--muted2);}
 
     /* ── STATS ── */
     .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:20px 28px;background:linear-gradient(180deg,rgba(0,132,61,.05),transparent);}
     .stat{background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:14px;text-align:center;}
-    .stat-val{font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--gold);}
+    .stat-val{font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--gold);transition:color .3s;}
+    .stat-val.flash{animation:statFlash .4s ease;}
+    @keyframes statFlash{0%,100%{color:var(--gold)}50%{color:#fff}}
     .stat-lbl{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
 
     /* ── PRIZE SECTION ── */
     .prize-section{margin:0 28px 20px;background:linear-gradient(135deg,rgba(255,215,0,.07),rgba(255,215,0,.02));border:1px solid rgba(255,215,0,.2);border-radius:18px;padding:18px 22px;position:relative;overflow:hidden;}
-    .prize-section::before{content:'🏆';position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:90px;opacity:.05;}
+    .prize-section::before{content:'🏆';position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:90px;opacity:.05;pointer-events:none;}
     .prize-title{font-size:11px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:12px;}
     .prize-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 24px;}
-    .pe{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;}
-    .pe-rank{font-size:15px;width:22px;text-align:center;flex-shrink:0;}
+    .pe{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;}
+    .pe-rank{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
     .pe-name{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .pe-score{font-family:'Black Han Sans',sans-serif;font-size:17px;color:var(--gold);}
 
@@ -40,27 +42,33 @@
     .rank-section{padding:0 28px 40px;}
     .rank-title{font-size:11px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:14px;}
     .rank-list{display:flex;flex-direction:column;gap:8px;}
-    .rank-item{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:16px 18px;transition:border-color .3s;}
+    .rank-item{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:16px 18px;transition:border-color .4s,background .4s;}
     .rank-item.prize-winner{border-color:rgba(255,215,0,.22);background:linear-gradient(135deg,rgba(255,215,0,.04),var(--card));}
     .rank-item.r1{border-color:rgba(255,215,0,.35);background:rgba(255,215,0,.04);}
     .rank-item.r2{border-color:rgba(192,192,192,.25);}
     .rank-item.r3{border-color:rgba(205,127,50,.25);}
-    .rank-item.new-entry{animation:slideIn .4s ease;}
-    @keyframes slideIn{from{transform:translateX(-16px);opacity:0}to{transform:translateX(0);opacity:1}}
+    .rank-item.new-entry{animation:slideIn .45s cubic-bezier(.34,1.56,.64,1);}
+    .rank-item.score-updated{animation:scoreFlash .6s ease;}
+    @keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes scoreFlash{0%,100%{background:var(--card)}40%{background:rgba(255,215,0,.1)}}
     .rank-num{font-family:'Black Han Sans',sans-serif;font-size:22px;width:34px;text-align:center;flex-shrink:0;}
     .r1 .rank-num{color:var(--gold);}
     .r2 .rank-num{color:var(--silver);}
     .r3 .rank-num{color:var(--bronze);}
     .rank-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;color:#000;}
     .rank-info{flex:1;min-width:0;}
-    .rank-name{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px;}
+    .rank-name{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
     .rank-sub{font-size:11px;color:var(--muted2);margin-top:3px;}
-    .rank-bar-wrap{width:100%;height:3px;background:rgba(255,255,255,.05);border-radius:100px;margin-top:7px;}
-    .rank-bar{height:100%;border-radius:100px;transition:width .6s ease;}
-    .rank-score{font-family:'Black Han Sans',sans-serif;font-size:26px;color:var(--gold);flex-shrink:0;}
+    .rank-bar-wrap{width:100%;height:4px;background:rgba(255,255,255,.05);border-radius:100px;margin-top:7px;}
+    .rank-bar{height:100%;border-radius:100px;transition:width .8s cubic-bezier(.34,1.56,.64,1);}
+    .rank-score{font-family:'Black Han Sans',sans-serif;font-size:26px;color:var(--gold);flex-shrink:0;text-align:right;}
     .rank-score small{font-size:12px;color:var(--muted2);font-family:'Noto Sans KR',sans-serif;font-weight:400;}
-    .prize-tag{font-size:10px;padding:2px 8px;border-radius:100px;font-weight:700;}
-    .pt-gift{background:rgba(255,215,0,.15);color:var(--gold);}
+    .prize-tag{font-size:10px;padding:2px 8px;border-radius:100px;font-weight:700;background:rgba(255,215,0,.15);color:var(--gold);}
+    .rank-delta{font-size:11px;font-weight:700;padding:2px 6px;border-radius:100px;}
+    .rank-delta.up{color:#4ade80;background:rgba(74,222,128,.12);}
+    .rank-delta.down{color:#f87171;background:rgba(248,113,113,.12);}
+    .rank-delta.same{color:var(--muted2);}
+    .rank-delta.new{color:#60a5fa;background:rgba(96,165,250,.12);}
 
     /* ── EMPTY ── */
     .empty{text-align:center;padding:60px 20px;color:var(--muted2);}
@@ -72,9 +80,7 @@
     .sb-text{font-size:13px;line-height:1.6;color:var(--muted2);}
     .sb-text strong{color:#60a5fa;}
 
-    /* ── CONFETTI ── */
     @keyframes cFall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
-
     @media(max-width:640px){
       header{padding:14px 16px;}
       .stats-row{grid-template-columns:1fr 1fr;padding:16px;}
@@ -91,16 +97,13 @@
   <div class="hdr-right">
     <div class="update-time" id="upd-time">—</div>
     <a href="index.html" class="hdr-link">🎮 게임 허브</a>
-    <a href="operator.html" class="hdr-link">👑 운영자</a>
-    <button class="hdr-link" onclick="exportCSV()" style="cursor:pointer;background:rgba(0,132,61,.1);border-color:rgba(0,132,61,.3);color:var(--green);">📥 CSV</button>
+    <span class="hdr-link" onclick="exportCSV()">📥 CSV 내보내기</span>
   </div>
 </header>
 
-<!-- Firebase setup notice -->
-<div class="setup-banner" id="setup-banner">
+<div class="setup-banner hidden" id="setup-banner">
   <div class="sb-text">
-    <strong>Firebase 미연결</strong> — 현재 이 기기에서만 점수가 보입니다.
-    30명이 함께 사용하려면 operator.html과 play.html의 <strong>FIREBASE_URL</strong>을 설정하세요.
+    <strong>Firebase 미연결</strong> — 운영자가 공유한 QR 코드 URL로 접속하거나, operator.html에서 Firebase URL을 설정하세요.
   </div>
 </div>
 
@@ -114,7 +117,7 @@
 
 <!-- Prize Top 10 -->
 <div class="prize-section">
-  <div class="prize-title">🎁 상품 수여 대상 TOP 10 — 이 순위 안에 들면 상품!</div>
+  <div class="prize-title">🎁 상품 수여 대상 — TOP 10 이내 시 상품!</div>
   <div class="prize-grid" id="prize-grid">
     <div style="color:var(--muted2);font-size:13px;grid-column:1/-1;">아직 기록 없음</div>
   </div>
@@ -133,113 +136,209 @@
 </div>
 
 <script>
-/* ══════════════════════════════════════════════════
-   FIREBASE URL — operator.html과 동일하게 설정
-   ══════════════════════════════════════════════════ */
-const FIREBASE_URL = 'YOUR_FIREBASE_URL';
+// ── Firebase URL (from ?db= param OR localStorage) ─────────────────
+const FIREBASE_URL = (()=>{
+  const p = new URLSearchParams(location.search).get('db');
+  if(p){try{const u=atob(p);localStorage.setItem('wc_fb_url',u);return u;}catch{}}
+  return localStorage.getItem('wc_fb_url')||'';
+})();
 
 const FB = FIREBASE_URL + '/wc_live';
-const USE_FB = FIREBASE_URL.startsWith('https://') && !FIREBASE_URL.includes('YOUR');
+const USE_FB = FIREBASE_URL.startsWith('https://');
 const AVATAR_COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#a855f7','#ec4899','#14b8a6','#f43f5e'];
 const PRIZE_COUNT = 10;
 const MEDALS = ['🥇','🥈','🥉','4','5','6','7','8','9','10'];
 
-if(USE_FB) document.getElementById('setup-banner').classList.add('hidden');
+if(!USE_FB) document.getElementById('setup-banner').classList.remove('hidden');
 
 let allScores = {};
+let prevRankMap = {};    // name → rank number
+let prevScoreMap = {};   // name → score
+let scoreEls = {};       // name → score DOM element (for animated counter)
+let isFirstRender = true;
+let prevTop1 = null;
 
-// ── Firebase SSE stream ───────────────────────────
+// ── Animated counter ───────────────────────────────────────────────
+function countUp(el, from, to, duration=700){
+  const start = Date.now();
+  const range = to - from;
+  if(range === 0){el.textContent = to.toLocaleString();return;}
+  const update = ()=>{
+    const elapsed = Date.now() - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    el.textContent = Math.round(from + range * eased).toLocaleString();
+    if(progress < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+
+// ── Firebase SSE ───────────────────────────────────────────────────
 function startStream(){
   const es = new EventSource(FB+'/scores.json');
   es.addEventListener('put', e=>{
-    const d = JSON.parse(e.data);
-    allScores = d.data || {};
+    allScores = JSON.parse(e.data).data || {};
     render();
   });
   es.addEventListener('patch', e=>{
-    const d = JSON.parse(e.data);
-    Object.assign(allScores, d.data || {});
+    const incoming = JSON.parse(e.data).data || {};
+    Object.assign(allScores, incoming);
     render();
   });
   es.onerror = ()=> setTimeout(startStream, 3000);
 }
 
-// ── Render ────────────────────────────────────────
-let prevRankMap = {};
-
+// ── Render ─────────────────────────────────────────────────────────
 function render(){
   const players = Object.values(allScores).filter(p=>p&&p.name);
   const sorted = [...players].sort((a,b)=>b.total-a.total);
-  const maxScore = sorted[0]?.total||1;
+  const maxScore = sorted[0]?.total || 1;
   const prizeSet = new Set(sorted.slice(0,PRIZE_COUNT).map(p=>p.name));
 
-  // Stats
+  // ── Stats (animated) ──
   const scores = players.map(p=>p.total||0);
-  const top = scores.length?Math.max(...scores):0;
-  const avg = scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
-  const totalCorrect = players.reduce((a,p)=>(p.correct||0)+a,0);
-  const fmt = n => n>=1000?(n/1000).toFixed(1)+'k':n;
-  document.getElementById('s-players').textContent = players.length;
-  document.getElementById('s-correct').textContent = totalCorrect;
-  document.getElementById('s-top').textContent = fmt(top);
-  document.getElementById('s-avg').textContent = fmt(avg);
+  const top = scores.length ? Math.max(...scores) : 0;
+  const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
+  const totalCorrect = players.reduce((a,p)=>(p.correct||0)+a, 0);
+  const fmt = n => n>=1000 ? (n/1000).toFixed(1)+'k' : n;
+
+  setStatAnimated('s-players', players.length);
+  setStatAnimated('s-correct', totalCorrect);
+  setStatAnimated('s-top', top);
+  setStatAnimated('s-avg', avg);
   document.getElementById('upd-time').textContent = new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
-  // Prize grid
-  const pg = document.getElementById('prize-grid');
+  // ── Prize grid ──
   const prizeIcons = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+  const pg = document.getElementById('prize-grid');
   pg.innerHTML = sorted.slice(0,PRIZE_COUNT).map((p,i)=>`
     <div class="pe">
       <span class="pe-rank">${prizeIcons[i]}</span>
       <span class="pe-name">${p.name}</span>
-      <span class="pe-score">${p.total||0}</span>
+      <span class="pe-score">${(p.total||0).toLocaleString()}</span>
     </div>`).join('') || '<div style="color:var(--muted2);font-size:13px;grid-column:1/-1;">아직 기록 없음</div>';
 
-  // Rank list
+  // ── Check new #1 ──
+  if(sorted.length>0 && sorted[0].name !== prevTop1 && !isFirstRender){
+    prevTop1 = sorted[0].name;
+    confetti(60);
+  }
+
+  // ── Build new rank list ──
   const rl = document.getElementById('rank-list');
   if(!sorted.length){
     rl.innerHTML='<div class="empty"><div class="empty-icon">⚽</div><div>아직 기록이 없어요</div></div>';
+    prevRankMap={};prevScoreMap={};scoreEls={};isFirstRender=true;
     return;
   }
 
+  // Build map of existing elements for score animation
+  const existingEls = {};
+  rl.querySelectorAll('.rank-item[data-name]').forEach(el=>{
+    existingEls[el.dataset.name] = el;
+  });
+
   rl.innerHTML = sorted.map((p,i)=>{
     const r = i+1;
-    const col = AVATAR_COLORS[i%AVATAR_COLORS.length];
-    const bw = Math.round((p.total||0)/maxScore*100);
-    const isNew = prevRankMap[p.name] !== r;
+    const col = AVATAR_COLORS[i % AVATAR_COLORS.length];
+    const bw = Math.round((p.total||0) / maxScore * 100);
     const prize = prizeSet.has(p.name);
-    const pt = prize ? '<span class="prize-tag pt-gift">🎁 상품</span>' : '';
-    return `<div class="rank-item ${prize?'prize-winner':''} ${r<=3?'r'+r:''} ${isNew?'new-entry':''}">
+    const prevRank = prevRankMap[p.name];
+    const prevScore = prevScoreMap[p.name];
+    const isNew = prevRank === undefined;
+    const scoreChanged = prevScore !== undefined && prevScore !== p.total;
+
+    // Rank delta badge
+    let deltaHtml = '';
+    if(isNew && !isFirstRender){
+      deltaHtml = '<span class="rank-delta new">NEW</span>';
+    } else if(!isNew && !isFirstRender){
+      const delta = prevRank - r;
+      if(delta > 0)      deltaHtml = `<span class="rank-delta up">▲${delta}</span>`;
+      else if(delta < 0) deltaHtml = `<span class="rank-delta down">▼${Math.abs(delta)}</span>`;
+    }
+
+    const prizeTag = prize ? '<span class="prize-tag">🎁 상품</span>' : '';
+    const entryClass = [
+      'rank-item',
+      prize ? 'prize-winner' : '',
+      r<=3 ? 'r'+r : '',
+      isNew && !isFirstRender ? 'new-entry' : '',
+      scoreChanged && !isFirstRender ? 'score-updated' : ''
+    ].filter(Boolean).join(' ');
+
+    return `<div class="${entryClass}" data-name="${p.name}">
       <div class="rank-num">${MEDALS[i]||r}</div>
       <div class="rank-avatar" style="background:${col}">${p.name.slice(0,2)}</div>
       <div class="rank-info">
-        <div class="rank-name">${p.name} ${pt}</div>
+        <div class="rank-name">${p.name} ${deltaHtml} ${prizeTag}</div>
         <div class="rank-sub">정답 ${p.correct||0}개 · 연속 ${p.streak||0}회</div>
         <div class="rank-bar-wrap"><div class="rank-bar" style="width:${bw}%;background:${col}"></div></div>
       </div>
-      <div class="rank-score">${(p.total||0).toLocaleString()}<small>점</small></div>
+      <div class="rank-score" data-score="${p.total||0}" data-prev="${prevScore||0}">
+        <span class="score-num">${(p.total||0).toLocaleString()}</span><small>점</small>
+      </div>
     </div>`;
   }).join('');
 
-  prevRankMap = Object.fromEntries(sorted.map((p,i)=>[p.name,i+1]));
+  // ── Animate score counters for updated scores ──
+  if(!isFirstRender){
+    rl.querySelectorAll('.rank-score[data-prev]').forEach(el=>{
+      const prev = parseInt(el.dataset.prev)||0;
+      const curr = parseInt(el.dataset.score)||0;
+      if(prev !== curr){
+        const numEl = el.querySelector('.score-num');
+        countUp(numEl, prev, curr, 600);
+      }
+    });
+  }
+
+  // ── Update tracking maps ──
+  prevRankMap = Object.fromEntries(sorted.map((p,i)=>[p.name, i+1]));
+  prevScoreMap = Object.fromEntries(sorted.map(p=>[p.name, p.total||0]));
+  isFirstRender = false;
+
+  // Prize confetti on first load if there are winners
+  if(sorted.length >= PRIZE_COUNT){
+    // only on first render
+  }
 }
 
-// ── Export CSV ────────────────────────────────────
+// ── Animated stat helper ───────────────────────────────────────────
+const statPrev = {};
+function setStatAnimated(id, value){
+  const el = document.getElementById(id);
+  const prev = statPrev[id];
+  if(prev !== undefined && prev !== value){
+    const numEl = el;
+    countUp(numEl, prev, value, 500);
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+    el.addEventListener('animationend', ()=>el.classList.remove('flash'), {once:true});
+  } else {
+    el.textContent = value >= 1000 ? (value/1000).toFixed(1)+'k' : value;
+  }
+  statPrev[id] = value;
+}
+
+// ── Export CSV ─────────────────────────────────────────────────────
 function exportCSV(){
   const sorted = Object.values(allScores).filter(p=>p&&p.name).sort((a,b)=>b.total-a.total);
-  const rows=[['순위','이름','점수','정답수','연속정답']];
-  sorted.forEach((p,i)=>rows.push([i+1,p.name,p.total||0,p.correct||0,p.streak||0]));
-  const csv=rows.map(r=>r.join(',')).join('\n');
-  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`월드컵랭킹_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.csv`;a.click();
-  URL.revokeObjectURL(url);
+  const rows = [['순위','이름','점수','정답수','연속정답']];
+  sorted.forEach((p,i)=>rows.push([i+1, p.name, p.total||0, p.correct||0, p.streak||0]));
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`월드컵랭킹_${new Date().toLocaleDateString('ko-KR').replace(/[\.\s]/g,'')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
 }
 
-// ── Confetti for prize ────────────────────────────
-function confetti(){
+// ── Confetti ───────────────────────────────────────────────────────
+function confetti(count=50){
   const colors=['#FFD700','#00843D','#ef4444','#3b82f6','#a855f7'];
-  for(let i=0;i<60;i++){
+  for(let i=0;i<count;i++){
     const el=document.createElement('div');
     el.style.cssText=`position:fixed;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${colors[~~(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};left:${Math.random()*100}%;top:-10px;pointer-events:none;z-index:9999;animation:cFall ${1.5+Math.random()*2}s linear ${Math.random()*.6}s forwards;`;
     document.body.appendChild(el);
@@ -247,20 +346,19 @@ function confetti(){
   }
 }
 
-// ── Init ──────────────────────────────────────────
+// ── Init ───────────────────────────────────────────────────────────
 if(USE_FB){
   startStream();
 } else {
-  // localStorage fallback
-  const data=JSON.parse(localStorage.getItem('wc_scoreboard_v1')||'{"players":[],"log":[]}');
-  data.players.forEach(p=>{allScores[p.name]={name:p.name,total:p.bestScore,correct:p.games,streak:0};});
-  render();
-  setInterval(()=>{
-    const d=JSON.parse(localStorage.getItem('wc_scoreboard_v1')||'{"players":[],"log":[]}');
-    allScores={};
-    d.players.forEach(p=>{allScores[p.name]={name:p.name,total:p.bestScore,correct:p.games,streak:0};});
+  // localStorage fallback (single-device mode)
+  const load = ()=>{
+    const data = JSON.parse(localStorage.getItem('wc_scoreboard_v1')||'{"players":[]}');
+    allScores = {};
+    (data.players||[]).forEach(p=>{allScores[p.name]={name:p.name,total:p.bestScore||0,correct:p.games||0,streak:0};});
     render();
-  },3000);
+  };
+  load();
+  setInterval(load, 3000);
 }
 </script>
 </body>
