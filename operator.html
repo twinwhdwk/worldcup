@@ -352,8 +352,8 @@
     <div class="ctrl-section" id="active-ctrl" style="display:none">
       <div class="ctrl-title">⚡ 진행 컨트롤</div>
       <button class="ctrl-btn btn-start" id="btn-nextq" onclick="nextQuestion()">▶ 다음 문제 시작</button>
-      <button class="ctrl-btn btn-reveal" id="btn-reveal" onclick="revealAnswer()" style="display:none">🎯 정답 공개</button>
-      <button class="ctrl-btn btn-next" id="btn-cont" onclick="nextQuestion()" style="display:none">➡ 다음 문제</button>
+      <button class="ctrl-btn btn-reveal" id="btn-reveal" onclick="revealAnswer()" style="display:none">🎯 정답 공개 <span style="font-size:11px;opacity:.6;font-family:monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;margin-left:4px;">Space</span></button>
+      <button class="ctrl-btn btn-next" id="btn-cont" onclick="nextQuestion()" style="display:none">➡ 다음 문제 <span style="font-size:11px;opacity:.6;font-family:monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;margin-left:4px;">Space</span></button>
       <button class="ctrl-btn btn-skip" id="btn-skip" onclick="skipQuestion()" style="display:none">⏭ 문제 건너뛰기</button>
       <button class="ctrl-btn btn-lobby" onclick="endSession()">🏁 세션 종료</button>
     </div>
@@ -1048,6 +1048,20 @@ function confetti(count=40){
 (function(){const pool=QB[selectedGame]?QB[selectedGame]().length:0;const info=document.getElementById('qbank-info');if(info)info.textContent=`문제 풀: ${pool}개 (최대 ${Math.min(pool,20)}문제 선택 가능)`;})();
 tvShow('tv-lobby');
 if(USE_FB)startListening();
+
+// ── Keyboard shortcuts ─────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.code==='Space'||e.code==='Enter'){
+    e.preventDefault();
+    const reveal=document.getElementById('btn-reveal');
+    const cont=document.getElementById('btn-cont');
+    const nextq=document.getElementById('btn-nextq');
+    if(reveal&&reveal.style.display!=='none'){reveal.click();return;}
+    if(cont&&cont.style.display!=='none'){cont.click();return;}
+    if(nextq&&nextq.style.display!=='none'&&sessionActive){nextq.click();return;}
+  }
+});
 </script>
 </body>
 </html>
