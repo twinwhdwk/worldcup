@@ -112,11 +112,23 @@
     @keyframes floatUp{from{transform:translateY(0) scale(.8);opacity:1}to{transform:translateY(-80px) scale(1.1);opacity:0}}
 
     @keyframes confettiFall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+    /* ── COUNTDOWN OVERLAY ── */
+    #countdown-overlay{position:fixed;inset:0;background:rgba(6,6,15,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:8000;pointer-events:none;opacity:0;transition:opacity .2s;}
+    #countdown-overlay.show{opacity:1;}
+    .cd-num{font-family:'Black Han Sans',sans-serif;font-size:120px;color:var(--gold);text-shadow:0 0 40px rgba(255,215,0,.6);animation:cdPop .35s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes cdPop{from{transform:scale(1.6);opacity:0}to{transform:scale(1);opacity:1}}
+    .cd-lbl{font-size:14px;color:var(--muted2);margin-top:8px;letter-spacing:2px;}
+
+    /* ── AUTO-JOIN TOAST ── */
+    .aj-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(0,132,61,.9);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-family:'Black Han Sans',sans-serif;z-index:9000;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;}
+    @keyframes toastIn{from{transform:translateX(-50%) translateY(12px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
   </style>
 </head>
 <body>
 
 <div class="status-bar hidden" id="status"></div>
+<div id="countdown-overlay"><div class="cd-num" id="cd-num">3</div><div class="cd-lbl">문제 시작!</div></div>
 
 <!-- LOGIN -->
 <div class="screen" id="s-login">
@@ -256,11 +268,15 @@ async function fbPut(p,d){await fetch(FB+p+'.json',{method:'PUT',headers:{'Conte
 async function fbGet(p){const r=await fetch(FB+p+'.json');return r.json();}
 
 // ── Join ──────────────────────────────────────────────────────────
+let joined=false;
 function join(){
+  if(joined)return;
+  joined=true;
+  const t=document.getElementById('aj-toast');if(t)t.remove();
   getAC(); // unlock audio on user gesture
   const n=document.getElementById('name-in').value.trim();
-  if(!n){document.getElementById('name-in').focus();return;}
-  if(!USE_FB){setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
+  if(!n){joined=false;document.getElementById('name-in').focus();return;}
+  if(!USE_FB){joined=false;setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
   myName=n;localStorage.setItem('wc_player_name',n);
   fetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:Date.now(),lastSeen:Date.now()})});
   document.getElementById('lb-name').textContent=n+' 참가 중';
@@ -336,23 +352,43 @@ function onSession(s){
   }
 }
 
+// ── Countdown overlay ─────────────────────────────────────────────
+function showCountdown(cb){
+  const ov=document.getElementById('countdown-overlay');
+  const nm=document.getElementById('cd-num');
+  let n=3;
+  ov.classList.add('show');
+  const step=()=>{
+    nm.textContent=n;
+    nm.style.animation='none';void nm.offsetWidth;nm.style.animation='cdPop .35s cubic-bezier(.34,1.56,.64,1)';
+    sndTick();
+    if(n<=1){setTimeout(()=>{ov.classList.remove('show');cb();},350);}
+    else{n--;setTimeout(step,600);}
+  };
+  step();
+}
+
 // ── Render question ───────────────────────────────────────────────
 function renderQ(s){
   const q=s.question;if(!q)return;
-  show('s-question');
-  document.getElementById('q-lbl').textContent=s.game||'퀴즈';
-  document.getElementById('q-score').textContent=myScore+'점';
-  document.getElementById('q-emoji').textContent=q.emoji||'⚽';
-  document.getElementById('q-text').textContent=q.text;
-  document.getElementById('q-num').textContent='문제 '+(s.questionIdx+1)+' / '+s.totalQuestions;
-  q.options.forEach((o,i)=>{
-    document.getElementById('ot'+i).textContent=o;
-    const b=document.getElementById('o'+i);
-    b.className='opt '+['a','b','c','d'][i];
-    b.disabled=false;
-  });
-  beepedSecs=new Set();
-  tick(q.startAt||Date.now(),q.timeLimit||20);
+  const doRender=()=>{
+    show('s-question');
+    document.getElementById('q-lbl').textContent=s.game||'퀴즈';
+    document.getElementById('q-score').textContent=myScore+'점';
+    document.getElementById('q-emoji').textContent=q.emoji||'⚽';
+    document.getElementById('q-text').textContent=q.text;
+    document.getElementById('q-num').textContent='문제 '+(s.questionIdx+1)+' / '+s.totalQuestions;
+    q.options.forEach((o,i)=>{
+      document.getElementById('ot'+i).textContent=o;
+      const b=document.getElementById('o'+i);
+      b.className='opt '+['a','b','c','d'][i];
+      b.disabled=false;
+    });
+    beepedSecs=new Set();
+    tick(q.startAt||Date.now(),q.timeLimit||20);
+  };
+  const elapsed=(Date.now()-(q.startAt||Date.now()))/1000;
+  if(elapsed<2){showCountdown(doRender);}else{doRender();}
 }
 
 function tick(startAt,limit){
@@ -441,7 +477,20 @@ function confetti(){
 
 // ── Init ──────────────────────────────────────────────────────────
 const saved=localStorage.getItem('wc_player_name');
-if(saved)document.getElementById('name-in').value=saved;
+if(saved){
+  document.getElementById('name-in').value=saved;
+  if(USE_FB){
+    // Auto-join returning players after 1.5s with toast
+    const aj=document.createElement('div');
+    aj.className='aj-toast';aj.id='aj-toast';
+    aj.textContent='안녕하세요, '+saved+'님! 자동 참가 중...';
+    document.body.appendChild(aj);
+    setTimeout(()=>{
+      const t=document.getElementById('aj-toast');if(t)t.remove();
+      join();
+    },1500);
+  }
+}
 document.getElementById('name-in').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
 if(!USE_FB)document.getElementById('no-fb-warn').classList.remove('hidden');
 </script>

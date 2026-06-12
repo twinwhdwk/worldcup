@@ -335,6 +335,13 @@
       <div class="ans-total" id="ans-total">0 / 0 응답</div>
     </div>
 
+    <!-- Reset scores -->
+    <div class="ctrl-section">
+      <div class="ctrl-title">⚙️ 관리</div>
+      <button class="ctrl-btn" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;font-size:13px;padding:10px;" onclick="clearScores()">🗑 점수 전체 초기화</button>
+      <button class="ctrl-btn" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--muted2);font-size:13px;padding:10px;" onclick="clearPlayers()">👤 참가자 목록 초기화</button>
+    </div>
+
     <!-- Leaderboard -->
     <div class="ctrl-section">
       <div class="ctrl-title">🏆 실시간 TOP 10</div>
@@ -816,6 +823,27 @@ async function endSession(){
   document.getElementById('tv-lobby-sub').textContent='게임 종료! 최종 스코어보드를 확인하세요.';
   tvShow('tv-lobby');
   toast('🏁 세션 종료!');
+}
+
+// ── Admin utilities ────────────────────────────────────────────────
+async function clearScores(){
+  if(!USE_FB){toast('Firebase 미연결');return;}
+  if(!confirm('⚠️ 모든 점수를 초기화합니다.\n이 작업은 취소할 수 없습니다. 계속하시겠습니까?'))return;
+  await fbDelete('/scores');
+  currentScores={};
+  renderLeaderboard();
+  toast('✅ 점수 초기화 완료!');
+}
+async function clearPlayers(){
+  if(!USE_FB){toast('Firebase 미연결');return;}
+  if(!confirm('참가자 목록을 초기화합니다. 계속하시겠습니까?'))return;
+  await fbDelete('/players');
+  currentPlayers={};
+  document.getElementById('st-players').textContent='0';
+  document.getElementById('tv-lobby-count').textContent='';
+  const wrap=document.getElementById('player-chips-wrap');
+  if(wrap)wrap.style.display='none';
+  toast('✅ 참가자 목록 초기화 완료!');
 }
 
 // ── Answer distribution ────────────────────────────────────────────
