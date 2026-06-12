@@ -743,11 +743,13 @@ function startListening(){
   answersES=new EventSource(FB+'/answers.json');
   answersES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentAnswers=d.data||{};renderAnswerDist();});
   answersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentAnswers,d);renderAnswerDist();});
+  answersES.onerror=()=>{setTimeout(()=>{if(answersES)answersES.close();answersES=null;startListening();},5000);};
 
   if(scoresES){try{scoresES.close();}catch{}}
   scoresES=new EventSource(FB+'/scores.json');
   scoresES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentScores=d.data||{};renderLeaderboard();});
   scoresES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentScores,d);renderLeaderboard();});
+  scoresES.onerror=()=>{setTimeout(()=>{if(scoresES)scoresES.close();scoresES=null;startListening();},5000);};
 }
 
 // ── Next question ──────────────────────────────────────────────────
@@ -851,11 +853,11 @@ async function revealAnswer(){
   const gains={};
   let correctCount=0;
   const answerAt={};
-  Object.entries(currentAnswers).forEach(([k,v])=>{if(v&&v.idx===ci){correctCount++;answerAt[k]=v.at||Date.now();}});
+  Object.entries(currentAnswers).forEach(([k,v])=>{if(v&&typeof v==='object'&&v.idx===ci){correctCount++;answerAt[k]=v.at||Date.now();}});
   const speedRanking=Object.entries(answerAt).sort((a,b)=>a[1]-b[1]);
 
   for(const[encName,ans] of Object.entries(currentAnswers)){
-    if(!ans)continue;
+    if(!ans||typeof ans!=='object'||ans.idx===undefined)continue;
     let gain=0;
     if(ans.idx===ci){
       gain=100;
@@ -1003,9 +1005,9 @@ async function clearPlayers(){
 let allAnsweredPending = false;
 function renderAnswerDist(){
   const counts=[0,0,0,0];
-  Object.values(currentAnswers).forEach(a=>{if(a&&a.idx>=0&&a.idx<4)counts[a.idx]++;});
+  Object.values(currentAnswers).forEach(a=>{if(a&&typeof a==='object'&&a.idx>=0&&a.idx<4)counts[a.idx]++;});
   const total=counts.reduce((a,b)=>a+b,0);
-  const playerCount=Object.keys(currentPlayers).length;
+  const playerCount=Object.values(currentPlayers).filter(p=>p&&typeof p==='object').length;
   const max=Math.max(...counts,1);
   [0,1,2,3].forEach(i=>{
     document.getElementById('abar'+i).style.width=(counts[i]/max*100)+'%';

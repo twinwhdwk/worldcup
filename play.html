@@ -322,8 +322,13 @@ function startSyncPoll(){
 
 // ── Listen ────────────────────────────────────────────────────────
 let _sessState=null;
+let _sES=null,_pES=null,_aES=null;
 function listen(){
   if(sessionES){try{sessionES.close();}catch{}}
+  if(_sES){try{_sES.close();}catch{}}
+  if(_pES){try{_pES.close();}catch{}}
+  if(_aES){try{_aES.close();}catch{}}
+
   sessionES=new EventSource(FB+'/session.json');
   sessionES.addEventListener('put',e=>{const d=JSON.parse(e.data);_sessState=d.data;onSession(_sessState);});
   sessionES.addEventListener('patch',e=>{const d=JSON.parse(e.data);_sessState=Object.assign(_sessState||{},d.data);onSession(_sessState);});
@@ -331,20 +336,28 @@ function listen(){
   sessionES.onopen=()=>setStatus('✅ 연결됨','ok');
 
   // My score stream
-  const sES=new EventSource(FB+'/scores/'+enc(myName)+'.json');
-  sES.addEventListener('put',e=>{
+  _sES=new EventSource(FB+'/scores/'+enc(myName)+'.json');
+  _sES.addEventListener('put',e=>{
     const d=JSON.parse(e.data).data;
     if(d){myScore=d.total||0;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;document.getElementById('q-score').textContent=myScore+'점';}
   });
 
-  // Player + answer count streams (for lobby and wait screen)
-  const pES=new EventSource(FB+'/players.json');
+  // Player count stream (lobby)
   let totalPlayers=0;
-  pES.addEventListener('put',e=>{const d=JSON.parse(e.data).data||{};totalPlayers=Object.keys(d).length;updatePlayerCount();});
+  _pES=new EventSource(FB+'/players.json');
   function updatePlayerCount(){document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명이 대기중':'';}
+  _pES.addEventListener('put',e=>{const d=JSON.parse(e.data).data||{};totalPlayers=Object.keys(d).filter(k=>d[k]&&typeof d[k]==='object').length;updatePlayerCount();});
+  _pES.addEventListener('patch',e=>{
+    const d=JSON.parse(e.data);
+    const key=d.path&&d.path!=='/'?d.path.replace(/^\//,''):null;
+    if(key){if(d.data)totalPlayers=Math.max(totalPlayers,1);} // new player joined
+    else if(d.data===null){totalPlayers=0;} // cleared
+    updatePlayerCount();
+  });
 
-  const aES=new EventSource(FB+'/answers.json');
+  // Answer count stream (wait screen progress)
   let answeredKeys=new Set();
+  _aES=new EventSource(FB+'/answers.json');
   function updateWaitSub(){
     const el=document.getElementById('wait-sub');
     const answerCount=answeredKeys.size;
@@ -353,8 +366,14 @@ function listen(){
       el.textContent=remaining>0?`${answerCount}/${totalPlayers}명 응답 · ${remaining}명 대기중`:'✅ 전원 응답! 곧 공개됩니다...';
     }
   }
-  aES.addEventListener('put',e=>{const d=JSON.parse(e.data).data||{};answeredKeys=new Set(Object.keys(d));updateWaitSub();});
-  aES.addEventListener('patch',e=>{const d=JSON.parse(e.data).data||{};Object.keys(d).forEach(k=>answeredKeys.add(k));updateWaitSub();});
+  _aES.addEventListener('put',e=>{const d=JSON.parse(e.data).data||{};answeredKeys=new Set(Object.keys(d));updateWaitSub();});
+  _aES.addEventListener('patch',e=>{
+    const d=JSON.parse(e.data);
+    if(d.data===null){answeredKeys=new Set();} // /answers deleted
+    else if(d.path&&d.path!=='/'){answeredKeys.add(d.path.replace(/^\//,'').split('/')[0]);}
+    else Object.keys(d.data||{}).forEach(k=>answeredKeys.add(k));
+    updateWaitSub();
+  });
 }
 
 // ── Session handler ───────────────────────────────────────────────
