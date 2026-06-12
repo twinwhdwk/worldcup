@@ -237,6 +237,10 @@
           <div class="player-chips" id="player-chips"></div>
         </div>
       </div>
+      <div id="tv-final-lb" style="display:none;margin-top:16px;width:100%;max-width:700px;">
+        <div style="font-family:'Black Han Sans',sans-serif;font-size:22px;color:var(--gold);margin-bottom:12px;letter-spacing:2px;">🏆 최종 순위 TOP 10 🏆</div>
+        <div id="tv-final-rows" style="display:flex;flex-direction:column;gap:6px;width:100%;"></div>
+      </div>
     </div>
 
     <!-- QUESTION -->
@@ -922,6 +926,24 @@ async function endSession(){
     if(qrLabel)qrLabel.textContent='📊 스코어보드 보기';
   }
   tvShow('tv-lobby');
+  // Show final top-10 leaderboard on TV
+  const top10=Object.values(currentScores).sort((a,b)=>b.total-a.total).slice(0,10);
+  const finalLb=document.getElementById('tv-final-lb');
+  const finalRows=document.getElementById('tv-final-rows');
+  if(finalLb&&finalRows&&top10.length>0){
+    const prizeIcons=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+    finalRows.innerHTML=top10.map((p,i)=>`
+      <div style="display:flex;align-items:center;gap:12px;background:${i<3?'rgba(255,215,0,.08)':'rgba(255,255,255,.03)'};border:1px solid ${i<3?'rgba(255,215,0,.25)':'rgba(255,255,255,.06)'};border-radius:12px;padding:10px 20px;">
+        <span style="font-size:22px;width:36px;text-align:center;">${prizeIcons[i]}</span>
+        <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;flex:1;text-align:left;">${p.name||'?'}</span>
+        <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--gold);">${(p.total||0).toLocaleString()}점</span>
+        <span style="font-size:14px;">🎁</span>
+      </div>`).join('');
+    finalLb.style.display='block';
+    // Hide player chips in final state
+    const pcw=document.getElementById('player-chips-wrap');
+    if(pcw)pcw.style.display='none';
+  }
   toast('🏁 세션 종료!');
   confetti(60);
 }
