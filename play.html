@@ -240,7 +240,7 @@ const USE_FB = FIREBASE_URL.startsWith('https://');
 
 const LETTERS = ['A','B','C','D'];
 let myName='', myScore=0, myStreak=0, myRank=0;
-let myAnswerIdx=-1, lastQId='', timerInt=null;
+let myAnswerIdx=-1, lastQId='', timerInt=null, _lastOpts=[];
 let sessionES=null, beepedSecs=new Set();
 let myJoinedAt=0, _pendingGain=0;
 
@@ -425,6 +425,22 @@ function showCountdown(cb){
   step();
 }
 
+// ── Flag emoji → flagcdn.com img ─────────────────────────────────
+function renderOptHtml(text){
+  if(!text)return'';
+  let s=String(text);
+  s=s
+    .replace(/🏴󠁧󠁢󠁥󠁮󠁧󠁿/g,'<img src="https://flagcdn.com/w40/gb-eng.png" style="height:20px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">')
+    .replace(/🏴󠁧󠁢󠁳󠁣󠁴󠁿/g,'<img src="https://flagcdn.com/w40/gb-sct.png" style="height:20px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">')
+    .replace(/🏴󠁧󠁢󠁷󠁬󠁳󠁿/g,'<img src="https://flagcdn.com/w40/gb-wls.png" style="height:20px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">');
+  s=s.replace(/\uD83C[\uDDE6-\uDDFF]\uD83C[\uDDE6-\uDDFF]/g,function(m){
+    const cp=[...m].map(c=>c.codePointAt(0));
+    const code=String.fromCharCode(cp[0]-0x1F1E6+65,cp[1]-0x1F1E6+65).toLowerCase();
+    return'<img src="https://flagcdn.com/w40/'+code+'.png" style="height:20px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">';
+  });
+  return s;
+}
+
 // ── Render question ───────────────────────────────────────────────
 async function renderQ(s){
   const q=s.question;if(!q)return;
@@ -433,8 +449,7 @@ async function renderQ(s){
   if(existingAns&&existingAns.idx>=0){
     myAnswerIdx=existingAns.idx;
     const wpEl=document.getElementById('wait-prev');
-    wpEl.textContent=LETTERS[existingAns.idx]+' — '+(q.options?.[existingAns.idx]||'?');
-    if(typeof twemoji!=='undefined')twemoji.parse(wpEl);
+    wpEl.innerHTML=LETTERS[existingAns.idx]+' — '+renderOptHtml(q.options?.[existingAns.idx]||'?');
     show('s-wait');startFactRotation();
     return;
   }
@@ -447,8 +462,9 @@ async function renderQ(s){
     else{emojiEl.textContent=q.emoji||'⚽';if(typeof twemoji!=='undefined')twemoji.parse(emojiEl);}
     document.getElementById('q-text').textContent=q.text;
     document.getElementById('q-num').textContent='문제 '+(s.questionIdx+1)+' / '+s.totalQuestions;
+    _lastOpts=q.options.slice();
     q.options.forEach((o,i)=>{
-      const otEl=document.getElementById('ot'+i);otEl.textContent=o;if(typeof twemoji!=='undefined')twemoji.parse(otEl);
+      const otEl=document.getElementById('ot'+i);otEl.innerHTML=renderOptHtml(o);
       const b=document.getElementById('o'+i);
       b.className='opt '+['a','b','c','d'][i];
       b.disabled=false;
@@ -484,10 +500,8 @@ async function answer(idx){
   myAnswerIdx=idx;
   clearInterval(timerInt);
   [0,1,2,3].forEach(i=>{const b=document.getElementById('o'+i);b.disabled=true;if(i===idx)b.classList.add('selected');});
-  const txtEl=document.getElementById('ot'+idx);
   const wp=document.getElementById('wait-prev');
-  wp.textContent=LETTERS[idx]+' — '+(txtEl?txtEl.textContent:'?');
-  if(typeof twemoji!=='undefined')twemoji.parse(wp);
+  wp.innerHTML=LETTERS[idx]+' — '+renderOptHtml(_lastOpts[idx]||'?');
   await fbPut('/answers/'+enc(myName),{idx,at:Date.now(),name:myName});
   if(navigator.vibrate)navigator.vibrate(40);
   show('s-wait');startFactRotation();
@@ -510,13 +524,11 @@ function showReveal(s){
   document.getElementById('rv-icon').textContent=!answered?'⏰':correct?'🎉':'❌';
   document.getElementById('rv-title').textContent=!answered?'시간 초과!':correct?'정답! 🎊':'아쉽다! ❌';
   const rvCorr=document.getElementById('rv-correct');
-  rvCorr.textContent=s.question?.options?.[ci]||'—';
-  if(typeof twemoji!=='undefined')twemoji.parse(rvCorr);
+  rvCorr.innerHTML=renderOptHtml(s.question?.options?.[ci]||'—');
   const myAnsEl=document.getElementById('rv-my-answer');
   const myAnsVal=document.getElementById('rv-my-val');
   if(answered&&!correct&&myAnswerIdx>=0&&s.question?.options){
-    myAnsVal.textContent=LETTERS[myAnswerIdx]+' — '+(s.question.options[myAnswerIdx]||'?');
-    if(typeof twemoji!=='undefined')twemoji.parse(myAnsVal);
+    myAnsVal.innerHTML=LETTERS[myAnswerIdx]+' — '+renderOptHtml(s.question.options[myAnswerIdx]||'?');
     myAnsEl.style.display='block';
   } else {myAnsEl.style.display='none';}
   document.getElementById('rv-gain').textContent=gain>0?'+'+gain+'점':'0점';
