@@ -243,7 +243,7 @@ let myName='', myScore=0, myStreak=0, myRank=0;
 let myAnswerIdx=-1, lastQId='', timerInt=null, _lastOpts=[];
 let sessionES=null, beepedSecs=new Set();
 let myJoinedAt=0, _pendingGain=0;
-let _revealQId='';
+let _revealQId='', _doneShown=false;
 
 // ── Sound Effects (Web Audio API) ─────────────────────────────────
 let AC=null;
@@ -377,6 +377,7 @@ function onSession(s){
   }
   if(!s||s.state==='lobby'){
     startSyncPoll(); // restart poll if it was stopped after a previous session ended
+    _doneShown=false; // allow next session's done screen to show
     show('s-lobby');
     document.getElementById('lb-score').textContent=myScore;
     updateLobbyRank();
@@ -384,6 +385,8 @@ function onSession(s){
   }
   if(s.state==='done'){
     clearInterval(_pollInt);_pollInt=null;
+    if(_doneShown)return;
+    _doneShown=true;
     const renderDone=()=>{
       document.getElementById('done-score').textContent=myScore.toLocaleString();
       const rankEl=document.getElementById('done-rank');

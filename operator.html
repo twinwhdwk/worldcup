@@ -753,9 +753,14 @@ async function startSession(){
   allAnsweredPending=false;
   localStorage.setItem('wc_op_session',JSON.stringify({qs,game:selectedGame,qIdx:-1}));
 
-  await fbPut('/session',{state:'lobby',game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
-  await fbDelete('/answers');
-  await fbDelete('/players');
+  try{
+    await fbPut('/session',{state:'lobby',game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
+    await fbDelete('/answers');
+    await fbDelete('/players');
+  }catch(err){
+    sessionActive=false;localStorage.removeItem('wc_op_session');
+    toast('⚠️ Firebase 오류: '+err.message,true);return;
+  }
 
   document.getElementById('game-setup').style.display='none';
   document.getElementById('active-ctrl').style.display='block';
@@ -931,8 +936,9 @@ function startTvTimer(startAt,limit){
 async function skipQuestion(){
   if(!confirm('이 문제를 건너뛰겠습니까?'))return;
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
+  revealInProgress=false;allAnsweredPending=false;
   document.getElementById('tv-countdown').textContent='';
-  await fbPatch('/session',{state:'lobby'});
+  try{await fbPatch('/session',{state:'lobby'});}catch(err){toast('⚠️ Firebase 오류: '+err.message,true);return;}
   document.getElementById('btn-reveal').style.display='none';
   document.getElementById('btn-skip').style.display='none';
   document.getElementById('btn-nextq').style.display='block';
@@ -1054,7 +1060,7 @@ async function endSession(){
   localStorage.removeItem('wc_op_session');
   const finalRanks={};
   Object.entries(currentScores).sort((a,b)=>b[1].total-a[1].total).forEach(([k],i)=>{finalRanks[k]=i+1;});
-  await fbPatch('/session',{state:'done',question:null,allRanks:finalRanks});
+  try{await fbPatch('/session',{state:'done',question:null,allRanks:finalRanks});}catch(err){toast('⚠️ Firebase 오류: '+err.message,true);}
   document.getElementById('active-ctrl').style.display='none';
   document.getElementById('game-setup').style.display='block';
   document.getElementById('ans-dist-section').style.display='none';
