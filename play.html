@@ -404,7 +404,7 @@ function onSession(s){
   }
   const qId=(s.questionIdx||0)+'_'+(s.game||'');
   if(s.state==='question'){
-    if(qId!==lastQId){lastQId=qId;myAnswerIdx=-1;renderQ(s);}
+    if(qId!==lastQId){lastQId=qId;myAnswerIdx=-1;_pendingGain=0;renderQ(s);}
     else if(myAnswerIdx>=0){show('s-wait');startFactRotation();}
   } else if(s.state==='reveal'){
     stopFactRotation();showReveal(s);
