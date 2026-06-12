@@ -43,16 +43,21 @@
     .tv-panel{flex:1;min-width:0;display:flex;flex-direction:column;padding:24px;overflow-y:auto;}
 
     /* LOBBY */
-    .tv-lobby{display:flex;flex-direction:column;align-items:center;justify-content:center;height:480px;text-align:center;}
-    .tv-ball{font-size:100px;animation:spin 8s linear infinite;}
+    .tv-lobby{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:480px;text-align:center;gap:4px;}
+    .tv-ball{font-size:90px;animation:spin 8s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .tv-lobby-title{font-family:'Black Han Sans',sans-serif;font-size:48px;margin:16px 0 8px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-    .tv-lobby-sub{font-size:18px;color:var(--muted2);}
-    .tv-lobby-count{margin-top:16px;font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--green);}
-    .qr-big{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:8px;}
-    .qr-big img{width:150px;height:150px;border-radius:8px;border:3px solid rgba(255,255,255,.1);}
-    .qr-label{font-size:12px;color:var(--muted2);}
-    .qr-url{font-size:10px;color:var(--muted2);word-break:break-all;max-width:200px;text-align:center;}
+    .tv-lobby-title{font-family:'Black Han Sans',sans-serif;font-size:52px;margin:10px 0 4px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .tv-lobby-sub{font-size:16px;color:var(--muted2);margin-bottom:4px;}
+    .tv-lobby-count{font-family:'Black Han Sans',sans-serif;font-size:32px;color:var(--green);min-height:40px;}
+    .tv-lobby-main{display:flex;gap:32px;align-items:flex-start;margin-top:12px;flex-wrap:wrap;justify-content:center;}
+    .qr-big{display:flex;flex-direction:column;align-items:center;gap:8px;}
+    .qr-big img{width:220px;height:220px;border-radius:12px;border:4px solid rgba(255,255,255,.15);box-shadow:0 0 40px rgba(255,215,0,.1);}
+    .qr-label{font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;}
+    .qr-url{font-size:10px;color:var(--muted2);word-break:break-all;max-width:240px;text-align:center;}
+    .player-chips{display:flex;flex-wrap:wrap;gap:8px;max-width:360px;align-content:flex-start;max-height:200px;overflow:hidden;padding-top:4px;}
+    .player-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:6px 14px;font-size:13px;font-weight:700;animation:chipPop .4s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes chipPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+    .player-chips-title{font-size:11px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
 
     /* QUESTION (TV view) */
     .tv-question{display:none;flex-direction:column;align-items:center;width:100%;}
@@ -198,12 +203,18 @@
     <div class="tv-lobby" id="tv-lobby">
       <div class="tv-ball">⚽</div>
       <div class="tv-lobby-title">월드컵 QUIZ</div>
-      <div class="tv-lobby-sub" id="tv-lobby-sub">운영자가 게임을 시작하길 기다리는 중...</div>
+      <div class="tv-lobby-sub" id="tv-lobby-sub">QR 코드를 스캔해서 참가하세요!</div>
       <div class="tv-lobby-count" id="tv-lobby-count"></div>
-      <div class="qr-big">
-        <img id="qr-img" src="" alt="QR" onerror="this.style.display='none'">
-        <p class="qr-label">📱 스캔해서 참가</p>
-        <p class="qr-url" id="qr-url-text"></p>
+      <div class="tv-lobby-main">
+        <div class="qr-big">
+          <img id="qr-img" src="" alt="QR" onerror="this.style.display='none'">
+          <p class="qr-label">📱 스캔해서 참가</p>
+          <p class="qr-url" id="qr-url-text"></p>
+        </div>
+        <div id="player-chips-wrap" style="display:none;">
+          <div class="player-chips-title">참가자 목록</div>
+          <div class="player-chips" id="player-chips"></div>
+        </div>
       </div>
     </div>
 
@@ -598,7 +609,17 @@ function startListening(){
     currentPlayers=d||{};
     const n=Object.keys(currentPlayers).length;
     document.getElementById('st-players').textContent=n;
-    document.getElementById('tv-lobby-count').textContent=n>0?n+'명 대기중':'';
+    document.getElementById('tv-lobby-count').textContent=n>0?'👥 '+n+'명 대기중':'';
+    // Player name chips in TV lobby
+    const wrap=document.getElementById('player-chips-wrap');
+    const chips=document.getElementById('player-chips');
+    if(wrap&&chips){
+      if(n>0){
+        wrap.style.display='block';
+        const names=Object.values(currentPlayers).filter(p=>p&&p.name).map(p=>p.name);
+        chips.innerHTML=names.map(name=>`<div class="player-chip">${name}</div>`).join('');
+      } else {wrap.style.display='none';}
+    }
   };
   playersES.addEventListener('put',e=>{const d=JSON.parse(e.data);onPlayers(d.data||{});});
   playersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);Object.assign(currentPlayers,d.data||{});onPlayers(currentPlayers);});

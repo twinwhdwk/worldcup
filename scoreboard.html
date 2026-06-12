@@ -81,6 +81,18 @@
     .sb-text strong{color:#60a5fa;}
 
     @keyframes cFall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+    /* ── GAME OVER BANNER ── */
+    .game-over-banner{display:none;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,215,0,.03));border:2px solid rgba(255,215,0,.3);border-radius:18px;margin:0 28px 20px;padding:24px;text-align:center;position:relative;overflow:hidden;}
+    .game-over-banner.show{display:block;animation:goBannerIn .6s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes goBannerIn{from{transform:scale(.9) translateY(-20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+    .game-over-banner::before{content:'🏆';position:absolute;font-size:120px;opacity:.04;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+    .go-title{font-family:'Black Han Sans',sans-serif;font-size:36px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+    .go-sub{font-size:14px;color:var(--muted2);}
+    .go-winner{display:flex;align-items:center;gap:12px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:14px;padding:14px 20px;margin-top:16px;justify-content:center;}
+    .go-crown{font-size:40px;}
+    .go-winner-name{font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--gold);}
+    .go-winner-score{font-size:14px;color:var(--muted2);margin-top:2px;}
     @media(max-width:640px){
       header{padding:14px 16px;}
       .stats-row{grid-template-columns:1fr 1fr;padding:16px;}
@@ -104,6 +116,19 @@
 <div class="setup-banner hidden" id="setup-banner">
   <div class="sb-text">
     <strong>Firebase 미연결</strong> — 운영자가 공유한 QR 코드 URL로 접속하거나, operator.html에서 Firebase URL을 설정하세요.
+  </div>
+</div>
+
+<!-- Game Over Banner (shown when session state = done) -->
+<div class="game-over-banner" id="go-banner">
+  <div class="go-title">🏆 최종 결과 발표!</div>
+  <div class="go-sub">모든 게임이 종료되었습니다. 최종 순위를 확인하세요!</div>
+  <div class="go-winner" id="go-winner" style="display:none">
+    <div class="go-crown">👑</div>
+    <div>
+      <div class="go-winner-name" id="go-winner-name">—</div>
+      <div class="go-winner-score" id="go-winner-score"></div>
+    </div>
   </div>
 </div>
 
@@ -365,9 +390,38 @@ function confetti(count=50){
   }
 })();
 
+// ── Session state listener (shows game-over banner) ────────────────
+let gameOverShown = false;
+function listenSession(){
+  if(!USE_FB)return;
+  const es=new EventSource(FB+'/session.json');
+  es.addEventListener('put',e=>{const d=JSON.parse(e.data).data;onSession(d);});
+  es.addEventListener('patch',e=>{const d=JSON.parse(e.data).data;onSession(d);});
+}
+function onSession(s){
+  if(!s)return;
+  if(s.state==='done'&&!gameOverShown){
+    gameOverShown=true;
+    const banner=document.getElementById('go-banner');
+    banner.classList.add('show');
+    const sorted=Object.values(allScores).filter(p=>p&&p.name).sort((a,b)=>b.total-a.total);
+    if(sorted.length>0){
+      document.getElementById('go-winner').style.display='flex';
+      document.getElementById('go-winner-name').textContent=sorted[0].name;
+      document.getElementById('go-winner-score').textContent=(sorted[0].total||0).toLocaleString()+'점 · 최종 1위!';
+    }
+    setTimeout(()=>confetti(100),400);
+    setTimeout(()=>confetti(80),1200);
+  } else if(s.state!=='done'){
+    gameOverShown=false;
+    document.getElementById('go-banner').classList.remove('show');
+  }
+}
+
 // ── Init ───────────────────────────────────────────────────────────
 if(USE_FB){
   startStream();
+  listenSession();
 } else {
   const load=()=>{
     const data=JSON.parse(localStorage.getItem('wc_scoreboard_v1')||'{"players":[]}');
