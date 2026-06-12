@@ -402,17 +402,20 @@ const FB = FIREBASE_URL + '/wc_live';
 const USE_FB = FIREBASE_URL.startsWith('https://');
 const BASE_URL = 'https://twinwhdwk.github.io/worldcup_minigame';
 function twparse(el){if(typeof twemoji!=='undefined'&&el)twemoji.parse(el);}
+function _fimg(code,h=22){
+  return`<img src="https://flagcdn.com/w40/${code}.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/${code}.svg'" style="height:${h}px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">`;
+}
 function renderOptHtml(text){
   if(!text)return'';
   let s=String(text);
   s=s
-    .replace(/🏴󠁧󠁢󠁥󠁮󠁧󠁿/g,'<img src="https://flagcdn.com/w40/gb-eng.png" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">')
-    .replace(/🏴󠁧󠁢󠁳󠁣󠁴󠁿/g,'<img src="https://flagcdn.com/w40/gb-sct.png" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">')
-    .replace(/🏴󠁧󠁢󠁷󠁬󠁳󠁿/g,'<img src="https://flagcdn.com/w40/gb-wls.png" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">');
+    .replace(/🏴󠁧󠁢󠁥󠁮󠁧󠁿/g,_fimg('gb-eng'))
+    .replace(/🏴󠁧󠁢󠁳󠁣󠁴󠁿/g,_fimg('gb-sct'))
+    .replace(/🏴󠁧󠁢󠁷󠁬󠁳󠁿/g,_fimg('gb-wls'));
   s=s.replace(/\uD83C[\uDDE6-\uDDFF]\uD83C[\uDDE6-\uDDFF]/g,function(m){
     const cp=[...m].map(c=>c.codePointAt(0));
     const code=String.fromCharCode(cp[0]-0x1F1E6+65,cp[1]-0x1F1E6+65).toLowerCase();
-    return'<img src="https://flagcdn.com/w40/'+code+'.png" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">';
+    return _fimg(code);
   });
   return s;
 }
@@ -840,7 +843,7 @@ async function nextQuestion(){
   document.getElementById('tv-q-game').textContent=selectedGame;
   document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
   const _emojiEl=document.getElementById('tv-q-emoji');
-  if(q.img){_emojiEl.innerHTML=`<img src="${q.img}" style="height:80px;width:auto;max-width:160px;border-radius:6px;object-fit:contain;" alt="">`;}
+  if(q.img){_emojiEl.innerHTML=`<img src="${q.img}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg'}" style="height:80px;width:auto;max-width:160px;border-radius:6px;object-fit:contain;" alt="">`;}
   else{_emojiEl.textContent=q.emoji||'⚽';twparse(_emojiEl);}
   document.getElementById('tv-q-text').textContent=q.text;
   q.options.forEach((o,i)=>{

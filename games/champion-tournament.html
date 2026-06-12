@@ -224,7 +224,7 @@ const ALL_COUNTRIES = [
   {name:"🇪🇸 스페인",flag:"🇪🇸",code:"es"},{name:"🇳🇱 네덜란드",flag:"🇳🇱",code:"nl"},{name:"🇵🇹 포르투갈",flag:"🇵🇹",code:"pt"},{name:"🇭🇷 크로아티아",flag:"🇭🇷",code:"hr"},
 ];
 const FLAG_CODE_CT = {'🇺🇾':'uy','🇧🇷':'br','🇩🇪':'de','🏴󠁧󠁢󠁥󠁮󠁧󠁿':'gb-eng','🇦🇷':'ar','🇮🇹':'it','🇫🇷':'fr','🇪🇸':'es','🇳🇱':'nl','🇵🇹':'pt','🇭🇷':'hr'};
-function flagImg(code,h=22){return `<img src="https://flagcdn.com/w40/${code}.png" style="height:${h}px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`;};
+function flagImg(code,h=22){return `<img src="https://flagcdn.com/w40/${code}.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/${code}.svg'" style="height:${h}px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`;};
 
 const TOTAL=10;
 let score=0,correctCount=0,currentQ=0,questions=[],history=[],hintRevealed=false,bossUsed=false;

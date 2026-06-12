@@ -315,7 +315,7 @@ const FLAG_CODE_PC = {
   '🇩🇰':'dk','🇮🇹':'it','🇩🇪':'de','🇳🇬':'ng','🇸🇳':'sn','🇩🇿':'dz','🇲🇦':'ma','🇨🇲':'cm',
   '🇯🇵':'jp','🇺🇾':'uy','🇲🇽':'mx','🇨🇭':'ch','🇺🇸':'us','🇷🇸':'rs','🇬🇭':'gh','🇸🇦':'sa',
 };
-function pcFlagImg(code){return `<img src="https://flagcdn.com/w40/${code}.png" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`;};
+function pcFlagImg(code){return `<img src="https://flagcdn.com/w40/${code}.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/${code}.svg'" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`;};
 
 let score=0, timeLeft=20, streak=0, bestStreak=0, totalQ=0, correctQ=0;
 let timerInterval, currentPlayer=null, answered=false;

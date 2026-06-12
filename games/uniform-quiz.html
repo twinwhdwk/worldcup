@@ -396,7 +396,7 @@ function setQuestion(){
     const f=o.match(/^(\S+)/)?.[1]||'';
     const n=o.replace(/^\S+\s*/,'');
     const fc=UQ_FC[f];
-    const fi=fc?`<img src="https://flagcdn.com/w40/${fc}.png" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`:( f?`<span class="flag">${f}</span>`:'');
+    const fi=fc?`<img src="https://flagcdn.com/w40/${fc}.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/${fc}.svg'" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`:( f?`<span class="flag">${f}</span>`:'');
     return `<button class="opt-btn" onclick="answer(this,'${o.replace(/'/g,"\\'")}'">${fi}${n}</button>`;
   }).join('');
 }
@@ -425,7 +425,7 @@ function answer(btn,selected){
     });
     fb.className='feedback wrong';
     const _ufc=UQ_FC[currentTeam.flag];
-    fb.innerHTML=`❌ 오답! 정답: ${_ufc?`<img src="https://flagcdn.com/w40/${_ufc}.png" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`:currentTeam.flag}${currentTeam.name.replace(/^\S+\s*/,'')}`;
+    fb.innerHTML=`❌ 오답! 정답: ${_ufc?`<img src="https://flagcdn.com/w40/${_ufc}.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/${_ufc}.svg'" style="height:22px;width:auto;vertical-align:middle;border-radius:2px;margin-right:4px;" alt="">`:currentTeam.flag}${currentTeam.name.replace(/^\S+\s*/,'')}`;
     document.getElementById('streak-bar').textContent='';
     // Auto hint on 2 consecutive wrong
     if(wrongStreak>=2){

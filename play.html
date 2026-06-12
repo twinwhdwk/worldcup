@@ -425,18 +425,21 @@ function showCountdown(cb){
   step();
 }
 
-// ── Flag emoji → flagcdn.com img ─────────────────────────────────
+// ── Flag emoji → flagcdn.com img (jsdelivr fallback) ─────────────
+function _fimg(code,h=20){
+  return`<img src="https://flagcdn.com/w40/${code}.png" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/${code}.svg'" style="height:${h}px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">`;
+}
 function renderOptHtml(text){
   if(!text)return'';
   let s=String(text);
   s=s
-    .replace(/🏴󠁧󠁢󠁥󠁮󠁧󠁿/g,'<img src="https://flagcdn.com/w40/gb-eng.png" style="height:20px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">')
-    .replace(/🏴󠁧󠁢󠁳󠁣󠁴󠁿/g,'<img src="https://flagcdn.com/w40/gb-sct.png" style="height:20px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">')
-    .replace(/🏴󠁧󠁢󠁷󠁬󠁳󠁿/g,'<img src="https://flagcdn.com/w40/gb-wls.png" style="height:20px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">');
+    .replace(/🏴󠁧󠁢󠁥󠁮󠁧󠁿/g,_fimg('gb-eng'))
+    .replace(/🏴󠁧󠁢󠁳󠁣󠁴󠁿/g,_fimg('gb-sct'))
+    .replace(/🏴󠁧󠁢󠁷󠁬󠁳󠁿/g,_fimg('gb-wls'));
   s=s.replace(/\uD83C[\uDDE6-\uDDFF]\uD83C[\uDDE6-\uDDFF]/g,function(m){
     const cp=[...m].map(c=>c.codePointAt(0));
     const code=String.fromCharCode(cp[0]-0x1F1E6+65,cp[1]-0x1F1E6+65).toLowerCase();
-    return'<img src="https://flagcdn.com/w40/'+code+'.png" style="height:20px;width:auto;vertical-align:middle;border-radius:2px;margin-right:3px;" alt="">';
+    return _fimg(code);
   });
   return s;
 }
@@ -458,7 +461,7 @@ async function renderQ(s){
     document.getElementById('q-lbl').textContent=s.game||'퀴즈';
     document.getElementById('q-score').textContent=myScore+'점';
     const emojiEl=document.getElementById('q-emoji');
-    if(q.img){emojiEl.innerHTML=`<img src="${q.img}" style="max-height:88px;width:auto;max-width:140px;border-radius:8px;object-fit:contain;" alt="">`;}
+    if(q.img){emojiEl.innerHTML=`<img src="${q.img}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg'}" style="max-height:88px;width:auto;max-width:140px;border-radius:8px;object-fit:contain;" alt="">`;}
     else{emojiEl.textContent=q.emoji||'⚽';if(typeof twemoji!=='undefined')twemoji.parse(emojiEl);}
     document.getElementById('q-text').textContent=q.text;
     document.getElementById('q-num').textContent='문제 '+(s.questionIdx+1)+' / '+s.totalQuestions;

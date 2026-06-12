@@ -237,7 +237,7 @@ function setQuestion(){
   answered=false;qStartTime=Date.now();qNum++;
   current=getFlag();totalQ++;
   const flagEl=document.getElementById('big-flag');
-  flagEl.innerHTML=`<img src="https://flagcdn.com/w160/${current.code}.png" style="height:clamp(90px,22vw,140px);width:auto;max-width:200px;object-fit:contain;border-radius:6px;display:block;margin:0 auto;" alt="${current.name}" onerror="this.parentNode.textContent='${current.flag}'">`;
+  flagEl.innerHTML=`<img src="https://flagcdn.com/w160/${current.code}.png" style="height:clamp(90px,22vw,140px);width:auto;max-width:200px;object-fit:contain;border-radius:6px;display:block;margin:0 auto;" alt="${current.name}" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/${current.code}.svg'">`;
   document.getElementById('q-num').textContent=`문제 ${qNum}`;
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
