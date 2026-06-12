@@ -465,7 +465,7 @@ function showResult(){
 // Splash
 setTimeout(()=>{ const s=document.getElementById('splash'); s.classList.add('out'); setTimeout(()=>s.remove(),400); },900);
 
-startGame();
+if(localStorage.getItem('wc_player_name'))startGame();
 
 function shareResult(s, gameName) {
   const grades = [[1400,'S'],[1000,'A'],[600,'B'],[300,'C'],[0,'D']
@@ -531,8 +531,7 @@ function saveNameOverlay(){
   var n=document.getElementById('no-input').value.trim();
   if(!n){document.getElementById('no-input').focus();return;}
   localStorage.setItem('wc_player_name',n);
-  document.getElementById('name-overlay').style.display='none';
-}
+  document.getElementById('name-overlay').style.display='none';if(typeof startGame==='function')startGame();}
 </script>
 </body>
 </html>
