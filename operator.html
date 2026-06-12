@@ -58,6 +58,8 @@
     .player-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:6px 14px;font-size:13px;font-weight:700;animation:chipPop .4s cubic-bezier(.34,1.56,.64,1);}
     @keyframes chipPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
     .player-chips-title{font-size:11px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+    .tv-fact-ticker{margin-top:14px;background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.15);border-radius:14px;padding:10px 22px;max-width:680px;text-align:center;font-size:14px;color:var(--muted2);line-height:1.5;min-height:42px;}
+    .tv-fact-ticker span{color:rgba(255,215,0,.6);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:4px;}
 
     /* QUESTION (TV view) */
     .tv-question{display:none;flex-direction:column;align-items:center;width:100%;}
@@ -237,6 +239,7 @@
           <div class="player-chips" id="player-chips"></div>
         </div>
       </div>
+      <div class="tv-fact-ticker" id="tv-fact-ticker"><span>⚽ 알고 계셨나요?</span><span id="tv-fact-text"></span></div>
       <div id="tv-final-lb" style="display:none;margin-top:16px;width:100%;max-width:700px;">
         <div style="font-family:'Black Han Sans',sans-serif;font-size:22px;color:var(--gold);margin-bottom:12px;letter-spacing:2px;">🏆 최종 순위 TOP 10 🏆</div>
         <div id="tv-final-rows" style="display:flex;flex-direction:column;gap:6px;width:100%;"></div>
@@ -525,6 +528,9 @@ const QB = {
   ]),
   '우승국퀴즈': ()=>shuffle([
     {emoji:'🏆',text:'1930년 첫 번째 월드컵 우승국은?',options:['브라질','아르헨티나','우루과이','이탈리아'],correct:2},
+    {emoji:'🏆',text:'1934년 이탈리아 홈 월드컵 우승국은?',options:['헝가리','체코슬로바키아','이탈리아','우루과이'],correct:2},
+    {emoji:'🏆',text:'1938년 프랑스 월드컵에서 2연속 우승한 나라는?',options:['브라질','우루과이','헝가리','이탈리아'],correct:3},
+    {emoji:'🏆',text:'1962년 칠레 월드컵 우승국은? (펠레 부상 이탈)',options:['아르헨티나','브라질','이탈리아','독일'],correct:1},
     {emoji:'🏆',text:'1958년 월드컵 우승국은? (17세 펠레 데뷔)',options:['우루과이','아르헨티나','이탈리아','브라질'],correct:3},
     {emoji:'🏆',text:'1966년 잉글랜드에서 열린 월드컵 우승국은?',options:['서독','잉글랜드','브라질','포르투갈'],correct:1},
     {emoji:'🏆',text:'1986년 "신의 손" 골이 나온 대회 우승국은?',options:['브라질','우루과이','독일','아르헨티나'],correct:3},
@@ -1061,6 +1067,35 @@ function confetti(count=40){
 (function(){const pool=QB[selectedGame]?QB[selectedGame]().length:0;const info=document.getElementById('qbank-info');if(info)info.textContent=`문제 풀: ${pool}개 (최대 ${Math.min(pool,20)}문제 선택 가능)`;})();
 tvShow('tv-lobby');
 if(USE_FB)startListening();
+
+// ── TV Lobby Fact Ticker ──────────────────────────────────────────
+(function(){
+  const facts=[
+    '브라질은 5회 우승으로 역대 월드컵 최다 우승국입니다.',
+    '저스트 퐁테인은 1958년 13골을 기록, 단일 대회 최다 득점으로 아직도 깨지지 않은 기록입니다.',
+    '마라도나의 "신의 손" 골은 1986년 잉글랜드와의 8강전에서 나왔습니다.',
+    '2014년 준결승에서 브라질은 개최국임에도 독일에 1-7로 대패했습니다 (미네이랑의 비극).',
+    '이탈리아는 1934년과 1938년 2대회 연속 우승, 사상 첫 연속 우승을 달성했습니다.',
+    '펠레는 1958년 17세 239일에 월드컵 결승골을 넣은 역대 최연소 기록자입니다.',
+    '독일(서독)은 역대 가장 많은 4번의 월드컵 결승에서 패했습니다.',
+    '2026 FIFA 월드컵은 미국·캐나다·멕시코 3개국이 공동 개최하는 역대 최초 3국 공동 개최입니다.',
+    '메시는 2022 카타르 대회까지 5번의 월드컵, 26경기로 역대 최다 출전 기록을 세웠습니다.',
+    '음바페는 2022 카타르 월드컵에서 8골로 득점왕을 차지, 결승에서 혼자 3골을 넣었습니다.',
+    '손흥민은 프리미어리그 100골 이상을 기록한 아시아 최초의 선수입니다.',
+    '라민 야말은 2006년생으로 유로 2024 결승골의 주인공이 된 최연소 스타입니다.',
+    '네덜란드는 1974·1978·2010년 3번 결승에 올랐지만 모두 준우승에 그쳤습니다.',
+    '한국은 2002년 홈 월드컵에서 4강까지 오른 아시아 역대 최고 성적을 기록했습니다.',
+    '1954 스위스 월드컵은 경기당 평균 5.38골로 역대 가장 많은 골이 터진 대회입니다.',
+  ];
+  let idx=~~(Math.random()*facts.length);
+  const el=document.getElementById('tv-fact-text');
+  if(el){el.textContent=facts[idx];}
+  setInterval(()=>{
+    idx=(idx+1)%facts.length;
+    const fel=document.getElementById('tv-fact-text');
+    if(fel){fel.style.opacity='0';setTimeout(()=>{fel.textContent=facts[idx];fel.style.opacity='1';fel.style.transition='opacity .5s';},400);}
+  },7000);
+})();
 
 // ── Session recovery after page reload ────────────────────────────
 (async function(){
