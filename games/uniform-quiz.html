@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -495,5 +495,28 @@ function shareResult(s, gameName) {
   <a href="record-quiz.html" class="nav-item "><span class="nav-icon">📊</span><span>기록</span></a>
   <a href="../scoreboard.html" class="nav-item"><span class="nav-icon">🏅</span><span>랭킹</span></a>
 </nav>
+<!-- Name overlay: appears if wc_player_name not set -->
+<div id="name-overlay" style="display:none;position:fixed;inset:0;background:rgba(6,6,15,.96);z-index:9998;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:0;">
+  <div style="font-size:64px;margin-bottom:16px;">⚽</div>
+  <div style="font-family:'Black Han Sans',sans-serif;font-size:26px;margin-bottom:6px;color:#fff;">닉네임 설정</div>
+  <div style="color:#888;font-size:13px;text-align:center;max-width:260px;margin-bottom:24px;line-height:1.5;">점수가 실시간 랭킹에<br>자동으로 등록됩니다!</div>
+  <input id="no-input" type="text" placeholder="예: 홍길동" maxlength="8" autocomplete="off" style="background:#10111e;border:2px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 20px;font-size:20px;color:#f0f0f0;font-family:'Black Han Sans',sans-serif;text-align:center;outline:none;width:100%;max-width:280px;margin-bottom:12px;">
+  <button onclick="saveNameOverlay()" style="background:#00843D;color:#fff;border:none;border-radius:14px;padding:16px;font-size:18px;font-family:'Black Han Sans',sans-serif;cursor:pointer;width:100%;max-width:280px;">✅ 시작하기</button>
+  <button onclick="document.getElementById('name-overlay').style.display='none'" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;margin-top:14px;font-family:'Noto Sans KR',sans-serif;">건너뛰기 (랭킹 미등록)</button>
+</div>
+<script>
+(function(){
+  if(!localStorage.getItem('wc_player_name')){
+    var o=document.getElementById('name-overlay');o.style.display='flex';
+    document.getElementById('no-input').addEventListener('keydown',function(e){if(e.key==='Enter')saveNameOverlay();});
+  }
+})();
+function saveNameOverlay(){
+  var n=document.getElementById('no-input').value.trim();
+  if(!n){document.getElementById('no-input').focus();return;}
+  localStorage.setItem('wc_player_name',n);
+  document.getElementById('name-overlay').style.display='none';
+}
+</script>
 </body>
 </html>
