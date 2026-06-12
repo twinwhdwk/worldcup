@@ -458,7 +458,17 @@ function showReveal(s){
   } else {myAnsEl.style.display='none';}
   document.getElementById('rv-gain').textContent=gain>0?'+'+gain+'점':'0점';
   document.getElementById('rv-gain').className='rv-gain'+(gain>0?'':' zero');
-  document.getElementById('rv-total').textContent='총 점수: '+myScore+'점';
+  // Animated total score countup
+  const totalEl=document.getElementById('rv-total');
+  const fromScore=oldScore;const toScore=myScore;
+  if(gain>0){
+    let start=null;
+    const dur=600;
+    const step=ts=>{if(!start)start=ts;const p=Math.min((ts-start)/dur,1);const ease=1-Math.pow(1-p,3);totalEl.textContent='총 점수: '+Math.round(fromScore+ease*(toScore-fromScore)).toLocaleString()+'점';if(p<1)requestAnimationFrame(step);else totalEl.textContent='총 점수: '+toScore.toLocaleString()+'점';};
+    requestAnimationFrame(step);
+  } else {
+    totalEl.textContent='총 점수: '+myScore.toLocaleString()+'점';
+  }
   document.getElementById('lb-score').textContent=myScore;
 
   // Rank display

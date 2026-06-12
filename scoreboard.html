@@ -79,6 +79,11 @@
     .rank-delta.down{color:#f87171;background:rgba(248,113,113,.12);}
     .rank-delta.same{color:var(--muted2);}
     .rank-delta.new{color:#60a5fa;background:rgba(96,165,250,.12);}
+    .streak-fire{font-size:13px;animation:fireWave .6s ease infinite alternate;}
+    @keyframes fireWave{from{transform:scale(1) rotate(-5deg)}to{transform:scale(1.2) rotate(5deg)}}
+
+    /* TV auto-scroll */
+    body.tv-mode .rank-section{overflow:hidden;height:calc(100vh - 320px);position:relative;}
 
     /* ── EMPTY ── */
     .empty{text-align:center;padding:60px 20px;color:var(--muted2);}
@@ -312,6 +317,7 @@ function render(){
     }
 
     const prizeTag = prize ? '<span class="prize-tag">🎁 상품</span>' : '';
+    const streakFire = (p.streak||0)>=3 ? `<span class="streak-fire" title="${p.streak}연속 정답!">${'🔥'.repeat(Math.min(p.streak,3))}</span>` : '';
     const entryClass = [
       'rank-item',
       prize ? 'prize-winner' : '',
@@ -324,7 +330,7 @@ function render(){
       <div class="rank-num">${MEDALS[i]||r}</div>
       <div class="rank-avatar" style="background:${col}">${p.name.slice(0,2)}</div>
       <div class="rank-info">
-        <div class="rank-name">${p.name} ${deltaHtml} ${prizeTag}</div>
+        <div class="rank-name">${p.name} ${deltaHtml} ${prizeTag} ${streakFire}</div>
         <div class="rank-sub">정답 ${p.correct||0}개 · 연속 ${p.streak||0}회</div>
         <div class="rank-bar-wrap"><div class="rank-bar" style="width:${bw}%;background:${col}"></div></div>
       </div>
@@ -375,14 +381,32 @@ function setStatAnimated(id, value){
   statPrev[id] = value;
 }
 
-// ── TV Mode toggle ─────────────────────────────────────────────────
+// ── TV Mode + auto-scroll ─────────────────────────────────────────
 let tvMode = false;
+let tvScrollRaf = null;
+let tvScrollDir = 1;
+let tvScrollPause = 0;
+
+function tvAutoScroll(){
+  const rs = document.querySelector('.rank-section');
+  if(!rs || !tvMode){tvScrollRaf=null;return;}
+  const max = rs.scrollHeight - rs.clientHeight;
+  if(max <= 0){tvScrollRaf=requestAnimationFrame(tvAutoScroll);return;}
+  if(tvScrollPause > 0){tvScrollPause--;tvScrollRaf=requestAnimationFrame(tvAutoScroll);return;}
+  if(rs.scrollTop >= max-2){tvScrollDir=-1;tvScrollPause=120;}
+  else if(rs.scrollTop <= 2){tvScrollDir=1;tvScrollPause=90;}
+  rs.scrollBy(0, tvScrollDir * 0.7);
+  tvScrollRaf = requestAnimationFrame(tvAutoScroll);
+}
+
 function toggleTvMode(){
   tvMode = !tvMode;
   document.body.classList.toggle('tv-mode', tvMode);
   const btn = document.getElementById('tv-mode-btn');
   btn.classList.toggle('active', tvMode);
   btn.textContent = tvMode ? '🖥️ TV 모드 켜짐' : '🖥️ TV 모드';
+  if(tvMode){tvScrollDir=1;tvScrollPause=60;if(!tvScrollRaf)tvAutoScroll();}
+  else{if(tvScrollRaf){cancelAnimationFrame(tvScrollRaf);tvScrollRaf=null;}document.querySelector('.rank-section')?.scrollTo(0,0);}
 }
 
 // ── Export CSV ─────────────────────────────────────────────────────
