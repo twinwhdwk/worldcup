@@ -683,6 +683,7 @@ async function startSession(){
 
   await fbPut('/session',{state:'lobby',game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
   await fbDelete('/answers');
+  await fbDelete('/players');
 
   document.getElementById('game-setup').style.display='none';
   document.getElementById('active-ctrl').style.display='block';
@@ -696,6 +697,19 @@ async function startSession(){
   startListening();
   sndStart();
   toast('✅ 세션 시작! 참가자들이 접속하길 기다리세요.');
+}
+
+// ── Firebase SSE patch helper ──────────────────────────────────────
+// Firebase patch events carry {path, data}: path="/" means root-level
+// merge; path="/{key}" means only that child changed. We must respect
+// the path so child writes don't splat their fields onto the parent.
+function applyFbPatch(obj, d){
+  if(!d.path||d.path==='/'||d.path===''){
+    Object.assign(obj, d.data||{});
+  } else {
+    const key=d.path.replace(/^\//,'').split('/')[0];
+    if(key) obj[key]=d.data;
+  }
 }
 
 // ── Listening ──────────────────────────────────────────────────────
@@ -716,24 +730,24 @@ function startListening(){
     if(wrap&&chips){
       if(n>0){
         wrap.style.display='block';
-        const names=Object.values(currentPlayers).filter(p=>p&&p.name).map(p=>p.name);
+        const names=Object.values(currentPlayers).filter(p=>p&&typeof p==='object'&&p.name).map(p=>p.name);
         chips.innerHTML=names.map(name=>`<div class="player-chip">${name}</div>`).join('');
       } else {wrap.style.display='none';}
     }
   };
   playersES.addEventListener('put',e=>{const d=JSON.parse(e.data);onPlayers(d.data||{});});
-  playersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);Object.assign(currentPlayers,d.data||{});onPlayers(currentPlayers);});
+  playersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentPlayers,d);onPlayers(currentPlayers);});
   playersES.onerror=()=>{toast('⚠️ Firebase 연결 불안정 — 재연결 시도 중...');setTimeout(startListening,4000);};
 
   if(answersES){try{answersES.close();}catch{}}
   answersES=new EventSource(FB+'/answers.json');
   answersES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentAnswers=d.data||{};renderAnswerDist();});
-  answersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);Object.assign(currentAnswers,d.data||{});renderAnswerDist();});
+  answersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentAnswers,d);renderAnswerDist();});
 
   if(scoresES){try{scoresES.close();}catch{}}
   scoresES=new EventSource(FB+'/scores.json');
   scoresES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentScores=d.data||{};renderLeaderboard();});
-  scoresES.addEventListener('patch',e=>{const d=JSON.parse(e.data);Object.assign(currentScores,d.data||{});renderLeaderboard();});
+  scoresES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentScores,d);renderLeaderboard();});
 }
 
 // ── Next question ──────────────────────────────────────────────────
