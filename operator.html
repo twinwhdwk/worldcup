@@ -1052,7 +1052,9 @@ async function endSession(){
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
   sessionActive=false;
   localStorage.removeItem('wc_op_session');
-  await fbPatch('/session',{state:'done',question:null});
+  const finalRanks={};
+  Object.entries(currentScores).sort((a,b)=>b[1].total-a[1].total).forEach(([k],i)=>{finalRanks[k]=i+1;});
+  await fbPatch('/session',{state:'done',question:null,allRanks:finalRanks});
   document.getElementById('active-ctrl').style.display='none';
   document.getElementById('game-setup').style.display='block';
   document.getElementById('ans-dist-section').style.display='none';

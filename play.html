@@ -384,27 +384,34 @@ function onSession(s){
   }
   if(s.state==='done'){
     clearInterval(_pollInt);_pollInt=null;
-    // Show final game-over screen
-    document.getElementById('done-score').textContent=myScore.toLocaleString();
-    const rankEl=document.getElementById('done-rank');
-    const prizeBanner=document.getElementById('done-prize-banner');
-    const doneEmoji=document.getElementById('done-emoji');
-    if(s.allRanks&&s.allRanks[enc(myName)]){
-      const r=s.allRanks[enc(myName)];
-      const inPrize=r<=10;
-      rankEl.textContent=inPrize?`🏆 ${r}위 — 상품 확정!`:`${r}위`;
-      rankEl.style.color=inPrize?'var(--gold)':'var(--muted2)';
-      if(inPrize){
-        prizeBanner.style.display='block';
-        doneEmoji.textContent='🎁';
-        confetti();setTimeout(confetti,300);setTimeout(confetti,700);
-        if(navigator.vibrate)navigator.vibrate([80,50,80,50,200]);
-      }
-    } else {rankEl.textContent='';}
-    const sbLink=document.getElementById('done-sb-link');
-    if(USE_FB)sbLink.href='scoreboard.html?db='+btoa(FIREBASE_URL);
-    show('s-done');
-    setTimeout(confetti,400);
+    const renderDone=()=>{
+      document.getElementById('done-score').textContent=myScore.toLocaleString();
+      const rankEl=document.getElementById('done-rank');
+      const prizeBanner=document.getElementById('done-prize-banner');
+      const doneEmoji=document.getElementById('done-emoji');
+      if(s.allRanks&&s.allRanks[enc(myName)]){
+        const r=s.allRanks[enc(myName)];
+        const inPrize=r<=10;
+        rankEl.textContent=inPrize?`🏆 ${r}위 — 상품 확정!`:`${r}위`;
+        rankEl.style.color=inPrize?'var(--gold)':'var(--muted2)';
+        if(inPrize){
+          prizeBanner.style.display='block';
+          doneEmoji.textContent='🎁';
+          confetti();setTimeout(confetti,300);setTimeout(confetti,700);
+          if(navigator.vibrate)navigator.vibrate([80,50,80,50,200]);
+        }
+      } else {rankEl.textContent='';}
+      const sbLink=document.getElementById('done-sb-link');
+      if(USE_FB)sbLink.href='scoreboard.html?db='+btoa(FIREBASE_URL);
+      show('s-done');
+      setTimeout(confetti,400);
+    };
+    // Fetch final score from Firebase to fix race condition on page reload
+    if(myName&&myScore===0){
+      fbGet('/scores/'+enc(myName)).then(d=>{if(d){myScore=d.total||0;myStreak=d.streak||0;}renderDone();});
+    } else {
+      renderDone();
+    }
     return;
   }
   const qId=(s.questionIdx||0)+'_'+(s.game||'');
