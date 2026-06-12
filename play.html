@@ -387,8 +387,16 @@ function showCountdown(cb){
 }
 
 // ── Render question ───────────────────────────────────────────────
-function renderQ(s){
+async function renderQ(s){
   const q=s.question;if(!q)return;
+  // Check if player already answered this question (page reload guard)
+  const existingAns=await fbGet('/answers/'+enc(myName));
+  if(existingAns&&existingAns.idx>=0){
+    myAnswerIdx=existingAns.idx;
+    document.getElementById('wait-prev').textContent=LETTERS[existingAns.idx]+' — '+(q.options?.[existingAns.idx]||'?');
+    show('s-wait');startFactRotation();
+    return;
+  }
   const doRender=()=>{
     show('s-question');
     document.getElementById('q-lbl').textContent=s.game||'퀴즈';
