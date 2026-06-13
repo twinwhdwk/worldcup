@@ -854,7 +854,8 @@ async function startGame(){
     toast('⚠️ Firebase 초기화 실패: '+err.message,true);
     return;
   }
-  nextQuestion();
+  document.getElementById('btn-nextq').textContent='🎮 게임 시작!';
+  toast('✅ 게임 준비 완료! 게임 시작 버튼을 눌러주세요.');
 }
 
 // ── Firebase SSE patch helper ──────────────────────────────────────
@@ -949,13 +950,18 @@ function startListening(){
 }
 
 // ── Next question ──────────────────────────────────────────────────
+let _nqRunning=false;
 async function nextQuestion(){
+  if(_nqRunning){toast('⏳ 이미 처리 중입니다...');return;}
   if(!sessionQuestions||!sessionQuestions.length){toast('⚠️ 게임을 먼저 시작해주세요.',true);return;}
+  _nqRunning=true;
+  document.getElementById('btn-nextq').style.display='none';
+  document.getElementById('btn-cont').style.display='none';
   toast('⏳ 문제 '+(currentQIdx+2)+'/'+sessionQuestions.length+' 준비 중...');
   document.getElementById('btn-nextq').textContent='▶ 다음 문제 시작';
   revealInProgress=false;
   currentQIdx++;
-  if(currentQIdx>=sessionQuestions.length){await endGame();return;}
+  if(currentQIdx>=sessionQuestions.length){_nqRunning=false;await endGame();return;}
   try{const s=JSON.parse(localStorage.getItem('wc_op_session')||'{}');s.qIdx=currentQIdx;localStorage.setItem('wc_op_session',JSON.stringify(s));}catch{}
 
   const q=sessionQuestions[currentQIdx];
@@ -979,8 +985,11 @@ async function nextQuestion(){
     });
   }catch(err){
     currentQIdx--;revealInProgress=false;
+    _nqRunning=false;
+    document.getElementById('btn-nextq').style.display='block';
     toast('⚠️ Firebase 오류: '+err.message,true);return;
   }
+  _nqRunning=false;
 
   tvShow('tv-question');
   document.getElementById('tv-q-game').textContent=selectedGame;
