@@ -855,7 +855,7 @@ async function startGame(){
   toast('⏳ 게임 초기화 중...');
 
   try{
-    await fbDelete('/answers');
+    await fbPut('/answers',null);
     await fbPatch('/session',{game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
   }catch(err){
     toast('⚠️ Firebase 초기화 실패: '+err.message,true);
@@ -987,7 +987,7 @@ async function nextQuestion(){
   catch(e){_nqRunning=false;document.getElementById('btn-nextq').style.display='block';toast('⚠️ 문제 데이터 오류: '+e.message,true);return;}
   try{
     toast('🔄 [1/2] 이전 답변 초기화 중...');
-    await fbDelete('/answers');
+    await fbPut('/answers',null);
     toast('🔄 [2/2] 세션 업데이트 중...');
     await fbPatch('/session',{
       state:'question',
@@ -999,7 +999,9 @@ async function nextQuestion(){
     currentQIdx--;revealInProgress=false;
     _nqRunning=false;
     document.getElementById('btn-nextq').style.display='block';
-    toast('⚠️ Firebase 오류: '+err.message,true);return;
+    const _errMsg=err.message||String(err);
+    toast('⚠️ Firebase 오류: '+_errMsg,true);
+    console.error('nextQuestion Firebase error:',err);return;
   }
   _nqRunning=false;
 
@@ -1261,7 +1263,7 @@ async function endSession(){
 async function clearScores(){
   if(!USE_FB){toast('Firebase 미연결');return;}
   if(!confirm('⚠️ 모든 점수를 초기화합니다.\n이 작업은 취소할 수 없습니다. 계속하시겠습니까?'))return;
-  await fbDelete('/scores');
+  await fbPut('/scores',null);
   currentScores={};
   renderLeaderboard();
   toast('✅ 점수 초기화 완료!');
@@ -1269,7 +1271,7 @@ async function clearScores(){
 async function clearPlayers(){
   if(!USE_FB){toast('Firebase 미연결');return;}
   if(!confirm('참가자 목록을 초기화합니다. 연결된 참가자는 로그인 화면으로 이동됩니다. 계속하시겠습니까?'))return;
-  await fbDelete('/players');
+  await fbPut('/players',null);
   await fbPatch('/session',{lastClearedAt:Date.now()});
   currentPlayers={};
   document.getElementById('st-players').textContent='0';
