@@ -301,6 +301,8 @@ function join(){
   listen();
   startSyncPoll();
   fbGet('/scores/'+enc(n)).then(d=>{if(d){myScore=d.total||0;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;}});
+  // Immediately show player count without waiting for first poll tick
+  fbGet('/players').then(d=>{if(d&&typeof d==='object'){totalPlayers=Object.values(d).filter(p=>p&&typeof p==='object').length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명이 대기중':(totalPlayers===1?'첫 번째 참가자!':'');}});
   sndJoin();
 }
 

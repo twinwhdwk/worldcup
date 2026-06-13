@@ -775,6 +775,8 @@ async function startSession(){
   document.getElementById('st-players').textContent='0';
   currentAnswers={};currentPlayers={};
   renderAnswerDist();
+  const finalLbEl=document.getElementById('tv-final-lb');
+  if(finalLbEl)finalLbEl.style.display='none';
   tvShow('tv-lobby');
   startListening();
   sndStart();
