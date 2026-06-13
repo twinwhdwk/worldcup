@@ -382,7 +382,11 @@ function onSession(s){
     startSyncPoll(); // restart poll if it was stopped after a previous session ended
     _doneShown=false; // allow next session's done screen to show
     show('s-lobby');
-    document.getElementById('lb-score').textContent=myScore;
+    // Sync score from Firebase on lobby entry to catch score resets between sessions
+    if(myName)fbGet('/scores/'+enc(myName)).then(d=>{
+      const fbTotal=d?d.total||0:0;
+      if(fbTotal!==myScore){myScore=fbTotal;myStreak=d?d.streak||0:0;document.getElementById('lb-score').textContent=myScore;}
+    });
     updateLobbyRank();
     return;
   }

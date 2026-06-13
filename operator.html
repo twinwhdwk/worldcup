@@ -771,6 +771,10 @@ async function startSession(){
   document.getElementById('btn-skip').style.display='none';
   document.getElementById('ans-dist-section').style.display='block';
   document.getElementById('st-state').textContent='대기중';
+  document.getElementById('st-answered').textContent='0';
+  document.getElementById('st-players').textContent='0';
+  currentAnswers={};currentPlayers={};
+  renderAnswerDist();
   tvShow('tv-lobby');
   startListening();
   sndStart();
