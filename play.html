@@ -156,6 +156,7 @@
   <div class="lobby-name" id="lb-name">이름 로딩 중</div>
   <div class="lobby-badge"><span class="ldot"></span>게임 시작을 기다리는 중</div>
   <div class="lobby-count" id="lb-count"></div>
+  <div id="lb-players" style="font-size:11px;color:var(--muted2);max-width:260px;text-align:center;line-height:1.6;margin-top:2px;word-break:break-word;"></div>
   <div class="my-score-box">
     <div class="ms-lbl">내 점수</div>
     <div class="ms-val" id="lb-score">0</div>
@@ -186,8 +187,8 @@
 
 <!-- WAIT -->
 <div class="screen hidden" id="s-wait">
-  <div class="wait-icon">✋</div>
-  <div class="wait-title">제출 완료!</div>
+  <div class="wait-icon" id="wait-icon-el">✋</div>
+  <div class="wait-title" id="wait-title-el">제출 완료!</div>
   <div class="wait-sub" id="wait-sub">정답 발표를 기다리세요...</div>
   <div class="ans-preview" id="wait-prev">—</div>
   <div class="wait-dots"><div class="wd"></div><div class="wd"></div><div class="wd"></div></div>
@@ -329,7 +330,7 @@ function join(){
   startSyncPoll();
   fbGet('/scores/'+enc(n)).then(d=>{if(d){myScore=d.total||0;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;}});
   // Immediately show player count without waiting for first poll tick
-  fbGet('/players').then(d=>{if(d&&typeof d==='object'){totalPlayers=Object.values(d).filter(p=>p&&p.name).length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';}});
+  fbGet('/players').then(d=>{if(d&&typeof d==='object'){const _pls=Object.values(d).filter(p=>p&&p.name);totalPlayers=_pls.length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';const _lbp=document.getElementById('lb-players');if(_lbp)_lbp.textContent=_pls.map(p=>p.name).slice(0,12).join(' · ');}});
   sndJoin();
 }
 
@@ -358,7 +359,7 @@ function startSyncPoll(){
     if(_pollTick===0){
       if(sid==='s-lobby'){
         fbGet('/scores/'+enc(myName)).then(d=>{if(d){const fbTotal=d.total||0;if(fbTotal>=myScore&&_pendingGain>0){_pendingGain=0;}if(fbTotal>myScore){myScore=fbTotal;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;}}});
-        fbGet('/players').then(d=>{if(d&&typeof d==='object'){totalPlayers=Object.values(d).filter(p=>p&&p.name).length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';}});
+        fbGet('/players').then(d=>{if(d&&typeof d==='object'){const _pls=Object.values(d).filter(p=>p&&p.name);totalPlayers=_pls.length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';const _lbp=document.getElementById('lb-players');if(_lbp)_lbp.textContent=_pls.map(p=>p.name).slice(0,12).join(' · ');}});
       }
     }
     if(sid==='s-wait'){
@@ -411,6 +412,7 @@ function onSession(s){
     return;
   }
   if(!s||s.state==='lobby'){
+    clearInterval(timerInt);
     startSyncPoll();
     _doneShown=false;
     lastQId=''; _revealQId=''; myAnswerIdx=-1; // reset per-question state for new session
@@ -532,6 +534,9 @@ async function renderQ(s){
     return;
   }
   const doRender=()=>{
+    const _wi=document.getElementById('wait-icon-el');if(_wi)_wi.textContent='✋';
+    const _wt=document.getElementById('wait-title-el');if(_wt)_wt.textContent='제출 완료!';
+    const _ws=document.getElementById('wait-sub');if(_ws)_ws.textContent='정답 발표를 기다리세요...';
     show('s-question');
     document.getElementById('q-lbl').textContent=s.game||'퀴즈';
     document.getElementById('q-score').textContent=myScore+'점';
@@ -566,7 +571,7 @@ function tick(startAt,limit){
     timeEl.textContent=rem>0?remSec:'⏰';
     timeEl.className='q-time-num'+(rem<6&&rem>0?' urgent':'');
     if(rem<6&&rem>0&&!beepedSecs.has(remSec)){beepedSecs.add(remSec);sndUrgent();}
-    if(rem<=0){clearInterval(timerInt);[0,1,2,3].forEach(i=>document.getElementById('o'+i).disabled=true);}
+    if(rem<=0){clearInterval(timerInt);[0,1,2,3].forEach(i=>document.getElementById('o'+i).disabled=true);const _as=document.querySelector('.screen:not(.hidden)')?.id;if(myAnswerIdx<0&&_as==='s-question'){const _wp=document.getElementById('wait-prev');if(_wp)_wp.textContent='— (미응답)';const _wi=document.getElementById('wait-icon-el');if(_wi)_wi.textContent='⏰';const _wt=document.getElementById('wait-title-el');if(_wt)_wt.textContent='시간 초과!';const _wsub=document.getElementById('wait-sub');if(_wsub)_wsub.textContent='⏰ 시간 초과! 정답을 기다리세요...';show('s-wait');startFactRotation();}}
   };
   run();timerInt=setInterval(run,200);
 }
@@ -580,6 +585,9 @@ async function answer(idx){
   [0,1,2,3].forEach(i=>{const b=document.getElementById('o'+i);b.disabled=true;if(i===idx)b.classList.add('selected');});
   const wp=document.getElementById('wait-prev');
   wp.innerHTML=LETTERS[idx]+' — '+renderOptHtml(_lastOpts[idx]||'?');
+  const _wi2=document.getElementById('wait-icon-el');if(_wi2)_wi2.textContent='✋';
+  const _wt2=document.getElementById('wait-title-el');if(_wt2)_wt2.textContent='제출 완료!';
+  const _ws2=document.getElementById('wait-sub');if(_ws2)_ws2.textContent='정답 발표를 기다리세요...';
   const payload={idx,at:Date.now(),name:myName};
   const submitAnswer=async(attempt=0)=>{
     if(_sessState&&_sessState.state!=='question')return;

@@ -850,6 +850,8 @@ async function startGame(){
   document.getElementById('game-setup').style.display='none';
   document.getElementById('active-ctrl').style.display='block';
   document.getElementById('btn-nextq').style.display='block';
+  document.getElementById('btn-nextq').disabled=true;
+  document.getElementById('btn-nextq').textContent='⏳ 초기화 중...';
   document.getElementById('btn-reveal').style.display='none';
   document.getElementById('btn-cont').style.display='none';
   document.getElementById('btn-skip').style.display='none';
@@ -867,12 +869,15 @@ async function startGame(){
   }catch(err){
     _startingGame=false;
     sessionActive=false;
+    document.getElementById('btn-nextq').disabled=false;
+    document.getElementById('btn-nextq').textContent='▶ 다음 문제 시작';
     document.getElementById('active-ctrl').style.display='none';
     document.getElementById('game-setup').style.display='block';
     toast('⚠️ Firebase 초기화 실패: '+err.message,true);
     return;
   }
   _startingGame=false;
+  document.getElementById('btn-nextq').disabled=false;
   document.getElementById('btn-nextq').textContent='🎮 게임 시작!';
   toast('✅ 게임 준비 완료! 게임 시작 버튼을 눌러주세요.');
 }
