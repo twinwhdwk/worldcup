@@ -792,7 +792,8 @@ async function openSession(){
   toast('⏳ 세션 초기화 중...');
 
   try{
-    await Promise.all([fbDelete('/players'),fbDelete('/answers'),fbDelete('/scores')]);
+    // Wipe the entire /wc_live root in one shot, then re-create the session
+    if(USE_FB){const r=await fetch(FB+'.json',{method:'DELETE'});if(!r.ok)throw new Error('DELETE root '+r.status);}
     await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
     toast('✅ 세션 오픈! 참가자를 기다리는 중...');
   }catch(err){
@@ -1410,11 +1411,9 @@ if(USE_FB)startListening();
       updateQR(getPlayUrl(),'📱 스캔해서 참가');
       toast('🔄 세션 복구됨 — 게임을 선택해 주세요.');
     } else if(!fbSess||fbSess.state==='done'){
-      await Promise.all([
-        fetch(FB+'/players.json',{method:'DELETE'}),
-        fetch(FB+'/answers.json',{method:'DELETE'}),
-      ]).catch(()=>{});
-      currentAnswers={};currentPlayers={};
+      // Wipe everything stale when operator opens with no active session
+      await fetch(FB+'.json',{method:'DELETE'}).catch(()=>{});
+      currentAnswers={};currentPlayers={};currentScores={};
       renderAnswerDist();renderLeaderboard();
     }
   }catch{}
