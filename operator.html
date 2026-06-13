@@ -309,8 +309,15 @@
       </div>
     </div>
 
-    <!-- Game selector -->
-    <div class="ctrl-section" id="game-setup">
+    <!-- Session setup (before session is opened) -->
+    <div class="ctrl-section" id="session-setup">
+      <div class="ctrl-title">🎮 세션 관리</div>
+      <button class="ctrl-btn btn-start" onclick="openSession()">🎮 세션 열기</button>
+      <div style="font-size:11px;color:var(--muted2);margin-top:8px;text-align:center;">세션을 열면 참가자·점수가 초기화되고<br>QR 링크로 참가자를 모집합니다.</div>
+    </div>
+
+    <!-- Game selector (shown when session is open) -->
+    <div class="ctrl-section" id="game-setup" style="display:none">
       <div class="ctrl-title">🎮 게임 선택</div>
       <div class="game-select-grid">
         <div class="game-sel-btn active" onclick="selectGame('선수퀴즈',this)">
@@ -353,7 +360,8 @@
         <div class="q-count-val" id="qlimit-val">15초</div>
         <input type="range" id="qlimit" min="10" max="40" step="5" value="15" oninput="document.getElementById('qlimit-val').textContent=this.value+'초'">
       </div>
-      <button class="ctrl-btn btn-start" onclick="startSession()">🚀 새 세션 시작</button>
+      <button class="ctrl-btn btn-start" onclick="startGame()">▶ 게임 시작</button>
+      <button class="ctrl-btn btn-lobby" style="margin-top:8px;" onclick="endSession()">🏁 세션 종료</button>
     </div>
 
     <!-- Active controls -->
@@ -363,7 +371,7 @@
       <button class="ctrl-btn btn-reveal" id="btn-reveal" onclick="revealAnswer()" style="display:none">🎯 정답 공개 <span style="font-size:11px;opacity:.6;font-family:monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;margin-left:4px;">Space</span></button>
       <button class="ctrl-btn btn-next" id="btn-cont" onclick="nextQuestion()" style="display:none">➡ 다음 문제 <span style="font-size:11px;opacity:.6;font-family:monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;margin-left:4px;">Space</span></button>
       <button class="ctrl-btn btn-skip" id="btn-skip" onclick="skipQuestion()" style="display:none">⏭ 문제 건너뛰기</button>
-      <button class="ctrl-btn btn-lobby" onclick="endSession()">🏁 세션 종료</button>
+      <button class="ctrl-btn btn-lobby" style="margin-top:8px;" onclick="endSession()">🏁 세션 종료</button>
     </div>
 
     <!-- Answer distribution -->
@@ -376,13 +384,6 @@
         <div class="ad-row d"><div class="ad-letter">D</div><div class="ad-bar-bg"><div class="ad-bar" id="abar3" style="width:0%"><span class="ad-cnt" id="acnt3">0</span></div></div></div>
       </div>
       <div class="ans-total" id="ans-total">0 / 0 응답</div>
-    </div>
-
-    <!-- Reset scores -->
-    <div class="ctrl-section">
-      <div class="ctrl-title">⚙️ 관리</div>
-      <button class="ctrl-btn" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;font-size:13px;padding:10px;" onclick="clearScores()">🗑 점수 전체 초기화</button>
-      <button class="ctrl-btn" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--muted2);font-size:13px;padding:10px;" onclick="clearPlayers()">👤 참가자 목록 초기화</button>
     </div>
 
     <!-- Leaderboard -->
@@ -773,11 +774,41 @@ function selectGame(name,el){
   if(slider){slider.max=Math.min(pool,20);if(parseInt(slider.value)>pool){slider.value=pool;document.getElementById('qcount-val').textContent=pool;}}
 }
 
-// ── Start session ──────────────────────────────────────────────────
-async function startSession(){
+// ── Open session (reset everything, let players join) ──────────────
+let sessionOpen=false;
+async function openSession(){
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
   _endingSession=false;
+  sessionActive=false;
+  sessionOpen=true;
   updateQR(getPlayUrl(),'📱 스캔해서 참가');
+  currentAnswers={};currentPlayers={};currentScores={};
+  try{
+    await Promise.all([fbDelete('/players'),fbDelete('/answers'),fbDelete('/scores')]);
+    await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
+  }catch(err){
+    sessionOpen=false;
+    toast('⚠️ Firebase 오류: '+err.message,true);return;
+  }
+  document.getElementById('session-setup').style.display='none';
+  document.getElementById('game-setup').style.display='block';
+  document.getElementById('active-ctrl').style.display='none';
+  document.getElementById('ans-dist-section').style.display='none';
+  document.getElementById('st-state').textContent='대기중';
+  document.getElementById('st-players').textContent='0';
+  renderAnswerDist();renderLeaderboard();
+  const finalLbEl=document.getElementById('tv-final-lb');
+  if(finalLbEl)finalLbEl.style.display='none';
+  tvShow('tv-lobby');
+  startListening();
+  sndStart();
+  toast('✅ 세션 오픈! 참가자를 기다리는 중...');
+}
+
+// ── Start game (within open session, preserves players & scores) ────
+async function startGame(){
+  if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
+  if(!sessionOpen){toast('⚠️ 먼저 세션을 열어주세요.',true);return;}
   const n=parseInt(document.getElementById('qcount').value);
   const qs=QB[selectedGame]().slice(0,n).map(shuffleOptions);
   sessionQuestions=qs;
@@ -786,16 +817,13 @@ async function startSession(){
   revealInProgress=false;
   allAnsweredPending=false;
   localStorage.setItem('wc_op_session',JSON.stringify({qs,game:selectedGame,qIdx:-1}));
-
   try{
-    await fbPut('/session',{state:'lobby',game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{},lastClearedAt:Date.now()});
     await fbDelete('/answers');
-    await fbDelete('/players');
+    await fbPatch('/session',{game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
   }catch(err){
     sessionActive=false;localStorage.removeItem('wc_op_session');
     toast('⚠️ Firebase 오류: '+err.message,true);return;
   }
-
   document.getElementById('game-setup').style.display='none';
   document.getElementById('active-ctrl').style.display='block';
   document.getElementById('btn-nextq').style.display='block';
@@ -805,15 +833,11 @@ async function startSession(){
   document.getElementById('ans-dist-section').style.display='block';
   document.getElementById('st-state').textContent='대기중';
   document.getElementById('st-answered').textContent='0';
-  document.getElementById('st-players').textContent='0';
-  currentAnswers={};currentPlayers={};
+  currentAnswers={};
   renderAnswerDist();
   const finalLbEl=document.getElementById('tv-final-lb');
   if(finalLbEl)finalLbEl.style.display='none';
-  tvShow('tv-lobby');
-  startListening();
-  sndStart();
-  toast('✅ 세션 시작! 참가자들이 접속하길 기다리세요.');
+  toast('✅ 게임 시작! 첫 문제를 눌러주세요.');
 }
 
 // ── Firebase SSE patch helper ──────────────────────────────────────
@@ -899,7 +923,7 @@ function startListening(){
 async function nextQuestion(){
   revealInProgress=false;
   currentQIdx++;
-  if(currentQIdx>=sessionQuestions.length){await endSession();return;}
+  if(currentQIdx>=sessionQuestions.length){await endGame();return;}
   try{const s=JSON.parse(localStorage.getItem('wc_op_session')||'{}');s.qIdx=currentQIdx;localStorage.setItem('wc_op_session',JSON.stringify(s));}catch{}
 
   const q=sessionQuestions[currentQIdx];
@@ -1065,7 +1089,7 @@ async function revealAnswer(){
   document.getElementById('btn-skip').style.display='none';
   const isLast=currentQIdx+1>=sessionQuestions.length;
   document.getElementById('btn-cont').style.display=isLast?'none':'block';
-  if(isLast)setTimeout(endSession,4000);
+  if(isLast)setTimeout(endGame,4000);
 
   sndReveal();
   if(correctCount>0)setTimeout(()=>confetti(),400);
@@ -1092,16 +1116,49 @@ async function revealAnswer(){
 
 // ── End session ────────────────────────────────────────────────────
 let _endingSession=false;
+// ── End current game, return to game selection within session ───────
+async function endGame(){
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);
+  sessionActive=false;
+  localStorage.removeItem('wc_op_session');
+  try{await fbPatch('/session',{state:'lobby',question:null,scoreGains:{}});}catch{}
+  document.getElementById('active-ctrl').style.display='none';
+  document.getElementById('game-setup').style.display='block';
+  document.getElementById('ans-dist-section').style.display='none';
+  document.getElementById('st-state').textContent='대기중';
+  document.getElementById('tv-lobby-sub').textContent='다음 게임을 준비 중...(운영자가 다음 게임을 선택합니다)';
+  document.getElementById('tv-lobby-count').textContent='🏆 현재 누적 순위';
+  tvShow('tv-lobby');
+  // Show current cumulative leaderboard on TV
+  const top10=Object.values(currentScores).sort((a,b)=>b.total-a.total).slice(0,10);
+  const finalLb=document.getElementById('tv-final-lb');
+  const finalRows=document.getElementById('tv-final-rows');
+  if(finalLb&&finalRows&&top10.length>0){
+    const prizeIcons=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+    finalRows.innerHTML=top10.map((p,i)=>`
+      <div style="display:flex;align-items:center;gap:12px;background:${i<3?'rgba(255,215,0,.08)':'rgba(255,255,255,.03)'};border:1px solid ${i<3?'rgba(255,215,0,.25)':'rgba(255,255,255,.06)'};border-radius:12px;padding:10px 20px;">
+        <span style="font-size:22px;width:36px;text-align:center;">${prizeIcons[i]}</span>
+        <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;flex:1;text-align:left;">${esc(p.name||'?')}</span>
+        <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--gold);">${(p.total||0).toLocaleString()}점</span>
+      </div>`).join('');
+    finalLb.style.display='block';
+  }
+  toast('🎮 게임 종료! 다음 게임을 선택하거나 세션을 종료하세요.');
+  confetti(30);
+}
+
 async function endSession(){
   if(_endingSession)return;_endingSession=true;
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
   sessionActive=false;
+  sessionOpen=false;
   localStorage.removeItem('wc_op_session');
   const finalRanks={};
   Object.entries(currentScores).sort((a,b)=>b[1].total-a[1].total).forEach(([k],i)=>{finalRanks[k]=i+1;});
   try{await fbPatch('/session',{state:'done',question:null,allRanks:finalRanks});}catch(err){toast('⚠️ Firebase 오류: '+err.message,true);}
   document.getElementById('active-ctrl').style.display='none';
-  document.getElementById('game-setup').style.display='block';
+  document.getElementById('game-setup').style.display='none';
+  document.getElementById('session-setup').style.display='block';
   document.getElementById('ans-dist-section').style.display='none';
   document.getElementById('st-state').textContent='종료';
   document.getElementById('tv-lobby-sub').textContent='게임 종료! 최종 순위를 확인하세요.';
@@ -1282,7 +1339,9 @@ if(USE_FB)startListening();
     sessionQuestions=qs;
     currentQIdx=qIdx>=0?qIdx:0;
     selectedGame=game||selectedGame;
+    sessionOpen=true;
     sessionActive=true;
+    document.getElementById('session-setup').style.display='none';
     document.getElementById('game-setup').style.display='none';
     document.getElementById('active-ctrl').style.display='block';
     document.getElementById('ans-dist-section').style.display='block';
@@ -1326,13 +1385,27 @@ if(USE_FB)startListening();
   }catch(e){localStorage.removeItem('wc_op_session');}
 })();
 
-// Clean up stale Firebase data when operator opens with no active session
+// Handle startup state: recover lobby session or clean up stale data
 (async function(){
   if(!USE_FB)return;
-  if(localStorage.getItem('wc_op_session'))return;
+  if(localStorage.getItem('wc_op_session'))return; // handled by recovery IIFE above
   try{
     const fbSess=await fetch(FB+'/session.json').then(r=>r.json()).catch(()=>null);
-    if(!fbSess||fbSess.state==='done'){
+    if(fbSess&&fbSess.state==='lobby'&&fbSess.lastClearedAt){
+      // Session is open between games — restore to game-selection UI
+      sessionOpen=true;
+      document.getElementById('session-setup').style.display='none';
+      document.getElementById('game-setup').style.display='block';
+      document.getElementById('st-state').textContent='대기중';
+      document.getElementById('st-players').textContent='0';
+      renderAnswerDist();renderLeaderboard();
+      const finalLbEl=document.getElementById('tv-final-lb');
+      if(finalLbEl)finalLbEl.style.display='none';
+      tvShow('tv-lobby');
+      startListening();
+      updateQR(getPlayUrl(),'📱 스캔해서 참가');
+      toast('🔄 세션 복구됨 — 게임을 선택해 주세요.');
+    } else if(!fbSess||fbSess.state==='done'){
       await Promise.all([
         fetch(FB+'/players.json',{method:'DELETE'}),
         fetch(FB+'/answers.json',{method:'DELETE'}),
