@@ -850,11 +850,11 @@ async function startGame(){
   try{
     await fbDelete('/answers');
     await fbPatch('/session',{game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
-    toast('✅ 게임 시작! 첫 문제를 눌러주세요.');
   }catch(err){
-    // Don't collapse UI on init error — nextQuestion() will retry Firebase
-    toast('⚠️ Firebase 초기화 실패: '+err.message+' — 다음 문제 버튼으로 재시도하세요.',true);
+    toast('⚠️ Firebase 초기화 실패: '+err.message,true);
+    return;
   }
+  nextQuestion();
 }
 
 // ── Firebase SSE patch helper ──────────────────────────────────────
