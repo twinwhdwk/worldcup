@@ -381,8 +381,9 @@ function onSession(s){
     return;
   }
   if(!s||s.state==='lobby'){
-    startSyncPoll(); // restart poll if it was stopped after a previous session ended
-    _doneShown=false; // allow next session's done screen to show
+    startSyncPoll();
+    _doneShown=false;
+    lastQId=''; _revealQId=''; myAnswerIdx=-1; // reset per-question state for new session
     show('s-lobby');
     // Sync score from Firebase on lobby entry to catch score resets between sessions
     if(myName)fbGet('/scores/'+enc(myName)).then(d=>{
