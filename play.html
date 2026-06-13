@@ -148,10 +148,10 @@
 
 <!-- LOBBY -->
 <div class="screen hidden" id="s-lobby">
-  <div class="lobby-icon">⏳</div>
-  <div class="lobby-title">대기 중...</div>
+  <div class="lobby-icon">✅</div>
+  <div class="lobby-title">참가 완료!</div>
   <div class="lobby-name" id="lb-name">이름 로딩 중</div>
-  <div class="lobby-badge"><span class="ldot"></span>운영자가 문제를 시작하길 기다리는 중</div>
+  <div class="lobby-badge"><span class="ldot"></span>게임 시작을 기다리는 중</div>
   <div class="lobby-count" id="lb-count"></div>
   <div class="my-score-box">
     <div class="ms-lbl">내 점수</div>
@@ -296,7 +296,7 @@ function join(){
   if(!USE_FB){joined=false;setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
   myName=n;myJoinedAt=Date.now();localStorage.setItem('wc_player_name',n);
   fetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:myJoinedAt,lastSeen:myJoinedAt})});
-  document.getElementById('lb-name').textContent=n+' 참가 중';
+  document.getElementById('lb-name').textContent=n+' 님 참가 완료';
   show('s-lobby');
   listen();
   startSyncPoll();
