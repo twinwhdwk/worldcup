@@ -773,15 +773,9 @@ async function openSession(){
   _endingSession=false;
   sessionActive=false;
   sessionOpen=true;
-  updateQR(getPlayUrl(),'📱 스캔해서 참가');
   currentAnswers={};currentPlayers={};currentScores={};
-  try{
-    await Promise.all([fbDelete('/players'),fbDelete('/answers'),fbDelete('/scores')]);
-    await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
-  }catch(err){
-    sessionOpen=false;
-    toast('⚠️ Firebase 오류: '+err.message,true);return;
-  }
+
+  // Show UI immediately — don't wait for Firebase
   document.getElementById('session-setup').style.display='none';
   document.getElementById('game-setup').style.display='block';
   document.getElementById('active-ctrl').style.display='none';
@@ -791,10 +785,22 @@ async function openSession(){
   renderAnswerDist();renderLeaderboard();
   const finalLbEl=document.getElementById('tv-final-lb');
   if(finalLbEl)finalLbEl.style.display='none';
+  updateQR(getPlayUrl(),'📱 스캔해서 참가');
   tvShow('tv-lobby');
   startListening();
   sndStart();
-  toast('✅ 세션 오픈! 참가자를 기다리는 중...');
+  toast('⏳ 세션 초기화 중...');
+
+  try{
+    await Promise.all([fbDelete('/players'),fbDelete('/answers'),fbDelete('/scores')]);
+    await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
+    toast('✅ 세션 오픈! 참가자를 기다리는 중...');
+  }catch(err){
+    sessionOpen=false;
+    document.getElementById('game-setup').style.display='none';
+    document.getElementById('session-setup').style.display='block';
+    toast('⚠️ Firebase 오류: '+err.message,true);
+  }
 }
 
 // ── Start game (within open session, preserves players & scores) ────
@@ -809,13 +815,9 @@ async function startGame(){
   revealInProgress=false;
   allAnsweredPending=false;
   localStorage.setItem('wc_op_session',JSON.stringify({qs,game:selectedGame,qIdx:-1}));
-  try{
-    await fbDelete('/answers');
-    await fbPatch('/session',{game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
-  }catch(err){
-    sessionActive=false;localStorage.removeItem('wc_op_session');
-    toast('⚠️ Firebase 오류: '+err.message,true);return;
-  }
+  currentAnswers={};
+
+  // Show UI immediately
   document.getElementById('game-setup').style.display='none';
   document.getElementById('active-ctrl').style.display='block';
   document.getElementById('btn-nextq').style.display='block';
@@ -825,11 +827,21 @@ async function startGame(){
   document.getElementById('ans-dist-section').style.display='block';
   document.getElementById('st-state').textContent='대기중';
   document.getElementById('st-answered').textContent='0';
-  currentAnswers={};
   renderAnswerDist();
   const finalLbEl=document.getElementById('tv-final-lb');
   if(finalLbEl)finalLbEl.style.display='none';
-  toast('✅ 게임 시작! 첫 문제를 눌러주세요.');
+  toast('⏳ 게임 초기화 중...');
+
+  try{
+    await fbDelete('/answers');
+    await fbPatch('/session',{game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
+    toast('✅ 게임 시작! 첫 문제를 눌러주세요.');
+  }catch(err){
+    sessionActive=false;localStorage.removeItem('wc_op_session');
+    document.getElementById('active-ctrl').style.display='none';
+    document.getElementById('game-setup').style.display='block';
+    toast('⚠️ Firebase 오류: '+err.message,true);
+  }
 }
 
 // ── Firebase SSE patch helper ──────────────────────────────────────
