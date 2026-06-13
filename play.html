@@ -332,7 +332,10 @@ function startSyncPoll(){
         fbGet('/players').then(d=>{if(d&&typeof d==='object'){totalPlayers=Object.values(d).filter(p=>p&&typeof p==='object').length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명이 대기중':'';}});
       }
     }
-    if(sid==='s-wait'){fbGet('/answers').then(d=>{if(d&&typeof d==='object'){answeredKeys=new Set(Object.keys(d));updateWaitSub();}else if(d===null){answeredKeys=new Set();updateWaitSub();}});}
+    if(sid==='s-wait'){
+      fbGet('/answers').then(d=>{if(d&&typeof d==='object'){answeredKeys=new Set(Object.keys(d));updateWaitSub();}else if(d===null){answeredKeys=new Set();updateWaitSub();}});
+      if(!totalPlayers)fbGet('/players').then(d=>{if(d&&typeof d==='object'){totalPlayers=Object.values(d).filter(p=>p&&typeof p==='object').length;}});
+    }
   },2500);
 }
 
@@ -534,7 +537,12 @@ async function answer(idx){
   [0,1,2,3].forEach(i=>{const b=document.getElementById('o'+i);b.disabled=true;if(i===idx)b.classList.add('selected');});
   const wp=document.getElementById('wait-prev');
   wp.innerHTML=LETTERS[idx]+' — '+renderOptHtml(_lastOpts[idx]||'?');
-  await fbPut('/answers/'+enc(myName),{idx,at:Date.now(),name:myName});
+  const payload={idx,at:Date.now(),name:myName};
+  const submitAnswer=async(attempt=0)=>{
+    try{await fbPut('/answers/'+enc(myName),payload);}
+    catch{if(attempt<3)setTimeout(()=>submitAnswer(attempt+1),1000*(attempt+1));}
+  };
+  submitAnswer();
   if(navigator.vibrate)navigator.vibrate(40);
   show('s-wait');startFactRotation();
   snd(440,.08);
