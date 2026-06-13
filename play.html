@@ -425,7 +425,7 @@ function onSession(s){
       const doneEmoji=document.getElementById('done-emoji');
       if(s.allRanks&&s.allRanks[enc(myName)]){
         const r=s.allRanks[enc(myName)];
-        const inPrize=r<=10;
+        const inPrize=r<=10&&myScore>0;
         rankEl.textContent=inPrize?`🏆 ${r}위 — 상품 확정!`:`${r}위`;
         rankEl.style.color=inPrize?'var(--gold)':'var(--muted2)';
         if(inPrize){
