@@ -553,7 +553,7 @@ async function answer(idx){
   wp.innerHTML=LETTERS[idx]+' — '+renderOptHtml(_lastOpts[idx]||'?');
   const payload={idx,at:Date.now(),name:myName};
   const submitAnswer=async(attempt=0)=>{
-    try{await fbPut('/answers/'+enc(myName),payload);}
+    try{await fetch(FB+'/answers/'+enc(myName)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
     catch{if(attempt<3)setTimeout(()=>submitAnswer(attempt+1),1000*(attempt+1));}
   };
   submitAnswer();

@@ -878,13 +878,13 @@ function startListening(){
       } else {wrap.style.display='none';}
     }
   };
-  playersES.addEventListener('put',e=>{const d=JSON.parse(e.data);onPlayers(d.data||{});});
+  playersES.addEventListener('put',e=>{const d=JSON.parse(e.data);if(!d.path||d.path==='/'||d.path===''){onPlayers(d.data||{});}else{applyFbPatch(currentPlayers,d);onPlayers(currentPlayers);}});
   playersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentPlayers,d);onPlayers(currentPlayers);});
   playersES.onerror=()=>{toast('⚠️ Firebase 연결 불안정 — 재연결 시도 중...');scheduleReconnect();};
 
   if(answersES){try{answersES.close();}catch{}}
   answersES=new EventSource(FB+'/answers.json');
-  answersES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentAnswers=d.data||{};renderAnswerDist();});
+  answersES.addEventListener('put',e=>{const d=JSON.parse(e.data);if(!d.path||d.path==='/'||d.path===''){currentAnswers=d.data||{};}else{applyFbPatch(currentAnswers,d);}renderAnswerDist();});
   answersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentAnswers,d);renderAnswerDist();});
   answersES.onerror=()=>{scheduleReconnect();};
 
