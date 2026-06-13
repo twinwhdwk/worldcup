@@ -2,7 +2,7 @@
 
 2026 FIFA 월드컵 기념 실시간 멀티플레이어 퀴즈 게임
 
-**🌐 플레이: [twinwhdwk.github.io/worldcup_minigame](https://twinwhdwk.github.io/worldcup_minigame)**
+**🌐 플레이: [twinwhdwk.github.io/worldcup](https://twinwhdwk.github.io/worldcup)**
 
 ---
 
