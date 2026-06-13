@@ -1271,7 +1271,18 @@ if(USE_FB)startListening();
       document.getElementById('btn-cont').style.display='block';
       document.getElementById('btn-nextq').style.display='none';
       document.getElementById('btn-skip').style.display='none';
+      // Restore TV reveal panel
+      const rq=fbSess.question||sessionQuestions[currentQIdx];
+      if(rq){
+        tvShow('tv-reveal');
+        const ci=fbSess.question?.correctIdx??-1;
+        document.getElementById('tv-rv-text').innerHTML='정답: '+(rq.options?.[ci]||'—');
+        document.getElementById('tv-rv-sub').textContent='정답 공개됨';
+        document.getElementById('tv-rv-icon').textContent=ci>=0?'🎯':'—';
+      }
     }
+    // SSE will populate currentAnswers/currentScores, but trigger initial renders now
+    renderAnswerDist();renderLeaderboard();
     toast('🔄 세션 복구됨 — 문제 '+(currentQIdx+1)+'/'+sessionQuestions.length);
   }catch(e){localStorage.removeItem('wc_op_session');}
 })();
