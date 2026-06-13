@@ -761,15 +761,9 @@ function tvShow(id){
 }
 
 // ── Firebase ───────────────────────────────────────────────────────
-async function fbPut(p,d){if(!USE_FB)return;const r=await _fbFetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
-async function _fbFetch(url,opts,ms=9000){
-  const ctrl=new AbortController();
-  const t=setTimeout(()=>ctrl.abort(),ms);
-  try{const r=await fetch(url,{...opts,signal:ctrl.signal});clearTimeout(t);return r;}
-  catch(e){clearTimeout(t);if(e.name==='AbortError')throw new Error('Firebase 응답 없음 (9초 초과)');throw e;}
-}
-async function fbPatch(p,d){if(!USE_FB)return;const r=await _fbFetch(FB+p+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PATCH '+r.status);}
-async function fbDelete(p){if(!USE_FB)return;const r=await _fbFetch(FB+p+'.json',{method:'DELETE'});if(!r.ok)throw new Error('Firebase DELETE '+r.status);}
+async function fbPut(p,d){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
+async function fbPatch(p,d){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PATCH '+r.status);}
+async function fbDelete(p){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'DELETE'});if(!r.ok)throw new Error('Firebase DELETE '+r.status);}
 
 // ── Game select ────────────────────────────────────────────────────
 function selectGame(name,el){
@@ -855,7 +849,7 @@ async function startGame(){
   toast('⏳ 게임 초기화 중...');
 
   try{
-    await fbPut('/answers',null);
+    await fbDelete('/answers');
     await fbPatch('/session',{game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
   }catch(err){
     toast('⚠️ Firebase 초기화 실패: '+err.message,true);
@@ -982,7 +976,7 @@ async function nextQuestion(){
   if(tvBar2){tvBar2.style.width='0%';tvBar2.style.background='var(--green)';}
   if(tvLbl2){tvLbl2.textContent='0명 응답';}
   try{
-    await fbPut('/answers',null);
+    await fbDelete('/answers');
     await fbPatch('/session',{
       state:'question',
       questionIdx:currentQIdx,
