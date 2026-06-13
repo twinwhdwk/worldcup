@@ -851,10 +851,8 @@ async function startGame(){
     await fbPatch('/session',{game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
     toast('✅ 게임 시작! 첫 문제를 눌러주세요.');
   }catch(err){
-    sessionActive=false;localStorage.removeItem('wc_op_session');
-    document.getElementById('active-ctrl').style.display='none';
-    document.getElementById('game-setup').style.display='block';
-    toast('⚠️ Firebase 오류: '+err.message,true);
+    // Don't collapse UI on init error — nextQuestion() will retry Firebase
+    toast('⚠️ Firebase 초기화 실패: '+err.message+' — 다음 문제 버튼으로 재시도하세요.',true);
   }
 }
 
@@ -933,7 +931,7 @@ function startListening(){
 
 // ── Next question ──────────────────────────────────────────────────
 async function nextQuestion(){
-  if(!sessionActive){toast('⚠️ 게임이 시작되지 않았습니다.',true);return;}
+  if(!sessionQuestions||!sessionQuestions.length){toast('⚠️ 게임을 먼저 시작해주세요.',true);return;}
   toast('⏳ 문제 '+(currentQIdx+2)+'/'+sessionQuestions.length+' 준비 중...');
   document.getElementById('btn-nextq').textContent='▶ 다음 문제 시작';
   revealInProgress=false;
@@ -1456,7 +1454,7 @@ document.addEventListener('keydown',e=>{
     const nextq=document.getElementById('btn-nextq');
     if(reveal&&reveal.style.display!=='none'){reveal.click();return;}
     if(cont&&cont.style.display!=='none'){cont.click();return;}
-    if(nextq&&nextq.style.display!=='none'&&sessionActive){nextq.click();return;}
+    if(nextq&&nextq.style.display!=='none'&&sessionQuestions&&sessionQuestions.length){nextq.click();return;}
   }
 });
 </script>
