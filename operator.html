@@ -761,7 +761,7 @@ function tvShow(id){
 }
 
 // ── Firebase ───────────────────────────────────────────────────────
-async function fbPut(p,d){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
+async function fbPut(p,d){if(!USE_FB)return;const r=await _fbFetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
 async function _fbFetch(url,opts,ms=9000){
   const ctrl=new AbortController();
   const t=setTimeout(()=>ctrl.abort(),ms);
@@ -861,8 +861,7 @@ async function startGame(){
     toast('⚠️ Firebase 초기화 실패: '+err.message,true);
     return;
   }
-  document.getElementById('btn-nextq').textContent='🎮 게임 시작!';
-  toast('✅ 게임 준비 완료! 게임 시작 버튼을 눌러주세요.');
+  nextQuestion();
 }
 
 // ── Firebase SSE patch helper ──────────────────────────────────────
@@ -982,26 +981,19 @@ async function nextQuestion(){
   const tvBar2=document.getElementById('tv-ans-bar');const tvLbl2=document.getElementById('tv-ans-lbl');
   if(tvBar2){tvBar2.style.width='0%';tvBar2.style.background='var(--green)';}
   if(tvLbl2){tvLbl2.textContent='0명 응답';}
-  let _qPayload;
-  try{_qPayload=JSON.stringify({...q,timeLimit:limit,startAt,correctIdx:null});}
-  catch(e){_nqRunning=false;document.getElementById('btn-nextq').style.display='block';toast('⚠️ 문제 데이터 오류: '+e.message,true);return;}
   try{
-    toast('🔄 [1/2] 이전 답변 초기화 중...');
     await fbPut('/answers',null);
-    toast('🔄 [2/2] 세션 업데이트 중...');
     await fbPatch('/session',{
       state:'question',
       questionIdx:currentQIdx,
-      question:JSON.parse(_qPayload),
+      question:{...q,timeLimit:limit,startAt,correctIdx:null},
       scoreGains:{}
     });
   }catch(err){
     currentQIdx--;revealInProgress=false;
     _nqRunning=false;
     document.getElementById('btn-nextq').style.display='block';
-    const _errMsg=err.message||String(err);
-    toast('⚠️ Firebase 오류: '+_errMsg,true);
-    console.error('nextQuestion Firebase error:',err);return;
+    toast('⚠️ Firebase 오류: '+err.message,true);return;
   }
   _nqRunning=false;
 
