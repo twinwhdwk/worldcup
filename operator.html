@@ -788,14 +788,16 @@ async function openSession(){
   if(finalLbEl)finalLbEl.style.display='none';
   updateQR(getPlayUrl(),'📱 스캔해서 참가');
   tvShow('tv-lobby');
-  startListening();
   sndStart();
   toast('⏳ 세션 초기화 중...');
 
   try{
-    // Wipe the entire /wc_live root in one shot, then re-create the session
+    // DELETE first so SSE isn't killed after startListening
     if(USE_FB){const r=await fetch(FB+'.json',{method:'DELETE'});if(!r.ok)throw new Error('DELETE root '+r.status);}
     await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
+    // Start listening AFTER Firebase is clean
+    if(_listenDebounceTimer){clearTimeout(_listenDebounceTimer);_listenDebounceTimer=null;}
+    startListening();
     toast('✅ 세션 오픈! 참가자를 기다리는 중...');
   }catch(err){
     sessionOpen=false;
@@ -921,6 +923,8 @@ function startListening(){
 
 // ── Next question ──────────────────────────────────────────────────
 async function nextQuestion(){
+  if(!sessionActive){toast('⚠️ 게임이 시작되지 않았습니다. 게임 시작을 먼저 눌러주세요.',true);return;}
+  document.getElementById('btn-nextq').textContent='▶ 다음 문제 시작';
   revealInProgress=false;
   currentQIdx++;
   if(currentQIdx>=sessionQuestions.length){await endGame();return;}
@@ -937,8 +941,8 @@ async function nextQuestion(){
   const tvBar2=document.getElementById('tv-ans-bar');const tvLbl2=document.getElementById('tv-ans-lbl');
   if(tvBar2){tvBar2.style.width='0%';tvBar2.style.background='var(--green)';}
   if(tvLbl2){tvLbl2.textContent='0명 응답';}
-  await fbDelete('/answers');
   try{
+    await fbDelete('/answers');
     await fbPatch('/session',{
       state:'question',
       questionIdx:currentQIdx,
