@@ -745,8 +745,7 @@ let currentQIdx = -1;
 let sessionActive = false;
 let tvTimerInt = null;
 let cntdownInt = null;
-let answersES = null, scoresES = null, playersES = null;
-let pollPlayersInt = null;
+let playersES = null;
 let currentAnswers = {}, currentScores = {}, currentPlayers = {};
 let beepedSeconds = new Set();
 
@@ -868,7 +867,8 @@ async function startGame(){
 // ── Firebase SSE patch helper ──────────────────────────────────────
 function applyFbPatch(obj, d){
   if(!d.path||d.path==='/'||d.path===''){
-    Object.assign(obj, d.data||{});
+    if(d.data===null){Object.keys(obj).forEach(k=>delete obj[k]);}
+    else{Object.assign(obj, d.data||{});}
   } else {
     // Navigate to the correct depth, then merge or set
     const parts=d.path.replace(/^\//,'').split('/');
@@ -898,62 +898,55 @@ function scheduleReconnect(){
   _listenDebounceTimer=setTimeout(()=>{_listenDebounceTimer=null;startListening();},4500);
 }
 
-// ── Listening ──────────────────────────────────────────────────────
+// ── Listening (단일 루트 SSE — HTTP 연결 1개만 사용) ───────────────
 let prevPlayerCount=0;
 function startListening(){
   if(playersES){try{playersES.close();}catch{}}
-  playersES=new EventSource(FB+'/players.json');
+  playersES=new EventSource(FB+'.json');
+
   const onPlayers=d=>{
-    currentPlayers=d||{};
-    const players=Object.values(currentPlayers).filter(p=>p&&typeof p==='object'&&p.name);
+    const players=Object.values(d||{}).filter(p=>p&&typeof p==='object'&&p.name);
     const n=players.length;
     if(n>prevPlayerCount){sndJoin();}
     prevPlayerCount=n;
     document.getElementById('st-players').textContent=n;
     document.getElementById('tv-lobby-count').textContent=n>0?'👥 '+n+'명 참가중':'';
-    // Player name chips in TV lobby
     const wrap=document.getElementById('player-chips-wrap');
     const chips=document.getElementById('player-chips');
     if(wrap&&chips){
-      if(n>0){
-        wrap.style.display='block';
-        chips.innerHTML=players.map(p=>`<div class="player-chip">${esc(p.name)}</div>`).join('');
-      } else {wrap.style.display='none';}
+      if(n>0){wrap.style.display='block';chips.innerHTML=players.map(p=>`<div class="player-chip">${esc(p.name)}</div>`).join('');}
+      else{wrap.style.display='none';}
     }
   };
-  playersES.addEventListener('put',e=>{const d=JSON.parse(e.data);if(!d.path||d.path==='/'||d.path===''){onPlayers(d.data||{});}else{applyFbPatch(currentPlayers,d);onPlayers(currentPlayers);}});
-  playersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentPlayers,d);onPlayers(currentPlayers);});
-  playersES.onerror=()=>{toast('⚠️ Firebase 연결 불안정 — 재연결 시도 중...');scheduleReconnect();};
 
-  if(answersES){try{answersES.close();}catch{}}
-  answersES=new EventSource(FB+'/answers.json');
-  answersES.addEventListener('put',e=>{const d=JSON.parse(e.data);if(!d.path||d.path==='/'||d.path===''){currentAnswers=d.data||{};}else{applyFbPatch(currentAnswers,d);}renderAnswerDist();});
-  answersES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentAnswers,d);renderAnswerDist();});
-  answersES.onerror=()=>{scheduleReconnect();};
+  const onRoot=data=>{
+    if(!data)return;
+    if(data.players!==undefined){currentPlayers=data.players||{};onPlayers(currentPlayers);}
+    if(data.answers!==undefined){currentAnswers=data.answers||{};renderAnswerDist();}
+    if(data.scores!==undefined){currentScores=data.scores||{};renderLeaderboard();}
+  };
 
-  if(scoresES){try{scoresES.close();}catch{}}
-  scoresES=new EventSource(FB+'/scores.json');
-  scoresES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentScores=d.data||{};renderLeaderboard();});
-  scoresES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentScores,d);renderLeaderboard();});
-  scoresES.onerror=()=>{scheduleReconnect();};
-
-  clearInterval(pollPlayersInt);
-  pollPlayersInt=setInterval(async()=>{
-    if(!USE_FB)return;
-    try{
-      const r=await fetch(FB+'/players.json');
-      const data=await r.json();
-      const ps=Object.values(data||{}).filter(p=>p&&typeof p==='object'&&p.name);
-      const n=ps.length;
-      document.getElementById('st-players').textContent=n;
-      document.getElementById('tv-lobby-count').textContent=n>0?'👥 '+n+'명 참가중':'';
-      const wrap=document.getElementById('player-chips-wrap');
-      const chips=document.getElementById('player-chips');
-      if(wrap&&chips){if(n>0){wrap.style.display='block';chips.innerHTML=ps.map(p=>'<div class="player-chip">'+esc(p.name)+'</div>').join('');}else{wrap.style.display='none';}}
-      if(n>(prevPlayerCount||0))sndJoin();
-      prevPlayerCount=n;
-    }catch{}
-  },3000);
+  playersES.addEventListener('put',e=>{
+    const d=JSON.parse(e.data);
+    if(!d.path||d.path==='/'||d.path===''){onRoot(d.data);}
+    else{
+      const top=d.path.replace(/^\//,'').split('/')[0];
+      if(top==='players'){applyFbPatch(currentPlayers,{path:d.path.replace('/players',''),data:d.data});onPlayers(currentPlayers);}
+      else if(top==='answers'){applyFbPatch(currentAnswers,{path:d.path.replace('/answers',''),data:d.data});renderAnswerDist();}
+      else if(top==='scores'){applyFbPatch(currentScores,{path:d.path.replace('/scores',''),data:d.data});renderLeaderboard();}
+    }
+  });
+  playersES.addEventListener('patch',e=>{
+    const d=JSON.parse(e.data);
+    const top=d.path.replace(/^\//,'').split('/')[0];
+    if(top==='players'){applyFbPatch(currentPlayers,{path:d.path.replace('/players',''),data:d.data});onPlayers(currentPlayers);}
+    else if(top==='answers'){applyFbPatch(currentAnswers,{path:d.path.replace('/answers',''),data:d.data});renderAnswerDist();}
+    else if(top==='scores'){applyFbPatch(currentScores,{path:d.path.replace('/scores',''),data:d.data});renderLeaderboard();}
+  });
+  playersES.onerror=()=>{
+    if(playersES){try{playersES.close();}catch{}}playersES=null;
+    toast('⚠️ Firebase 연결 불안정 — 재연결 시도 중...');scheduleReconnect();
+  };
 }
 
 // ── Next question ──────────────────────────────────────────────────
@@ -1219,7 +1212,7 @@ async function goHome(){
 
 async function endSession(){
   if(_endingSession)return;_endingSession=true;
-  clearInterval(tvTimerInt);clearInterval(cntdownInt);clearInterval(pollPlayersInt);
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);
   sessionActive=false;
   sessionOpen=false;
   localStorage.removeItem('wc_op_session');
@@ -1263,7 +1256,7 @@ async function endSession(){
 async function clearScores(){
   if(!USE_FB){toast('Firebase 미연결');return;}
   if(!confirm('⚠️ 모든 점수를 초기화합니다.\n이 작업은 취소할 수 없습니다. 계속하시겠습니까?'))return;
-  await fbPut('/scores',null);
+  await fbDelete('/scores');
   currentScores={};
   renderLeaderboard();
   toast('✅ 점수 초기화 완료!');
@@ -1271,7 +1264,7 @@ async function clearScores(){
 async function clearPlayers(){
   if(!USE_FB){toast('Firebase 미연결');return;}
   if(!confirm('참가자 목록을 초기화합니다. 연결된 참가자는 로그인 화면으로 이동됩니다. 계속하시겠습니까?'))return;
-  await fbPut('/players',null);
+  await fbDelete('/players');
   await fbPatch('/session',{lastClearedAt:Date.now()});
   currentPlayers={};
   document.getElementById('st-players').textContent='0';
@@ -1449,7 +1442,7 @@ tvShow('tv-lobby');
         document.getElementById('tv-rv-icon').textContent=ci>=0?'🎯':'—';
       }
     }
-    // SSE will populate currentAnswers/currentScores, but trigger initial renders now
+    startListening(); // resume SSE after reload
     renderAnswerDist();renderLeaderboard();
     toast('🔄 세션 복구됨 — 문제 '+(currentQIdx+1)+'/'+sessionQuestions.length);
   }catch(e){localStorage.removeItem('wc_op_session');}
