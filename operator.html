@@ -238,6 +238,7 @@
           <img id="qr-img" src="" alt="QR" width="220" height="220" style="background:#fff;padding:6px;">
           <div class="qr-label" id="qr-label">📱 스캔해서 참가</div>
           <div class="qr-url" id="qr-url"></div>
+          <button onclick="copyPlayUrl()" style="margin-top:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;width:100%;" id="copy-url-btn">🔗 링크 복사 (카카오·문자 공유용)</button>
         </div>
         <div id="player-chips-wrap" style="display:none;">
           <div class="player-chips-title">참가자 목록</div>
@@ -452,6 +453,15 @@ function getPlayUrl(){
 }
 function openPlayLink(){
   window.open(getPlayUrl(),'_blank');
+}
+function copyPlayUrl(){
+  const url=getPlayUrl();
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=document.getElementById('copy-url-btn');
+    if(btn){btn.textContent='✅ 복사됨!';setTimeout(()=>{btn.textContent='🔗 링크 복사 (카카오·문자 공유용)';},2000);}
+  }).catch(()=>{
+    prompt('아래 링크를 복사하세요:',url);
+  });
 }
 
 // Update scoreboard link with db param
