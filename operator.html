@@ -1396,7 +1396,7 @@ tvShow('tv-lobby');
   try{
     const {qs,game,qIdx}=JSON.parse(saved);
     if(!qs||!qs.length)return;
-    const fbSess=await fetch(FB+'/session.json').then(r=>r.json()).catch(()=>null);
+    const fbSess=await _fbFetch(FB+'/session.json',{}).then(r=>r.ok?r.json():null).catch(()=>null);
     if(!fbSess||fbSess.state==='done'||fbSess.state==='lobby'){localStorage.removeItem('wc_op_session');return;}
     // Active session found — restore state
     sessionQuestions=qs;
@@ -1453,7 +1453,7 @@ tvShow('tv-lobby');
   if(!USE_FB)return;
   if(localStorage.getItem('wc_op_session'))return; // handled by recovery IIFE above
   try{
-    const fbSess=await fetch(FB+'/session.json').then(r=>r.json()).catch(()=>null);
+    const fbSess=await _fbFetch(FB+'/session.json',{}).then(r=>r.ok?r.json():null).catch(()=>null);
     if(fbSess&&fbSess.state==='lobby'&&fbSess.lastClearedAt){
       // Session is open between games — restore to game-selection UI
       sessionOpen=true;
@@ -1470,7 +1470,7 @@ tvShow('tv-lobby');
       toast('🔄 세션 복구됨 — 게임을 선택해 주세요.');
     } else if(!fbSess||fbSess.state==='done'){
       // Wipe everything stale when operator opens with no active session
-      await fetch(FB+'.json',{method:'DELETE'}).catch(()=>{});
+      await _fbFetch(FB+'.json',{method:'DELETE'}).catch(()=>{});
       currentAnswers={};currentPlayers={};currentScores={};
       renderAnswerDist();renderLeaderboard();
     }
