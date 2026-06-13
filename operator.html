@@ -785,8 +785,11 @@ function selectGame(name,el){
 
 // ── Open session (reset everything, let players join) ──────────────
 let sessionOpen=false;
+let _openingSession=false;
 async function openSession(){
+  if(_openingSession)return;
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
+  _openingSession=true;
   _endingSession=false;
   sessionActive=false;
   sessionOpen=true;
@@ -820,6 +823,8 @@ async function openSession(){
     document.getElementById('game-setup').style.display='none';
     document.getElementById('session-setup').style.display='block';
     toast('⚠️ Firebase 오류: '+err.message,true);
+  }finally{
+    _openingSession=false;
   }
 }
 
@@ -857,6 +862,9 @@ async function startGame(){
     await fbPut('/answers',null);
     await fbPatch('/session',{game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
   }catch(err){
+    sessionActive=false;
+    document.getElementById('active-ctrl').style.display='none';
+    document.getElementById('game-setup').style.display='block';
     toast('⚠️ Firebase 초기화 실패: '+err.message,true);
     return;
   }
@@ -1046,14 +1054,24 @@ function startTvTimer(startAt,limit){
 }
 
 // ── Skip question ──────────────────────────────────────────────────
+let _skipping=false;
 async function skipQuestion(){
+  if(_skipping)return;
   if(!confirm('이 문제를 건너뛰겠습니까?'))return;
+  _skipping=true;
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
   revealInProgress=false;allAnsweredPending=false;
   document.getElementById('tv-countdown').textContent='';
-  try{await fbPatch('/session',{state:'lobby'});}catch(err){toast('⚠️ Firebase 오류: '+err.message,true);return;}
+  document.getElementById('btn-skip').disabled=true;
+  try{await fbPatch('/session',{state:'lobby'});}catch(err){
+    document.getElementById('btn-skip').disabled=false;
+    _skipping=false;
+    toast('⚠️ Firebase 오류: '+err.message,true);return;
+  }
+  _skipping=false;
   document.getElementById('btn-reveal').style.display='none';
   document.getElementById('btn-skip').style.display='none';
+  document.getElementById('btn-skip').disabled=false;
   document.getElementById('btn-nextq').style.display='block';
   document.getElementById('st-state').textContent='대기';
   toast('⏭ 문제 건너뜀');
