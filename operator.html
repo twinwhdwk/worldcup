@@ -713,7 +713,7 @@ let currentAnswers = {}, currentScores = {}, currentPlayers = {};
 let beepedSeconds = new Set();
 
 // ── Utils ──────────────────────────────────────────────────────────
-function enc(n){return n.replace(/[.#$[\]]/g,'_');}
+function enc(n){return n.replace(/[.#$[\]/]/g,'_');}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'#ef4444':'var(--green)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 function tvShow(id){

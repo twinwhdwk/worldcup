@@ -265,7 +265,7 @@ function sndJoin(){snd(440,.1);setTimeout(()=>snd(550,.15),120);}
 
 // ── Utils ─────────────────────────────────────────────────────────
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
-function enc(n){return n.replace(/[.#$[\]]/g,'_');}
+function enc(n){return n.replace(/[.#$[\]/]/g,'_');}
 function setStatus(msg,type='ok'){const el=document.getElementById('status');el.textContent=msg;el.className='status-bar '+type;el.classList.remove('hidden');if(type==='ok')setTimeout(()=>el.classList.add('hidden'),2500);}
 
 // ── Floating score animation ──────────────────────────────────────
@@ -291,7 +291,7 @@ function join(){
   joined=true;
   const t=document.getElementById('aj-toast');if(t)t.remove();
   getAC(); // unlock audio on user gesture
-  const n=document.getElementById('name-in').value.trim().slice(0,12);
+  const n=document.getElementById('name-in').value.trim().slice(0,8);
   if(!n){joined=false;document.getElementById('name-in').focus();return;}
   if(!USE_FB){joined=false;setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
   myName=n;myJoinedAt=Date.now();localStorage.setItem('wc_player_name',n);
