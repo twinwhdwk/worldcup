@@ -789,7 +789,7 @@ async function startSession(){
   localStorage.setItem('wc_op_session',JSON.stringify({qs,game:selectedGame,qIdx:-1}));
 
   try{
-    await fbPut('/session',{state:'lobby',game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
+    await fbPut('/session',{state:'lobby',game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{},lastClearedAt:Date.now()});
     await fbDelete('/answers');
     await fbDelete('/players');
   }catch(err){
@@ -831,8 +831,9 @@ function applyFbPatch(obj, d){
     }
     const leaf=parts[parts.length-1];
     if(leaf){
-      // Merge if both existing value and incoming data are objects (partial update)
-      if(typeof target[leaf]==='object'&&target[leaf]!==null&&typeof d.data==='object'&&d.data!==null){
+      if(d.data===null){
+        delete target[leaf];
+      } else if(typeof target[leaf]==='object'&&target[leaf]!==null&&typeof d.data==='object'&&d.data!==null){
         Object.assign(target[leaf],d.data);
       } else {
         target[leaf]=d.data;

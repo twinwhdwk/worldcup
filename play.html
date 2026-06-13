@@ -377,7 +377,8 @@ function onSession(s){
     clearInterval(timerInt);clearInterval(_pollInt);_pollInt=null;
     if(sessionES){try{sessionES.close();}catch{}}sessionES=null;
     show('s-login');
-    setStatus('운영자가 참가자 목록을 초기화했습니다. 다시 참가하세요.','warn');
+    const msg=s.state==='lobby'?'새 게임 세션이 시작됐습니다. 이름을 입력해 참가하세요!':'운영자가 참가자 목록을 초기화했습니다. 다시 참가하세요.';
+    setStatus(msg,'warn');
     return;
   }
   if(!s||s.state==='lobby'){
