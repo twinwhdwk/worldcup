@@ -542,33 +542,25 @@ function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=~~(Math
 function shuffleOptions(q){const items=q.options.map((o,i)=>({o,c:i===q.correct}));for(let i=items.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]];}return{...q,options:items.map(x=>x.o),correct:items.findIndex(x=>x.c)};}
 
 const QB = {
+  // 출처: ESPN - Ranking the 50 best players at the 2026 World Cup
+  // https://www.espn.com/soccer/story/_/id/48991846/world-cup-rank-50-best-players-2026-tournament
   '선수퀴즈': ()=>shuffle([
-    {emoji:'🐐',text:'리오넬 메시의 국적은?',options:['🇦🇷 아르헨티나','🇧🇷 브라질','🇫🇷 프랑스','🇵🇹 포르투갈'],correct:0},
-    {emoji:'💪',text:'크리스티아누 호날두의 국적은?',options:['🇪🇸 스페인','🇧🇷 브라질','🇵🇹 포르투갈','🇮🇹 이탈리아'],correct:2},
-    {emoji:'⚡',text:'킬리안 음바페의 국적은?',options:['🇧🇪 벨기에','🇫🇷 프랑스','🇸🇳 세네갈','🇲🇦 모로코'],correct:1},
-    {emoji:'🎪',text:'네이마르의 국적은?',options:['🇦🇷 아르헨티나','🇨🇴 콜롬비아','🇧🇷 브라질','🇺🇾 우루과이'],correct:2},
-    {emoji:'🦁',text:'손흥민의 국적은?',options:['🇯🇵 일본','🇨🇳 중국','🇦🇺 호주','🇰🇷 대한민국'],correct:3},
-    {emoji:'🤖',text:'엘링 홀란의 국적은?',options:['🇸🇪 스웨덴','🇩🇰 덴마크','🇳🇴 노르웨이','🇫🇮 핀란드'],correct:2},
-    {emoji:'🎯',text:'케빈 데 브루이너의 국적은?',options:['🇳🇱 네덜란드','🇧🇪 벨기에','🇩🇪 독일','🇫🇷 프랑스'],correct:1},
-    {emoji:'🌙',text:'모하메드 살라의 국적은?',options:['🇳🇬 나이지리아','🇲🇦 모로코','🇸🇳 세네갈','🇪🇬 이집트'],correct:3},
-    {emoji:'🌟',text:'루카 모드리치의 국적은?',options:['🇸🇮 슬로베니아','🇧🇦 보스니아','🇷🇸 세르비아','🇭🇷 크로아티아'],correct:3},
-    {emoji:'🎭',text:'페드리의 국적은?',options:['🇵🇹 포르투갈','🇫🇷 프랑스','🇪🇸 스페인','🇮🇹 이탈리아'],correct:2},
-    {emoji:'💃',text:'비니시우스 주니오르의 국적은?',options:['🇦🇷 아르헨티나','🇧🇷 브라질','🇺🇾 우루과이','🇨🇴 콜롬비아'],correct:1},
-    {emoji:'⚽',text:'이강인의 국적은?',options:['🇨🇳 중국','🇯🇵 일본','🇰🇷 대한민국','🇦🇺 호주'],correct:2},
-    {emoji:'🛡️',text:'로드리의 국적은?',options:['🇵🇹 포르투갈','🇫🇷 프랑스','🇩🇪 독일','🇪🇸 스페인'],correct:3},
-    {emoji:'💫',text:'필 포든의 국적은?',options:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드','🏴󠁧󠁢󠁳󠁣󠁴󠁿 스코틀랜드','🇮🇪 아일랜드','🏴󠁧󠁢󠁷󠁬󠁳󠁿 웨일스'],correct:0},
-    {emoji:'🌟',text:'펠레의 국적은?',options:['🇦🇷 아르헨티나','🇧🇷 브라질','🇺🇾 우루과이','🇨🇴 콜롬비아'],correct:1},
-    {emoji:'🤌',text:'디에고 마라도나의 국적은?',options:['🇧🇷 브라질','🇨🇱 칠레','🇦🇷 아르헨티나','🇺🇾 우루과이'],correct:2},
-    {emoji:'💫',text:'지네딘 지단의 국적은?',options:['🇧🇪 벨기에','🇲🇦 모로코','🇩🇿 알제리','🇫🇷 프랑스'],correct:3},
-    {emoji:'😁',text:'호나우지뉴의 국적은?',options:['🇦🇷 아르헨티나','🇧🇷 브라질','🇵🇹 포르투갈','🇨🇴 콜롬비아'],correct:1},
-    {emoji:'👑',text:'티에리 앙리의 국적은?',options:['🇧🇪 벨기에','🇨🇮 코트디부아르','🇫🇷 프랑스','🇬🇧 영국'],correct:2},
-    {emoji:'💪',text:'크리스티안 에릭센의 국적은?',options:['🇸🇪 스웨덴','🇫🇮 핀란드','🇳🇴 노르웨이','🇩🇰 덴마크'],correct:3},
-    {emoji:'✨',text:'2006년생 유로 2024 최연소 결승골의 주인공은?',options:['라민 야말 (🇪🇸 스페인)','주드 벨링엄 (🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드)','자말 무시알라 (🇩🇪 독일)','플로리안 비르츠 (🇩🇪 독일)'],correct:0},
-    {emoji:'⚡',text:'주드 벨링엄의 국적은?',options:['🇩🇪 독일','🇫🇷 프랑스','🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드','🇪🇸 스페인'],correct:2},
-    {emoji:'🌠',text:'플로리안 비르츠의 국적은?',options:['🇦🇹 오스트리아','🇨🇭 스위스','🇳🇱 네덜란드','🇩🇪 독일'],correct:3},
-    {emoji:'💃',text:'비니시우스 주니오르는 어떤 세리머니로 유명한가?',options:['무릎 슬라이딩','춤 세리머니','손하트','박치기'],correct:1},
-    {emoji:'🦁',text:'손흥민이 주장인 클럽은?',options:['첼시','아스날','맨체스터 유나이티드','토트넘 홋스퍼'],correct:3},
-  ]),
+    {emoji:'🇫🇷',text:'우스만 뎀벨레의 국적은? (ESPN 2026 WC 랭킹 1위)',options:['🇸🇳 세네갈','🇫🇷 프랑스','🇨🇮 코트디부아르','🇧🇪 벨기에'],correct:1},
+    {emoji:'🇪🇸',text:'라민 야말의 국적은? (ESPN 2026 WC 랭킹 2위)',options:['🇲🇦 모로코','🇪🇸 스페인','🇫🇷 프랑스','🇨🇮 코트디부아르'],correct:1},
+    {emoji:'🇫🇷',text:'마이클 올리스의 국적은? (ESPN 2026 WC 랭킹 3위)',options:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드','🇨🇳 중국','🇫🇷 프랑스','🇩🇪 독일'],correct:2},
+    {emoji:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',text:'해리 케인의 국적은? (ESPN 2026 WC 랭킹 4위)',options:['🇩🇪 독일','🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드','🇮🇪 아일랜드','🏴󠁧󠁢󠁳󠁣󠁴󠁿 스코틀랜드'],correct:1},
+    {emoji:'🇵🇹',text:'브루노 페르난데스의 국적은? (ESPN 2026 WC 랭킹 5위)',options:['🇪🇸 스페인','🇧🇷 브라질','🇵🇹 포르투갈','🇦🇷 아르헨티나'],correct:2},
+    {emoji:'🇪🇸',text:'페드리의 국적은? (ESPN 2026 WC 랭킹 6위)',options:['🇵🇹 포르투갈','🇫🇷 프랑스','🇮🇹 이탈리아','🇪🇸 스페인'],correct:3},
+    {emoji:'🇫🇷',text:'윌리엄 살리바의 국적은? (ESPN 2026 WC 랭킹 7위)',options:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드','🇲🇦 모로코','🇨🇮 코트디부아르','🇫🇷 프랑스'],correct:3},
+    {emoji:'🇧🇷',text:'하피냐의 국적은? (ESPN 2026 WC 랭킹 8위)',options:['🇺🇾 우루과이','🇦🇷 아르헨티나','🇨🇴 콜롬비아','🇧🇷 브라질'],correct:3},
+    {emoji:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',text:'부카요 사카의 국적은? (ESPN 2026 WC 랭킹 9위)',options:['🇳🇬 나이지리아','🇬🇭 가나','🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드','🇮🇪 아일랜드'],correct:2},
+    {emoji:'🇳🇴',text:'마르틴 외데고르의 국적은? (ESPN 2026 WC 랭킹 10위)',options:['🇸🇪 스웨덴','🇩🇰 덴마크','🇳🇴 노르웨이','🇫🇮 핀란드'],correct:2},
+    {emoji:'🇳🇴',text:'엘링 홀란의 국적은? (ESPN 2026 WC 랭킹 11위)',options:['🇸🇪 스웨덴','🇩🇰 덴마크','🇫🇮 핀란드','🇳🇴 노르웨이'],correct:3},
+    {emoji:'🇧🇷',text:'비니시우스 주니오르의 국적은? (ESPN 2026 WC 랭킹 12위)',options:['🇦🇷 아르헨티나','🇧🇷 브라질','🇺🇾 우루과이','🇨🇴 콜롬비아'],correct:1},
+    {emoji:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',text:'주드 벨링엄의 국적은? (ESPN 2026 WC 랭킹 13위)',options:['🇩🇪 독일','🇫🇷 프랑스','🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드','🇪🇸 스페인'],correct:2},
+    {emoji:'🇫🇷',text:'킬리안 음바페의 국적은? (ESPN 2026 WC 랭킹 14위)',options:['🇧🇪 벨기에','🇫🇷 프랑스','🇸🇳 세네갈','🇨🇲 카메룬'],correct:1},
+    {emoji:'🇦🇷',text:'리오넬 메시의 국적은? (ESPN 2026 WC 랭킹 15위)',options:['🇺🇾 우루과이','🇵🇾 파라과이','🇧🇷 브라질','🇦🇷 아르헨티나'],correct:3},
+  ])
   '국기퀴즈': ()=>{
     const hard=shuffle([
       {emoji:'🇺🇿',img:'https://flagcdn.com/w160/uz.png',text:'이 국기는 어느 나라?',options:['카자흐스탄','타지키스탄','투르크메니스탄','우즈베키스탄'],correct:3},
