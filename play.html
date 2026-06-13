@@ -22,6 +22,9 @@
     .login-input:focus{border-color:var(--green);}
     .login-btn{width:100%;max-width:300px;background:var(--green);color:#fff;border:none;border-radius:16px;padding:18px;font-size:20px;font-family:'Black Han Sans',sans-serif;cursor:pointer;transition:opacity .2s,transform .15s;}
     .login-btn:active{transform:scale(0.97);}
+    .login-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+    @keyframes inputShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+    .login-input.shake{animation:inputShake .35s ease;border-color:#ef4444!important;}
     .no-fb-warn{color:#fcd34d;font-size:12px;text-align:center;margin-top:14px;max-width:280px;line-height:1.5;}
 
     /* ── LOBBY ── */
@@ -140,7 +143,7 @@
   <div class="login-title">월드컵 QUIZ</div>
   <div class="login-sub">닉네임을 입력하고 참가하세요!</div>
   <input class="login-input" id="name-in" type="text" placeholder="예: 홍길동" maxlength="8" autocomplete="off">
-  <button class="login-btn" onclick="join()">✅ 참가하기</button>
+  <button class="login-btn" id="join-btn" onclick="join()">✅ 참가하기</button>
   <div class="no-fb-warn hidden" id="no-fb-warn">
     ⚠️ Firebase가 연결되지 않았습니다.<br>운영자에게 올바른 QR 코드를 요청하세요.
   </div>
@@ -301,13 +304,23 @@ async function fbGet(p){try{const r=await _fbFetch(FB+p+'.json',{},9000);return 
 
 // ── Join ──────────────────────────────────────────────────────────
 let joined=false;
+function _resetJoinBtn(){const b=document.getElementById('join-btn');if(b){b.disabled=false;b.textContent='✅ 참가하기';}}
 function join(){
   if(joined)return;
+  const btn=document.getElementById('join-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ 참가 중...';}
   joined=true;
   getAC(); // unlock audio on user gesture
-  const n=document.getElementById('name-in').value.trim().slice(0,8);
-  if(!n){joined=false;document.getElementById('name-in').focus();return;}
-  if(!USE_FB){joined=false;setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
+  const nameIn=document.getElementById('name-in');
+  const n=nameIn.value.trim().slice(0,8);
+  if(!n){
+    joined=false;_resetJoinBtn();
+    nameIn.classList.remove('shake');void nameIn.offsetWidth;nameIn.classList.add('shake');
+    nameIn.focus();
+    setTimeout(()=>nameIn.classList.remove('shake'),400);
+    return;
+  }
+  if(!USE_FB){joined=false;_resetJoinBtn();setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
   myName=n;myJoinedAt=Date.now();localStorage.setItem('wc_player_name',n);
   _fbFetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:myJoinedAt,lastSeen:myJoinedAt})}).catch(()=>setStatus('⚠️ 서버 연결 실패 — 잠시 후 자동 재시도','warn'));
   document.getElementById('lb-name').textContent=n+' 님 참가 완료';
@@ -392,6 +405,7 @@ function onSession(s){
     joined=false;myJoinedAt=0;myName='';myScore=0;myStreak=0;_pendingGain=0;lastKnownRank=0;
     clearInterval(timerInt);clearInterval(_pollInt);_pollInt=null;
     if(sessionES){try{sessionES.close();}catch{}}sessionES=null;
+    _resetJoinBtn();
     show('s-login');
     setStatus('새 세션이 시작됐습니다. 이름을 입력해 다시 참가하세요!','warn');
     return;

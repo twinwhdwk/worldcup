@@ -1087,6 +1087,8 @@ async function revealAnswer(){
   allAnsweredPending=false;
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
   document.getElementById('tv-countdown').textContent='';
+  const _revBtn=document.getElementById('btn-reveal');
+  if(_revBtn)_revBtn.disabled=true;
   const q=sessionQuestions[currentQIdx];
   const ci=q.correct;
 
@@ -1129,7 +1131,8 @@ async function revealAnswer(){
     if(Object.keys(scoreUpdates).length>0)await fbPatch('/scores',scoreUpdates);
   }catch(err){
     revealInProgress=false;
-    toast('⚠️ Firebase 오류: '+err.message,true);
+    if(_revBtn){_revBtn.disabled=false;}
+    toast('⚠️ Firebase 오류: '+err.message+' — 정답 공개 재시도 가능',true);
     return;
   }
 
