@@ -402,6 +402,16 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ── Global error catch (debug) ────────────────────────────────────
+window.addEventListener('unhandledrejection',e=>{
+  const msg=e.reason?.message||String(e.reason);
+  const el=document.getElementById('toast');
+  if(el){el.textContent='❌ JS오류: '+msg;el.className='toast show err';setTimeout(()=>el.classList.remove('show'),6000);}
+});
+window.onerror=(msg,src,ln)=>{
+  const el=document.getElementById('toast');
+  if(el){el.textContent='❌ '+msg+' (line '+ln+')';el.className='toast show err';setTimeout(()=>el.classList.remove('show'),6000);}
+};
 // ── Firebase URL (from localStorage — no code editing needed!) ────
 const FIREBASE_URL = (()=>{
   const u=localStorage.getItem('wc_fb_url')||'https://worldcup-minigame-default-rtdb.firebaseio.com';localStorage.setItem('wc_fb_url',u);return u;
@@ -924,7 +934,8 @@ function startListening(){
 
 // ── Next question ──────────────────────────────────────────────────
 async function nextQuestion(){
-  if(!sessionActive){toast('⚠️ 게임이 시작되지 않았습니다. 게임 시작을 먼저 눌러주세요.',true);return;}
+  if(!sessionActive){toast('⚠️ 게임이 시작되지 않았습니다.',true);return;}
+  toast('⏳ 문제 '+(currentQIdx+2)+'/'+sessionQuestions.length+' 준비 중...');
   document.getElementById('btn-nextq').textContent='▶ 다음 문제 시작';
   revealInProgress=false;
   currentQIdx++;
