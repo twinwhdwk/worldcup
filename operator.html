@@ -683,26 +683,23 @@ const QB = {
     {emoji:'🇲🇽',img:'https://flagcdn.com/w160/mx.png',text:'멕시코의 월드컵 우승 횟수는?',options:['0회','1회','2회','3회'],correct:0},
   ]),
   '유니폼퀴즈': ()=>shuffle([
-    {get img(){return jerseyImg(['#74ACDF','#ffffff','#74ACDF'],'stripes')},emoji:'👕',text:'아르헨티나 홈 유니폼의 특징은?',options:['하늘색·흰색 세로줄무늬','노란색·초록색','빨간색·흰색','남색 단색'],correct:0},
-    {get img(){return jerseyImg(['#FFD700','#009c3b','#009c3b'],'solid')},emoji:'👕',text:'브라질 홈 유니폼 상의 색상은?',options:['초록색','빨간색','노란색','흰색'],correct:2},
-    {get img(){return jerseyImg(['#ffffff','#000000','#cc0000'],'collar-stripe')},emoji:'👕',text:'독일 홈 유니폼의 전통 색상은?',options:['검정색','빨간색','흰색','파란색'],correct:2},
-    {get img(){return jerseyImg(['#003189','#ff0000','#ffffff'],'solid')},emoji:'👕',text:'프랑스 홈 유니폼의 색상은?',options:['흰색','남색(진파랑)','빨간색','하늘색'],correct:1},
-    {get img(){return jerseyImg(['#c60b1e','#ffc400','#c60b1e'],'collar-stripe')},emoji:'👕',text:'스페인 홈 유니폼의 색상은?',options:['빨간색','노란색','파란색','흰색'],correct:0},
-    {get img(){return jerseyImg(['#0066CC','#ffffff','#ffffff'],'solid')},emoji:'👕',text:'"아주리"로 불리는 이탈리아 유니폼 색상은?',options:['초록색','빨간색','흰색','파란색'],correct:3},
-    {get img(){return jerseyImg(['#ffffff','#1D3461','#CC0000'],'collar-stripe')},emoji:'👕',text:'잉글랜드 홈 유니폼의 전통 색상은?',options:['빨간색','파란색','흰색','노란색'],correct:2},
-    {get img(){return jerseyImg(['#006600','#ff0000','#006600'],'half')},emoji:'👕',text:'포르투갈 홈 유니폼의 색상은?',options:['빨간색','파란색','흰색','초록색'],correct:0},
-    {get img(){return jerseyImg(['#FF6600','#ffffff','#ffffff'],'solid')},emoji:'👕',text:'"오란예(Oranje)"로 유명한 네덜란드 유니폼 색상은?',options:['노란색','빨간색','파란색','주황색'],correct:3},
-    {get img(){return jerseyImg(['#C60C30','#003478','#ffffff'],'solid')},emoji:'👕',text:'대한민국 홈 유니폼 색상은?',options:['빨간색','파란색','흰색','초록색'],correct:0},
-    {get img(){return jerseyImg(['#FF0000','#ffffff','#FF0000'],'checkerboard')},emoji:'👕',text:'크로아티아 유니폼의 특징적인 패턴은?',options:['별무늬','세로줄무늬','빨간·흰 체크무늬','삼각형 패턴'],correct:2},
-    {get img(){return jerseyImg(['#5EB6E4','#000000','#5EB6E4'],'solid')},emoji:'👕',text:'우루과이 홈 유니폼의 색상은?',options:['흰색·파란색','빨간색','하늘색','초록색'],correct:2},
-    {get img(){return jerseyImg(['#006847','#ffffff','#ffffff'],'collar-stripe')},emoji:'👕',text:'멕시코 홈 유니폼의 색상은?',options:['흰색','파란색','초록색','빨간색'],correct:2},
-    {get img(){return jerseyImg(['#008751','#ffffff','#008751'],'stripes')},emoji:'👕',text:'나이지리아 유니폼의 주요 색상은?',options:['빨간색','초록색','파란색','노란색'],correct:1},
-    {get img(){return jerseyImg(['#C60C30','#ffffff','#C60C30'],'collar-stripe')},emoji:'👕',text:'덴마크 홈 유니폼의 색상 조합은?',options:['파란색·흰색','빨간색·흰색','초록색·흰색','노란색·빨간색'],correct:1},
-    {get img(){return jerseyImg(['#ffffff','#DC143C','#DC143C'],'collar-stripe')},emoji:'👕',text:'폴란드 홈 유니폼의 색상은?',options:['빨간색','파란색','흰색','노란색'],correct:2},
-    {get img(){return jerseyImg(['#ED2939','#000000','#FAE042'],'sash')},emoji:'👕',text:'벨기에 홈 유니폼의 특징 색상은?',options:['파란색','노란색','빨간색·검정색','초록색'],correct:2},
-    {get img(){return jerseyImg(['#ffffff','#00853F','#FDEF42'],'sash')},emoji:'👕',text:'세네갈 홈 유니폼의 주요 색상은?',options:['초록색·노란색·빨간색','파란색','흰색','빨간색'],correct:2},
-    {get img(){return jerseyImg(['#C1272D','#006233','#C1272D'],'solid')},emoji:'👕',text:'모로코 홈 유니폼의 색상은?',options:['파란색','노란색','흰색','빨간색'],correct:3},
-    {get img(){return jerseyImg(['#1A2F5F','#CC0000','#ffffff'],'chevron')},emoji:'👕',text:'일본 홈 유니폼의 전통 색상은?',options:['흰색','빨간색','파란색(사무라이 블루)','초록색'],correct:2},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgkEIQ3IkUfhmPld-ksky7FrQcBm4d23gtYvgHxtQZmfNCdgeaayW6LCEsDzgBh_e66H-AyjZS_EWkgw1ny9QI5qvwZWwoIYWoJ82TUiX7webZtOtfJdN9uqMG9fkgRn-VvG89JQsyeXY52bJxK5llA8XGKgeY9_T1K2vgR0dzWT__DprgYX7sH1UuRVizv/s1600/afa-2026-home-kit',text:'이 유니폼은 어느 나라 것인가요?',options:['🇺🇾 우루과이','🇦🇷 아르헨티나','🇵🇾 파라과이','🇧🇷 브라질'],correct:1},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiFK9wFSe0ch3jxixx_NzFa0nwD3lSOaiMWt3XNR-nCglaQoW8IfJxL2fv46I5CPZOyWPez-NfnqodddEqAdWEiPPGUD9t7Y1v5wOkSILgsCFr0-CE1K_0P8vZ-XY_tQRE5tDj4qBX6k4u1T83AezsVyVvFNVGsd6NU4nXrs66g9htC6iHwCz0GX1geEyTj/s1600/brazil-2026-home-kit%20(3).jpg',text:'이 유니폼은 어느 나라 것인가요?',options:['🇨🇴 콜롬비아','🇸🇪 스웨덴','🇧🇷 브라질','🇪🇨 에콰도르'],correct:2},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhACqA_a8dOzacQIfAb8zajNqg_s4ZrqIkoe5hiE8twnqNMN1BIx3QYaoFOeyIpNnnn0No3W2umVoVzBiWsuHgdO6uCY0Jwp-4BvFg1e993gtE3zqyZzYrUOSKW2l6y5VeVaSrh6IUY9hjCaQOeWQb9EI_tSL2L2s9R1OHdun7l-o0yYJ35WYCfHBCs4nM3/s1600/dfb-2026-home-kit%20(13).jpg',text:'이 유니폼은 어느 나라 것인가요?',options:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드','🇩🇪 독일','🇵🇱 폴란드','🇺🇸 미국'],correct:1},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEggk81FATmwYxDexf0Mf8otEHtlWHejxVtgFY5II-j5weEPFG_uL9yeMQDsHFX4mgQNbWpUtHNn-_Ny2vUZtH7XrJLaFebiFyoSawSNDN7dT32jy3fgoA8qMbVLf51INQ-an9QwO7Wd500j-q5TN0owsFXICuRM1HNcQ5cLDSc-Twc2F9Ac_POudNUE6m_A/s1600/france%202026%20kits%20(2).jpg',text:'이 유니폼은 어느 나라 것인가요?',options:['🇫🇷 프랑스','🇯🇵 일본','🇰🇷 대한민국','🇦🇺 호주'],correct:0},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjf7qDUwPJxm4ro5cT-cFasDS0GzCo7qkOrwgELYuc5VWWgcipQhz5EBjxv1PcaqR-UT0IsdNDwbzCf4KOFyvL6SCPmpxmCqCtB-SYvsuaq4ca3Cn3CujvwU-Txn1_5u988desdzl5-qJ7SDbugy5a5uivNI28Un49Zx4n0n9TMvYT_Xsz3YjMV84xBX4Ip/s1600/spain-2026-home-kit',text:'이 유니폼은 어느 나라 것인가요?',options:['🇲🇦 모로코','🇨🇦 캐나다','🇪🇸 스페인','🇩🇰 덴마크'],correct:2},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh5L_0nnZfToKC9O_ggwR3SJgg6bRObxQxVr6YDY1B_Bq_PwU10NxHgpOsI3ykXNZJJM_RVOYSxlUUcV4VvLyVkNBYNIEaegaOW_zMFstluMyGJLcxKm9yjix1rdc4l3Amhl9fLJAnB6zhdwnkc-43nrH13cqGv2e128Gq1V7Ruhv7ZnthNBvCVWWfZycDy/s1600/korea-2026-kits%20(13).jpg',text:'이 유니폼은 어느 나라 것인가요?',options:['🇪🇸 스페인','🇨🇦 캐나다','🇳🇴 노르웨이','🇰🇷 대한민국'],correct:3},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgKIDtuBb7yXxBGDVCG0671zXA9uSb04yPwSj03keVldCKw-UAYM_N_rrcKAeAzh70OouDrQXEYZ3GhrhPVINUSssHoExpVFwmxJgFrNvGEltxE3Tgcm5bB9F34aG_A8filN_soXAw_Y2YxDT58-aIIetZ9EPQWZ4jj8KLqsfLI6F9lzqSCxQs-zH28UEo8/s1600/Netherlands%202026%20World%20Cup%20Home%20Kit%20Leaked%20-%20New%20Official%20Pictures%20(3).jpg',text:'이 유니폼은 어느 나라 것인가요?',options:['🇳🇱 네덜란드','🇨🇮 코트디부아르','🇲🇽 멕시코','🇸🇦 사우디아라비아'],correct:0},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj0cjEA74P1KGDEoWgMVEN24JuQhAeDyT8LtAa79TXtxq7j8Dj03Om6GPfEuZWVkp_9h9Twx1P8bBp-CkIu1-ZLTPuCKu1gH38Z_tXunlCZ-YS1H7c08S84NfxwzuwP4UWvYQkEwP3dEI6_uYCVXzdpkvpFlMauPNnkn-YfFXidFuGPnBap8md3zwOz-8MX/s1600/adidas-2026-home-kit%20(5).jpg',text:'이 유니폼은 어느 나라 것인가요?',options:['🇯🇵 일본','🇫🇷 프랑스','🇸🇪 스웨덴','🇰🇷 대한민국'],correct:0},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZ_9Evwg-vU3iN4sclfa12VHKx8ppPtVXP1MZQ6QzO1sO-X8gLTaVkzm3N6WjIGdNEmH1tqQkzC5Mmk-f_k3s4EkbEYBzq8q98eW8XgPxvkginMATzQKlb_0EPpklqxrE68mBj__jeNwsP5yAGrBHW7CuxeksaXFQfLqJ1quIFHUyUC0waqL2mLseWxA0Y/s1600/mexico-2026-home-kit',text:'이 유니폼은 어느 나라 것인가요?',options:['🇸🇦 사우디아라비아','🇳🇬 나이지리아','🇲🇽 멕시코','🇩🇿 알제리'],correct:2},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgWntUsL12_8srh31D9iebWc4J93ZJkN4dImhnnfCtlzSCHvknqchwtsb5hVHhK3H3O-K3RdlBkp7dRAwrk4XhVIxQnkSRkC0j6F8ww046fCDqjdTubcGUZ00VzmSA-MTlWypjzkLMCpA6N1rDkfOdfErcE2EwPwrvoscYsvewZ1TtPBkdBvT1-4amdLQHx/s1600/usa-2026-home-kit',text:'이 유니폼은 어느 나라 것인가요?',options:['🇺🇸 미국','🇺🇾 우루과이','🇨🇷 코스타리카','🇵🇦 파나마'],correct:0},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiYHdS6p5Jcbjgn72b4AT9uT3-_Gpy_4nCSK6XWgoAW9mwFcy2FQoKa8PT1DzpHTwB5jfYTMky1eh3xV8XnH7a4OiE5LbxtDrB_QXQdwQ0U8XVg-_Ck8tBuFwNgnvEBoPwVK_SeHU_D1tQ50g2HAWvxv7QrRsnYx3K9bPcJjmU_KVsAYPh0sZ1yuPI303Kg/s1600/belgium-2026-home-kit',text:'이 유니폼은 어느 나라 것인가요?',options:['🇧🇪 벨기에','🇩🇪 독일','🇨🇴 콜롬비아','🇷🇴 루마니아'],correct:0},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh1-7jDWZAQIn39zvILO5hfzTHJvazTakpxP9om6vkhDouozRnf6ZMXofjqcYPm8Qh9KDiawo7bb671wJUuKDfVt90kCQKpKstiLtQ7o6SuR04O4hUNEsQ7pVPc41FyRuiuxlx9gCnPi3cIBl8bQkxk-PoiSmnTK2KbzG225WCt1x8MkR_WQ_5Dla6fKuI4/s1600/ecuador-2026-kits',text:'이 유니폼은 어느 나라 것인가요?',options:['🇧🇷 브라질','🇨🇴 콜롬비아','🇪🇨 에콰도르','🇸🇪 스웨덴'],correct:2},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgQwDgi1Qwi1jHMEwtssuaH64Ppqhx1YM9K0VGLb0SDbe4WV5yVpUqS-d8RcoOcAnDBMh5EFgU86urnzW4S_vVxlscsVSJSjd6uXcihfkYWqfkf1xifjlT34WMxv6uWuphvR0dUqOh4ATwq91MKOpmkQZ5Q6Wp-gdp6u3_6vo0HzgBtIADtR9hNJ2QDn22p/s1600/colombia-2026-home-kit',text:'이 유니폼은 어느 나라 것인가요?',options:['🇨🇴 콜롬비아','🇧🇷 브라질','🇸🇪 스웨덴','🇪🇨 에콰도르'],correct:0},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhbsx0W4sk7TeGzjhG3No78A-ivxmWqekcDgLInNhgGlqGIIg91o2reoHAFuz4A662cWEaIhPtWUu1rWHZ6FNBUR4i_0sNWmmCXWok55BudnrOYtrhgqaNeYc7WOlYUxTg-SR8nFP0TK6LOAgwP0BI1tCyg3L4wW5mVcxdTNDBK54GQ_Luh6UOsSufbwrWd/s1600/canada-2026-kits',text:'이 유니폼은 어느 나라 것인가요?',options:['🇩🇰 덴마크','🇨🇭 스위스','🇨🇦 캐나다','🇦🇹 오스트리아'],correct:2},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjTwVb5D340qd9kB67KLSioXocLfenY1Hq_pQkIoiavybg6g5VOh1vd5bzGbJPUkacyEwiWsx5DZRU6nVlGNscFNitEjlhAbZ_EgsXQRlkH-iSGrW0dt_TNDR9RxOnW87Q1SNx5Bl7PMAkA__IgpNNafY8pimgLr9AwhHDLJja7esTC6L2s36SE_6XDDDc/s1600/scotland-2026-home-kit',text:'이 유니폼은 어느 나라 것인가요?',options:['🇫🇷 프랑스','🏴󠁧󠁢󠁳󠁣󠁴󠁿 스코틀랜드','🇳🇱 네덜란드','🇯🇵 일본'],correct:1},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjyh_UqZxnFDThVWOo8Zh5M8JUnrC-oDfcOda6t0v_WQuHitYF5SVrBuOEh_PB8xi7Ut0dLHu2jvlu2Yj98zAbjaTAvkHBIDFqhW4MXHIaiJ5J39kMTb08SGMBbdVAcvPGwTRYYcv19L82TbyjHa7h_UYOKIAeS5LKU_LJgn4sMybcIv2uGeuP_byERVgUG/s1600/norway-26',text:'이 유니폼은 어느 나라 것인가요?',options:['🇳🇴 노르웨이','🇩🇰 덴마크','🇨🇭 스위스','🇵🇱 폴란드'],correct:0},
+    {bigImg:true,emoji:'👕',img:'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoMMhGOxiJOGSIvdWC3O97k49cRUXcZ062VZFap9rDGnFtr-gxAHlNjhHJdzW7ltKvMcmB63su6LrZ_G4jl_f_4Ew7iOsYVqIfVXnC703HKbJowgfuv9YXWa0cBXNmHuPl-lVh0Ex7E6IseRgB1KVoSCXfxVyR6vSOXpMFVgGFZCyTOiI6I3otJnknWxzD/s1600/austria-2026-home-kit',text:'이 유니폼은 어느 나라 것인가요?',options:['🇨🇭 스위스','🇩🇰 덴마크','🇦🇹 오스트리아','🇵🇱 폴란드'],correct:2},
   ]),
   '2026퀴즈': ()=>shuffle([
     {emoji:'🌎',text:'2026 FIFA 월드컵의 참가팀 수는?',options:['32팀','40팀','48팀','56팀'],correct:2},
@@ -919,7 +916,7 @@ async function nextQuestion(){
   document.getElementById('tv-q-game').textContent=selectedGame;
   document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
   const _emojiEl=document.getElementById('tv-q-emoji');
-  if(q.img){_emojiEl.innerHTML=`<img src="${q.img}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg'}" style="height:80px;width:auto;max-width:160px;border-radius:6px;object-fit:contain;" alt="">`;}
+  if(q.img){const _is=q.bigImg?'height:200px;max-width:320px':'height:80px;max-width:160px';_emojiEl.innerHTML=`<img src="${q.img}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg'}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
   else{_emojiEl.textContent=q.emoji||'⚽';twparse(_emojiEl);}
   document.getElementById('tv-q-text').textContent=q.text;
   q.options.forEach((o,i)=>{
@@ -1047,11 +1044,7 @@ async function revealAnswer(){
     return `<div class="sc-chip" style="animation-delay:${i*.08}s">+${g}점 ${esc(name)}${fire}</div>`;
   }).join('');
 
-  [0,1,2,3].forEach(i=>{
-    const el=document.getElementById('tv-o'+i);
-    el.style.animation='';
-    el.classList.add(i===ci?'correct':'wrong');
-  });
+  // O/X highlight removed — operator already knows correct answer; reveal panel shows it clearly
 
   document.getElementById('st-state').textContent='정답 공개';
   document.getElementById('btn-reveal').style.display='none';
@@ -1290,7 +1283,7 @@ if(USE_FB)startListening();
       if(q){
         tvShow('tv-question');
         const _ei=document.getElementById('tv-q-emoji');
-        if(q.img){_ei.innerHTML=`<img src="${q.img}" style="height:80px;width:auto;max-width:160px;border-radius:6px;object-fit:contain;" alt="">`;}
+        if(q.img){const _is=q.bigImg?'height:200px;max-width:320px':'height:80px;max-width:160px';_ei.innerHTML=`<img src="${q.img}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
         else{_ei.textContent=q.emoji||'⚽';twparse(_ei);}
         document.getElementById('tv-q-text').textContent=q.text;
         document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
@@ -1317,6 +1310,23 @@ if(USE_FB)startListening();
     renderAnswerDist();renderLeaderboard();
     toast('🔄 세션 복구됨 — 문제 '+(currentQIdx+1)+'/'+sessionQuestions.length);
   }catch(e){localStorage.removeItem('wc_op_session');}
+})();
+
+// Clean up stale Firebase data when operator opens with no active session
+(async function(){
+  if(!USE_FB)return;
+  if(localStorage.getItem('wc_op_session'))return;
+  try{
+    const fbSess=await fetch(FB+'/session.json').then(r=>r.json()).catch(()=>null);
+    if(!fbSess||fbSess.state==='done'){
+      await Promise.all([
+        fetch(FB+'/players.json',{method:'DELETE'}),
+        fetch(FB+'/answers.json',{method:'DELETE'}),
+      ]).catch(()=>{});
+      currentAnswers={};currentPlayers={};
+      renderAnswerDist();renderLeaderboard();
+    }
+  }catch{}
 })();
 
 // ── Initial QR display ────────────────────────────────────────────
