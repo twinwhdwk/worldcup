@@ -394,7 +394,7 @@ setInterval(refresh,8000);
 
 // Share
 function copyLink(){
-  const url='https://twinwhdwk.github.io/worldcup_minigame/';
+  const url='https://twinwhdwk.github.io/worldcup/';
   navigator.clipboard.writeText(url).then(()=>{
     const btn=document.querySelector('.share-btn.copy');
     const orig=btn.innerHTML;btn.innerHTML='✅ 복사됨!';
@@ -402,7 +402,7 @@ function copyLink(){
   }).catch(()=>alert(url));
 }
 function shareNative(){
-  const url='https://twinwhdwk.github.io/worldcup_minigame/';
+  const url='https://twinwhdwk.github.io/worldcup/';
   if(navigator.share){navigator.share({title:'⚽ 월드컵 미니게임 2026',text:'7종의 월드컵 미니게임에 도전하세요!',url});}
   else copyLink();
 }
