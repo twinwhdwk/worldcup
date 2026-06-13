@@ -238,7 +238,6 @@
           <img id="qr-img" src="" alt="QR" width="220" height="220" style="background:#fff;padding:6px;">
           <div class="qr-label" id="qr-label">📱 스캔해서 참가</div>
           <div class="qr-url" id="qr-url"></div>
-          <button onclick="copyPlayUrl()" style="margin-top:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;width:100%;" id="copy-url-btn">🔗 링크 복사 (카카오·문자 공유용)</button>
         </div>
         <div id="player-chips-wrap" style="display:none;">
           <div class="player-chips-title">참가자 목록</div>
@@ -362,7 +361,8 @@
         <input type="range" id="qlimit" min="10" max="40" step="5" value="15" oninput="document.getElementById('qlimit-val').textContent=this.value+'초'">
       </div>
       <button class="ctrl-btn btn-start" onclick="startGame()">▶ 게임 시작</button>
-      <button class="ctrl-btn btn-lobby" style="margin-top:8px;" onclick="endSession()">🏁 세션 종료</button>
+      <button class="ctrl-btn" style="margin-top:8px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:#93c5fd;" onclick="goHome()">🏠 홈으로 (스코어 유지)</button>
+      <button class="ctrl-btn btn-lobby" style="margin-top:4px;" onclick="endSession()">🏁 세션 종료</button>
     </div>
 
     <!-- Active controls -->
@@ -453,15 +453,6 @@ function getPlayUrl(){
 }
 function openPlayLink(){
   window.open(getPlayUrl(),'_blank');
-}
-function copyPlayUrl(){
-  const url=getPlayUrl();
-  navigator.clipboard.writeText(url).then(()=>{
-    const btn=document.getElementById('copy-url-btn');
-    if(btn){btn.textContent='✅ 복사됨!';setTimeout(()=>{btn.textContent='🔗 링크 복사 (카카오·문자 공유용)';},2000);}
-  }).catch(()=>{
-    prompt('아래 링크를 복사하세요:',url);
-  });
 }
 
 // Update scoreboard link with db param
@@ -832,7 +823,6 @@ async function startGame(){
   document.getElementById('game-setup').style.display='none';
   document.getElementById('active-ctrl').style.display='block';
   document.getElementById('btn-nextq').style.display='block';
-  document.getElementById('btn-nextq').textContent='🎮 게임 시작!';
   document.getElementById('btn-reveal').style.display='none';
   document.getElementById('btn-cont').style.display='none';
   document.getElementById('btn-skip').style.display='none';
@@ -931,7 +921,6 @@ function startListening(){
 
 // ── Next question ──────────────────────────────────────────────────
 async function nextQuestion(){
-  document.getElementById('btn-nextq').textContent='▶ 다음 문제 시작';
   revealInProgress=false;
   currentQIdx++;
   if(currentQIdx>=sessionQuestions.length){await endGame();return;}
@@ -1156,6 +1145,20 @@ async function endGame(){
   }
   toast('🎮 게임 종료! 다음 게임을 선택하거나 세션을 종료하세요.');
   confetti(30);
+}
+
+async function goHome(){
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);
+  sessionActive=false;
+  localStorage.removeItem('wc_op_session');
+  try{await fbPatch('/session',{state:'lobby',question:null,scoreGains:{}});}catch{}
+  document.getElementById('active-ctrl').style.display='none';
+  document.getElementById('ans-dist-section').style.display='none';
+  document.getElementById('game-setup').style.display='block';
+  document.getElementById('st-state').textContent='대기중';
+  document.getElementById('tv-lobby-sub').textContent='다음 게임을 준비 중... 잠시만 기다려주세요!';
+  tvShow('tv-lobby');
+  toast('🏠 홈으로 돌아왔습니다. 스코어는 유지됩니다.');
 }
 
 async function endSession(){
