@@ -1293,7 +1293,7 @@ function confetti(count=40){
 // Show initial QB info
 (function(){const pool=QB[selectedGame]?QB[selectedGame]().length:0;const info=document.getElementById('qbank-info');if(info)info.textContent=`문제 풀: ${pool}개 (최대 ${Math.min(pool,20)}문제 선택 가능)`;})();
 tvShow('tv-lobby');
-if(USE_FB)startListening();
+// startListening() is called only after openSession() — not on page load
 
 // ── TV Lobby Fact Ticker ──────────────────────────────────────────
 (function(){

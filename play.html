@@ -286,14 +286,29 @@ async function fbGet(p){try{const r=await fetch(FB+p+'.json');return r.json();}c
 
 // ── Join ──────────────────────────────────────────────────────────
 let joined=false;
-function join(){
+async function join(){
   if(joined)return;
-  joined=true;
   const t=document.getElementById('aj-toast');if(t)t.remove();
   getAC(); // unlock audio on user gesture
   const n=document.getElementById('name-in').value.trim().slice(0,8);
-  if(!n){joined=false;document.getElementById('name-in').focus();return;}
-  if(!USE_FB){joined=false;setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
+  if(!n){document.getElementById('name-in').focus();return;}
+  if(!USE_FB){setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
+  // Check session is open before registering
+  setStatus('⏳ 연결 확인 중...','ok');
+  const sess=await fbGet('/session').catch(()=>null);
+  if(!sess||sess.state==='done'||!sess.lastClearedAt){
+    setStatus('⏳ 아직 세션이 열리지 않았습니다. 운영자가 세션을 열면 자동으로 참가됩니다.','warn');
+    // Poll until session opens
+    const _waitInt=setInterval(async()=>{
+      const s=await fbGet('/session').catch(()=>null);
+      if(s&&s.state==='lobby'&&s.lastClearedAt){
+        clearInterval(_waitInt);
+        setStatus('✅ 세션이 열렸습니다! 이름을 입력해 참가하세요.','ok');
+      }
+    },3000);
+    return;
+  }
+  joined=true;
   myName=n;myJoinedAt=Date.now();localStorage.setItem('wc_player_name',n);
   fetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:myJoinedAt,lastSeen:myJoinedAt})});
   document.getElementById('lb-name').textContent=n+' 님 참가 완료';
