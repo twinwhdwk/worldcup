@@ -345,13 +345,13 @@
       <div style="font-size:11px;color:var(--muted2);margin-bottom:8px;text-align:center;" id="qbank-info">문제 풀: — 개</div>
       <div class="q-count-row">
         <div class="q-count-lbl">문제 수:</div>
-        <div class="q-count-val" id="qcount-val">10</div>
-        <input type="range" id="qcount" min="5" max="20" value="10" oninput="document.getElementById('qcount-val').textContent=this.value">
+        <div class="q-count-val" id="qcount-val">5</div>
+        <input type="range" id="qcount" min="5" max="20" value="5" oninput="document.getElementById('qcount-val').textContent=this.value">
       </div>
       <div class="q-count-row">
         <div class="q-count-lbl">제한 시간:</div>
-        <div class="q-count-val" id="qlimit-val">20초</div>
-        <input type="range" id="qlimit" min="10" max="40" step="5" value="20" oninput="document.getElementById('qlimit-val').textContent=this.value+'초'">
+        <div class="q-count-val" id="qlimit-val">15초</div>
+        <input type="range" id="qlimit" min="10" max="40" step="5" value="15" oninput="document.getElementById('qlimit-val').textContent=this.value+'초'">
       </div>
       <button class="ctrl-btn btn-start" onclick="startSession()">🚀 새 세션 시작</button>
     </div>
