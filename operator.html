@@ -805,12 +805,11 @@ async function openSession(){
   toast('⏳ 세션 초기화 중...');
 
   try{
-    // DELETE first so SSE isn't killed after startListening
-    if(USE_FB){const r=await fetch(FB+'.json',{method:'DELETE'});if(!r.ok)throw new Error('DELETE root '+r.status);}
     await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
-    // Start listening AFTER Firebase is clean
     if(_listenDebounceTimer){clearTimeout(_listenDebounceTimer);_listenDebounceTimer=null;}
     startListening();
+    fbPut('/answers',null).catch(()=>{});
+    fbPut('/scores',null).catch(()=>{});
     toast('✅ 세션 오픈! 참가자를 기다리는 중...');
   }catch(err){
     sessionOpen=false;
