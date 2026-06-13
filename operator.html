@@ -829,10 +829,13 @@ async function openSession(){
 }
 
 // ── Start game (within open session, preserves players & scores) ────
+let _startingGame=false;
 async function startGame(){
+  if(_startingGame)return;
   _nqRunning=false;
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
   if(!sessionOpen){toast('⚠️ 먼저 세션을 열어주세요.',true);return;}
+  _startingGame=true;
   const n=parseInt(document.getElementById('qcount').value);
   const qs=QB[selectedGame]().slice(0,n).map(shuffleOptions);
   sessionQuestions=qs;
@@ -862,12 +865,14 @@ async function startGame(){
     await fbPut('/answers',null);
     await fbPatch('/session',{game:selectedGame,questionIdx:0,totalQuestions:n,question:null,scoreGains:{}});
   }catch(err){
+    _startingGame=false;
     sessionActive=false;
     document.getElementById('active-ctrl').style.display='none';
     document.getElementById('game-setup').style.display='block';
     toast('⚠️ Firebase 초기화 실패: '+err.message,true);
     return;
   }
+  _startingGame=false;
   document.getElementById('btn-nextq').textContent='🎮 게임 시작!';
   toast('✅ 게임 준비 완료! 게임 시작 버튼을 눌러주세요.');
 }
@@ -1010,7 +1015,7 @@ async function nextQuestion(){
   document.getElementById('tv-q-game').textContent=selectedGame;
   document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
   const _emojiEl=document.getElementById('tv-q-emoji');
-  if(q.img){const _is=q.bigImg?'height:200px;max-width:320px':'height:80px;max-width:160px';_emojiEl.innerHTML=`<img src="${q.img}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg'}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
+  if(q.img){const _is=q.bigImg?'height:200px;max-width:320px':'height:80px;max-width:160px';_emojiEl.innerHTML=`<img src="${q.img}" data-emoji="${q.emoji||'⚽'}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg';else{this.style.display='none';this.parentElement.textContent=this.dataset.emoji||'⚽';}}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
   else{_emojiEl.textContent=q.emoji||'⚽';twparse(_emojiEl);}
   document.getElementById('tv-q-text').textContent=q.text;
   q.options.forEach((o,i)=>{
@@ -1440,7 +1445,7 @@ tvShow('tv-lobby');
       if(q){
         tvShow('tv-question');
         const _ei=document.getElementById('tv-q-emoji');
-        if(q.img){const _is=q.bigImg?'height:200px;max-width:320px':'height:80px;max-width:160px';_ei.innerHTML=`<img src="${q.img}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
+        if(q.img){const _is=q.bigImg?'height:200px;max-width:320px':'height:80px;max-width:160px';_ei.innerHTML=`<img src="${q.img}" data-emoji="${q.emoji||'⚽'}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg';else{this.style.display='none';this.parentElement.textContent=this.dataset.emoji||'⚽';}}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
         else{_ei.textContent=q.emoji||'⚽';twparse(_ei);}
         document.getElementById('tv-q-text').textContent=q.text;
         document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
