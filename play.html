@@ -281,7 +281,7 @@ function floatScore(text, color='#FFD700'){
 }
 
 // ── Firebase ──────────────────────────────────────────────────────
-async function fbPut(p,d){try{await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(e){console.warn('fbPut failed',p,e);}}
+async function fbPut(p,d){const r=await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
 async function fbGet(p){try{const r=await fetch(FB+p+'.json');return r.json();}catch(e){return null;}}
 
 // ── Join ──────────────────────────────────────────────────────────
