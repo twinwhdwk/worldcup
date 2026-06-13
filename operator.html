@@ -246,8 +246,8 @@
       </div>
       <div class="tv-fact-ticker" id="tv-fact-ticker"><span>⚽ 알고 계셨나요?</span><span id="tv-fact-text"></span></div>
       <div id="tv-final-lb" style="display:none;margin-top:16px;width:100%;max-width:700px;">
-        <div style="font-family:'Black Han Sans',sans-serif;font-size:22px;color:var(--gold);margin-bottom:12px;letter-spacing:2px;">🏆 최종 순위 TOP 10 🏆</div>
-        <div id="tv-final-rows" style="display:flex;flex-direction:column;gap:6px;width:100%;"></div>
+        <div id="tv-final-title" style="font-family:'Black Han Sans',sans-serif;font-size:22px;color:var(--gold);margin-bottom:12px;letter-spacing:2px;">🏆 종합 순위 — 1~10위 상품 🎁 🏆</div>
+        <div id="tv-final-rows" style="display:flex;flex-direction:column;gap:4px;width:100%;max-height:60vh;overflow-y:auto;"></div>
       </div>
     </div>
 
@@ -388,7 +388,7 @@
 
     <!-- Leaderboard -->
     <div class="ctrl-section">
-      <div class="ctrl-title">🏆 실시간 TOP 10</div>
+      <div class="ctrl-title">🏆 실시간 순위 (1~10위 🎁)</div>
       <div class="lb-list" id="lb-list">
         <div style="color:var(--muted2);font-size:13px;text-align:center;padding:20px;">아직 기록 없음</div>
       </div>
@@ -1121,6 +1121,33 @@ async function revealAnswer(){
 
 // ── End session ────────────────────────────────────────────────────
 let _endingSession=false;
+// ── Render TV final leaderboard (all players, prize mark for top 10) ─
+function renderTvFinalLb(titleText){
+  const sorted=Object.values(currentScores).sort((a,b)=>b.total-a.total);
+  const finalLb=document.getElementById('tv-final-lb');
+  const finalRows=document.getElementById('tv-final-rows');
+  const titleEl=document.getElementById('tv-final-title');
+  if(!finalLb||!finalRows||!sorted.length)return;
+  if(titleEl)titleEl.textContent=titleText||'🏆 종합 순위 — 1~10위 상품 🎁 🏆';
+  const prizeIcons=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+  finalRows.innerHTML=sorted.map((p,i)=>{
+    const isPrize=i<PRIZE_COUNT;
+    const rankLabel=isPrize?prizeIcons[i]:`<span style="font-size:16px;font-weight:700;color:var(--muted2);">${i+1}</span>`;
+    const bg=i===0?'rgba(255,215,0,.12)':i===1?'rgba(192,192,192,.08)':i===2?'rgba(205,127,50,.08)':isPrize?'rgba(255,215,0,.04)':'rgba(255,255,255,.02)';
+    const border=i<3?'rgba(255,215,0,.3)':isPrize?'rgba(255,215,0,.15)':'rgba(255,255,255,.05)';
+    const pad=i<3?'12px 20px':'8px 18px';
+    const nameSize=i<3?'18px':'15px';
+    const scoreSize=i<3?'18px':'15px';
+    return`<div style="display:flex;align-items:center;gap:10px;background:${bg};border:1px solid ${border};border-radius:10px;padding:${pad};">
+      <span style="font-size:${i<3?'24px':'18px'};width:32px;text-align:center;">${rankLabel}</span>
+      <span style="font-family:'Black Han Sans',sans-serif;font-size:${nameSize};flex:1;text-align:left;">${esc(p.name||'?')}</span>
+      <span style="font-family:'Black Han Sans',sans-serif;font-size:${scoreSize};color:var(--gold);">${(p.total||0).toLocaleString()}점</span>
+      ${isPrize?'<span style="font-size:14px;">🎁</span>':''}
+    </div>`;
+  }).join('');
+  finalLb.style.display='block';
+}
+
 // ── End current game, return to game selection within session ───────
 async function endGame(){
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
@@ -1131,23 +1158,10 @@ async function endGame(){
   document.getElementById('game-setup').style.display='block';
   document.getElementById('ans-dist-section').style.display='none';
   document.getElementById('st-state').textContent='대기중';
-  document.getElementById('tv-lobby-sub').textContent='다음 게임을 준비 중...(운영자가 다음 게임을 선택합니다)';
-  document.getElementById('tv-lobby-count').textContent='🏆 현재 누적 순위';
+  document.getElementById('tv-lobby-sub').textContent='다음 게임을 준비 중... 운영자가 다음 게임을 선택합니다';
+  document.getElementById('tv-lobby-count').textContent='🏆 현재 누적 순위 (1~10위 상품)';
   tvShow('tv-lobby');
-  // Show current cumulative leaderboard on TV
-  const top10=Object.values(currentScores).sort((a,b)=>b.total-a.total).slice(0,10);
-  const finalLb=document.getElementById('tv-final-lb');
-  const finalRows=document.getElementById('tv-final-rows');
-  if(finalLb&&finalRows&&top10.length>0){
-    const prizeIcons=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
-    finalRows.innerHTML=top10.map((p,i)=>`
-      <div style="display:flex;align-items:center;gap:12px;background:${i<3?'rgba(255,215,0,.08)':'rgba(255,255,255,.03)'};border:1px solid ${i<3?'rgba(255,215,0,.25)':'rgba(255,255,255,.06)'};border-radius:12px;padding:10px 20px;">
-        <span style="font-size:22px;width:36px;text-align:center;">${prizeIcons[i]}</span>
-        <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;flex:1;text-align:left;">${esc(p.name||'?')}</span>
-        <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--gold);">${(p.total||0).toLocaleString()}점</span>
-      </div>`).join('');
-    finalLb.style.display='block';
-  }
+  renderTvFinalLb('🏆 현재 누적 순위 — 1~10위 상품 🎁 🏆');
   toast('🎮 게임 종료! 다음 게임을 선택하거나 세션을 종료하세요.');
   confetti(30);
 }
@@ -1169,24 +1183,10 @@ async function endSession(){
   document.getElementById('tv-lobby-sub').textContent='게임 종료! 최종 순위를 확인하세요.';
   document.getElementById('tv-lobby-count').textContent='🏆 최종 순위 발표!';
   tvShow('tv-lobby');
-  // Show final top-10 leaderboard on TV
-  const top10=Object.values(currentScores).sort((a,b)=>b.total-a.total).slice(0,10);
-  const finalLb=document.getElementById('tv-final-lb');
-  const finalRows=document.getElementById('tv-final-rows');
-  if(finalLb&&finalRows&&top10.length>0){
-    const prizeIcons=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
-    finalRows.innerHTML=top10.map((p,i)=>`
-      <div style="display:flex;align-items:center;gap:12px;background:${i<3?'rgba(255,215,0,.08)':'rgba(255,255,255,.03)'};border:1px solid ${i<3?'rgba(255,215,0,.25)':'rgba(255,255,255,.06)'};border-radius:12px;padding:10px 20px;">
-        <span style="font-size:22px;width:36px;text-align:center;">${prizeIcons[i]}</span>
-        <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;flex:1;text-align:left;">${esc(p.name||'?')}</span>
-        <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--gold);">${(p.total||0).toLocaleString()}점</span>
-        <span style="font-size:14px;">🎁</span>
-      </div>`).join('');
-    finalLb.style.display='block';
-    // Hide player chips in final state
-    const pcw=document.getElementById('player-chips-wrap');
-    if(pcw)pcw.style.display='none';
-  }
+  // Show final leaderboard (all players, prize mark for top 10)
+  renderTvFinalLb('🏆 최종 종합 순위 — 1~10위 상품 🎁 🏆');
+  const pcw=document.getElementById('player-chips-wrap');
+  if(pcw)pcw.style.display='none';
   // Swap QR to scoreboard so players can scan to see final ranking
   const sbUrl=USE_FB?BASE_URL+'/scoreboard.html?db='+btoa(FIREBASE_URL):BASE_URL+'/scoreboard.html';
   updateQR(sbUrl,'🏆 순위 보기');
@@ -1256,18 +1256,19 @@ const AVATAR_COLORS=['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6'
 const PRIZE_COUNT=10;
 
 function renderLeaderboard(){
-  const sorted=Object.values(currentScores).sort((a,b)=>b.total-a.total).slice(0,10);
+  const sorted=Object.values(currentScores).sort((a,b)=>b.total-a.total);
   const lb=document.getElementById('lb-list');
   if(!sorted.length){lb.innerHTML='<div style="color:var(--muted2);font-size:13px;text-align:center;padding:16px;">아직 기록 없음</div>';return;}
-  const medals=['🥇','🥈','🥉','4','5','6','7','8','9','10'];
+  const medals=['🥇','🥈','🥉'];
   lb.innerHTML=sorted.map((p,i)=>{
     const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
     const prize=i<PRIZE_COUNT;
     const streak=p.streak||0;
     const streakBadge=streak>=5?'🔥🔥':streak>=3?'🔥':'';
+    const rankLabel=medals[i]||(i+1);
     const safeName=esc(p.name||'?');
     return `<div class="lb-item${prize?' prize':''}">
-      <div class="lb-rank">${medals[i]}</div>
+      <div class="lb-rank">${rankLabel}</div>
       <div class="lb-avatar" style="background:${col}">${esc((p.name||'?').slice(0,2))}</div>
       <div class="lb-name">${safeName}${prize?'&nbsp;🎁':''}${streakBadge?'&nbsp;<span style="font-size:13px">'+streakBadge+'</span>':''}</div>
       <div class="lb-score">${p.total||0}</div>
