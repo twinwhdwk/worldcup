@@ -885,25 +885,19 @@ function startListening(){
   playersES=new EventSource(FB+'/players.json');
   const onPlayers=d=>{
     currentPlayers=d||{};
-    const n=Object.keys(currentPlayers).length;
+    const players=Object.values(currentPlayers).filter(p=>p&&typeof p==='object'&&p.name);
+    const n=players.length;
     if(n>prevPlayerCount){sndJoin();}
     prevPlayerCount=n;
-    const now=Date.now();
-    const onlineN=Object.values(currentPlayers).filter(p=>p&&(!p.lastSeen||(now-p.lastSeen)<30000)).length;
-    document.getElementById('st-players').textContent=onlineN<n?`${onlineN}/${n}`:n;
-    document.getElementById('tv-lobby-count').textContent=n>0?'👥 '+n+'명 대기중':'';
+    document.getElementById('st-players').textContent=n;
+    document.getElementById('tv-lobby-count').textContent=n>0?'👥 '+n+'명 참가중':'';
     // Player name chips in TV lobby
     const wrap=document.getElementById('player-chips-wrap');
     const chips=document.getElementById('player-chips');
     if(wrap&&chips){
       if(n>0){
         wrap.style.display='block';
-        const now=Date.now();
-        const players=Object.values(currentPlayers).filter(p=>p&&typeof p==='object'&&p.name);
-        chips.innerHTML=players.map(p=>{
-          const online=!p.lastSeen||(now-p.lastSeen)<30000;
-          return`<div class="player-chip" style="${online?'':'opacity:.4;filter:grayscale(1);'}" title="${online?'온라인':'오프라인 (30초 이상 응답 없음)'}">${esc(p.name)}</div>`;
-        }).join('');
+        chips.innerHTML=players.map(p=>`<div class="player-chip">${esc(p.name)}</div>`).join('');
       } else {wrap.style.display='none';}
     }
   };

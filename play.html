@@ -302,7 +302,7 @@ function join(){
   startSyncPoll();
   fbGet('/scores/'+enc(n)).then(d=>{if(d){myScore=d.total||0;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;}});
   // Immediately show player count without waiting for first poll tick
-  fbGet('/players').then(d=>{if(d&&typeof d==='object'){totalPlayers=Object.values(d).filter(p=>p&&typeof p==='object').length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명이 대기중':(totalPlayers===1?'첫 번째 참가자!':'');}});
+  fbGet('/players').then(d=>{if(d&&typeof d==='object'){totalPlayers=Object.values(d).filter(p=>p&&p.name).length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';}});
   sndJoin();
 }
 
@@ -331,7 +331,7 @@ function startSyncPoll(){
     if(_pollTick===0){
       if(sid==='s-lobby'){
         fbGet('/scores/'+enc(myName)).then(d=>{if(d){const fbTotal=d.total||0;if(fbTotal>=myScore&&_pendingGain>0){_pendingGain=0;}if(fbTotal>myScore){myScore=fbTotal;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;}}});
-        fbGet('/players').then(d=>{if(d&&typeof d==='object'){totalPlayers=Object.values(d).filter(p=>p&&typeof p==='object').length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명이 대기중':'';}});
+        fbGet('/players').then(d=>{if(d&&typeof d==='object'){totalPlayers=Object.values(d).filter(p=>p&&p.name).length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';}});
       }
     }
     if(sid==='s-wait'){
