@@ -361,7 +361,6 @@
         <input type="range" id="qlimit" min="10" max="40" step="5" value="15" oninput="document.getElementById('qlimit-val').textContent=this.value+'초'">
       </div>
       <button class="ctrl-btn btn-start" onclick="startGame()">▶ 게임 시작</button>
-      <button class="ctrl-btn" style="margin-top:8px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:#93c5fd;" onclick="goHome()">🏠 홈으로 (스코어 유지)</button>
       <button class="ctrl-btn btn-lobby" style="margin-top:4px;" onclick="endSession()">🏁 세션 종료</button>
     </div>
 
@@ -1167,7 +1166,6 @@ async function goHome(){
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
   sessionActive=false;
   localStorage.removeItem('wc_op_session');
-  try{await fbPatch('/session',{state:'lobby',question:null,scoreGains:{}});}catch{}
   document.getElementById('active-ctrl').style.display='none';
   document.getElementById('ans-dist-section').style.display='none';
   document.getElementById('game-setup').style.display='block';
@@ -1175,6 +1173,7 @@ async function goHome(){
   document.getElementById('tv-lobby-sub').textContent='다음 게임을 준비 중... 잠시만 기다려주세요!';
   tvShow('tv-lobby');
   toast('🏠 홈으로 돌아왔습니다. 스코어는 유지됩니다.');
+  try{await fbPatch('/session',{state:'lobby',question:null,scoreGains:{}});}catch{}
 }
 
 async function endSession(){
