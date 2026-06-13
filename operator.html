@@ -746,6 +746,7 @@ let sessionActive = false;
 let tvTimerInt = null;
 let cntdownInt = null;
 let answersES = null, scoresES = null, playersES = null;
+let pollPlayersInt = null;
 let currentAnswers = {}, currentScores = {}, currentPlayers = {};
 let beepedSeconds = new Set();
 
@@ -927,6 +928,24 @@ function startListening(){
   scoresES.addEventListener('put',e=>{const d=JSON.parse(e.data);currentScores=d.data||{};renderLeaderboard();});
   scoresES.addEventListener('patch',e=>{const d=JSON.parse(e.data);applyFbPatch(currentScores,d);renderLeaderboard();});
   scoresES.onerror=()=>{scheduleReconnect();};
+
+  clearInterval(pollPlayersInt);
+  pollPlayersInt=setInterval(async()=>{
+    if(!USE_FB)return;
+    try{
+      const r=await fetch(FB+'/players.json');
+      const data=await r.json();
+      const ps=Object.values(data||{}).filter(p=>p&&typeof p==='object'&&p.name);
+      const n=ps.length;
+      document.getElementById('st-players').textContent=n;
+      document.getElementById('tv-lobby-count').textContent=n>0?'👥 '+n+'명 참가중':'';
+      const wrap=document.getElementById('player-chips-wrap');
+      const chips=document.getElementById('player-chips');
+      if(wrap&&chips){if(n>0){wrap.style.display='block';chips.innerHTML=ps.map(p=>'<div class="player-chip">'+esc(p.name)+'</div>').join('');}else{wrap.style.display='none';}}
+      if(n>(prevPlayerCount||0))sndJoin();
+      prevPlayerCount=n;
+    }catch{}
+  },3000);
 }
 
 // ── Next question ──────────────────────────────────────────────────
@@ -1176,7 +1195,7 @@ async function goHome(){
 
 async function endSession(){
   if(_endingSession)return;_endingSession=true;
-  clearInterval(tvTimerInt);clearInterval(cntdownInt);
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);clearInterval(pollPlayersInt);
   sessionActive=false;
   sessionOpen=false;
   localStorage.removeItem('wc_op_session');
