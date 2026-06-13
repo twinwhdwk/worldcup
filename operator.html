@@ -791,16 +791,13 @@ async function openSession(){
   sndStart();
   toast('⏳ 세션 초기화 중...');
 
+  // Wipe all data then open session — don't revert UI on failure, just report
+  try{await fetch(FB+'.json',{method:'DELETE'});}catch{}
   try{
-    // Wipe the entire /wc_live root in one shot, then re-create the session
-    if(USE_FB){const r=await fetch(FB+'.json',{method:'DELETE'});if(!r.ok)throw new Error('DELETE root '+r.status);}
     await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
     toast('✅ 세션 오픈! 참가자를 기다리는 중...');
   }catch(err){
-    sessionOpen=false;
-    document.getElementById('game-setup').style.display='none';
-    document.getElementById('session-setup').style.display='block';
-    toast('⚠️ Firebase 오류: '+err.message,true);
+    toast('⚠️ Firebase 오류: '+err.message+' (새로고침 후 다시 시도)',true);
   }
 }
 
@@ -1316,12 +1313,14 @@ if(USE_FB)startListening();
   ];
   let idx=~~(Math.random()*facts.length);
   const el=document.getElementById('tv-fact-text');
-  if(el){el.textContent=facts[idx];}
+  if(el){el.textContent=facts[idx];el.style.transition='opacity .4s';}
   setInterval(()=>{
     idx=(idx+1)%facts.length;
     const fel=document.getElementById('tv-fact-text');
-    if(fel){fel.style.opacity='0';setTimeout(()=>{fel.textContent=facts[idx];fel.style.opacity='1';fel.style.transition='opacity .5s';},400);}
-  },7000);
+    if(!fel)return;
+    fel.style.opacity='0';
+    setTimeout(()=>{fel.textContent=facts[idx];fel.style.opacity='1';},450);
+  },8000);
 })();
 
 // ── Session recovery after page reload ────────────────────────────
