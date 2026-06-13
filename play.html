@@ -247,8 +247,12 @@ let _revealQId='', _doneShown=false;
 
 // ── Sound Effects (Web Audio API) ─────────────────────────────────
 let AC=null;
-function getAC(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch{}}return AC;}
-function snd(freq,dur,type='sine',vol=0.25){
+function getAC(){
+  if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch{}}
+  if(AC&&AC.state==='suspended')AC.resume();
+  return AC;
+}
+function snd(freq,dur,type='sine',vol=0.3){
   const ac=getAC();if(!ac)return;
   const o=ac.createOscillator(),g=ac.createGain();
   o.connect(g);g.connect(ac.destination);
@@ -257,11 +261,21 @@ function snd(freq,dur,type='sine',vol=0.25){
   g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
   o.start();o.stop(ac.currentTime+dur);
 }
-function sndCorrect(){snd(523,.08);setTimeout(()=>snd(659,.08),90);setTimeout(()=>snd(784,.22),180);}
-function sndWrong(){snd(180,.4,'sawtooth',.18);}
-function sndTick(){snd(660,.04,'square',.06);}
-function sndUrgent(){snd(880,.06,'square',.1);}
-function sndJoin(){snd(440,.1);setTimeout(()=>snd(550,.15),120);}
+// 정답: 밝은 3음 상승 팡파레
+function sndCorrect(){
+  snd(523,.1,'sine',.35);
+  setTimeout(()=>snd(659,.1,'sine',.35),100);
+  setTimeout(()=>snd(784,.1,'sine',.35),200);
+  setTimeout(()=>snd(1047,.4,'sine',.4),300);
+}
+// 오답: 하강 2음 + 낮은 버즈
+function sndWrong(){
+  snd(300,.15,'sawtooth',.25);
+  setTimeout(()=>snd(200,.4,'sawtooth',.22),150);
+}
+function sndTick(){snd(660,.04,'square',.07);}
+function sndUrgent(){snd(880,.07,'square',.13);}
+function sndJoin(){snd(440,.1);setTimeout(()=>snd(550,.18),120);}
 
 // ── Utils ─────────────────────────────────────────────────────────
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
@@ -618,12 +632,12 @@ function showReveal(s){
 
   if(correct){
     sndCorrect();
-    if(navigator.vibrate)navigator.vibrate([50,30,80]);
+    if(navigator.vibrate)navigator.vibrate([60,40,60,40,180]); // 짧-짧-길 (정답 패턴)
     if(gain>0)floatScore('+'+gain+'점','#FFD700');
     setTimeout(confetti,200);
   } else {
     sndWrong();
-    if(navigator.vibrate)navigator.vibrate(200);
+    if(navigator.vibrate)navigator.vibrate([400,100,400]); // 길-길 (오답 패턴)
   }
 }
 
