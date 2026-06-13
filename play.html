@@ -281,7 +281,7 @@ function floatScore(text, color='#FFD700'){
 }
 
 // ── Firebase ──────────────────────────────────────────────────────
-async function fbPut(p,d){const r=await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
+async function fbPut(p,d){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
 async function fbGet(p){try{const r=await fetch(FB+p+'.json');return r.json();}catch(e){return null;}}
 
 // ── Join ──────────────────────────────────────────────────────────
@@ -289,7 +289,6 @@ let joined=false;
 function join(){
   if(joined)return;
   joined=true;
-  const t=document.getElementById('aj-toast');if(t)t.remove();
   getAC(); // unlock audio on user gesture
   const n=document.getElementById('name-in').value.trim().slice(0,8);
   if(!n){joined=false;document.getElementById('name-in').focus();return;}
