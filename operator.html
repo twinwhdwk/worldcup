@@ -743,6 +743,7 @@ function selectGame(name,el){
 // ── Start session ──────────────────────────────────────────────────
 async function startSession(){
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
+  _endingSession=false;
   updateQR(getPlayUrl(),'📱 스캔해서 참가');
   const n=parseInt(document.getElementById('qcount').value);
   const qs=QB[selectedGame]().slice(0,n).map(shuffleOptions);
@@ -1054,7 +1055,9 @@ async function revealAnswer(){
 }
 
 // ── End session ────────────────────────────────────────────────────
+let _endingSession=false;
 async function endSession(){
+  if(_endingSession)return;_endingSession=true;
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
   sessionActive=false;
   localStorage.removeItem('wc_op_session');
