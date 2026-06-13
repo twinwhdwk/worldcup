@@ -721,7 +721,7 @@ const QB = {
     {emoji:'🏆',text:'2026 월드컵 결승전 날짜는?',options:['2026년 7월 12일','2026년 7월 19일','2026년 8월 1일','2026년 7월 25일'],correct:1},
     {emoji:'🌟',text:'2026 월드컵에서 새로 추가된 라운드는?',options:['8강이 없어짐','32강 라운드 추가','24강 라운드 추가','16강이 없어짐'],correct:1},
     {emoji:'🔢',text:'2026 월드컵에서 32강에 오르는 팀 수는?',options:['24팀','28팀','32팀(조 상위2팀×12 + 3위 최우수 8팀)','36팀'],correct:2},
-    {emoji:'🌎',text:'2026 월드컵 마스코트 이름은?',options:['풀레코','아티','풀라','카토'],correct:1},
+    {emoji:'🌎',text:'2026 월드컵 미국 마스코트 이름은? (힌트: 대머리 독수리)',options:['Maple','Zayu','Clutch','Futebol'],correct:2},
     {emoji:'🇲🇽',text:'멕시코에서 월드컵이 열리는 도시가 아닌 것은?',options:['멕시코시티','과달라하라','몬테레이','칸쿤'],correct:3},
     {emoji:'📺',text:'2026 월드컵 공식 주제가는 누가 불렀나?',options:['BTS','피타 불','샤키라','방탄소년단 정국'],correct:1},
   ]),
@@ -787,24 +787,25 @@ async function openSession(){
   if(finalLbEl)finalLbEl.style.display='none';
   updateQR(getPlayUrl(),'📱 스캔해서 참가');
   tvShow('tv-lobby');
+  startListening();
   sndStart();
   toast('⏳ 세션 초기화 중...');
 
-  // Delete fires before startListening so SSE isn't killed mid-setup
-  try{await fetch(FB+'.json',{method:'DELETE'});}catch{}
   try{
+    // Wipe the entire /wc_live root in one shot, then re-create the session
+    if(USE_FB){const r=await fetch(FB+'.json',{method:'DELETE'});if(!r.ok)throw new Error('DELETE root '+r.status);}
     await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
-    // Start listening AFTER Firebase is clean — prevents SSE being killed by DELETE
-    if(_listenDebounceTimer){clearTimeout(_listenDebounceTimer);_listenDebounceTimer=null;}
-    startListening();
     toast('✅ 세션 오픈! 참가자를 기다리는 중...');
   }catch(err){
-    toast('⚠️ Firebase 오류: '+err.message+' (새로고침 후 다시 시도)',true);
+    sessionOpen=false;
+    document.getElementById('game-setup').style.display='none';
+    document.getElementById('session-setup').style.display='block';
+    toast('⚠️ Firebase 오류: '+err.message,true);
   }
 }
 
 // ── Start game (within open session, preserves players & scores) ────
-async function startGame(){
+async async function startGame(){
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
   if(!sessionOpen){toast('⚠️ 먼저 세션을 열어주세요.',true);return;}
   const n=parseInt(document.getElementById('qcount').value);
@@ -1315,14 +1316,12 @@ if(USE_FB)startListening();
   ];
   let idx=~~(Math.random()*facts.length);
   const el=document.getElementById('tv-fact-text');
-  if(el){el.textContent=facts[idx];el.style.transition='opacity .4s';}
+  if(el){el.textContent=facts[idx];}
   setInterval(()=>{
     idx=(idx+1)%facts.length;
     const fel=document.getElementById('tv-fact-text');
-    if(!fel)return;
-    fel.style.opacity='0';
-    setTimeout(()=>{fel.textContent=facts[idx];fel.style.opacity='1';},450);
-  },8000);
+    if(fel){fel.style.opacity='0';setTimeout(()=>{fel.textContent=facts[idx];fel.style.opacity='1';fel.style.transition='opacity .5s';},400);}
+  },7000);
 })();
 
 // ── Session recovery after page reload ────────────────────────────
