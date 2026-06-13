@@ -394,7 +394,7 @@ if(localStorage.getItem('wc_player_name'))startGame();
 function shareResult(s, gameName) {
   const grades = [[1400,'S'],[1000,'A'],[600,'B'],[300,'C'],[0,'D']];
   const grade = grades.find(g => s >= g[0])?.[1] || 'D';
-  const text = `⚽ 월드컵 미니게임 — ${gameName}\nGRADE ${grade} · ${s.toLocaleString()}점\nhttps://twinwhdwk.github.io/worldcup_minigame/`;
+  const text = `⚽ 월드컵 미니게임 — ${gameName}\nGRADE ${grade} · ${s.toLocaleString()}점\nhttps://twinwhdwk.github.io/worldcup/`;
   if (navigator.share) {
     navigator.share({ title: '월드컵 미니게임 결과', text }).catch(() => {});
   } else {
