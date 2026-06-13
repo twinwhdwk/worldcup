@@ -760,7 +760,7 @@ function tvShow(id){
 }
 
 // ── Firebase ───────────────────────────────────────────────────────
-async function fbPut(p,d){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
+async function fbPut(p,d){if(!USE_FB)return;const r=await _fbFetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
 async function _fbFetch(url,opts,ms=9000){
   const ctrl=new AbortController();
   const t=setTimeout(()=>ctrl.abort(),ms);
@@ -809,7 +809,7 @@ async function openSession(){
 
   try{
     // DELETE first so SSE isn't killed after startListening
-    if(USE_FB){const r=await fetch(FB+'.json',{method:'DELETE'});if(!r.ok)throw new Error('DELETE root '+r.status);}
+    if(USE_FB){const r=await _fbFetch(FB+'.json',{method:'DELETE'});if(!r.ok)throw new Error('DELETE root '+r.status);}
     await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
     // Start listening AFTER Firebase is clean
     if(_listenDebounceTimer){clearTimeout(_listenDebounceTimer);_listenDebounceTimer=null;}
