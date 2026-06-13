@@ -822,6 +822,7 @@ async function startGame(){
   document.getElementById('game-setup').style.display='none';
   document.getElementById('active-ctrl').style.display='block';
   document.getElementById('btn-nextq').style.display='block';
+  document.getElementById('btn-nextq').textContent='🎮 게임 시작!';
   document.getElementById('btn-reveal').style.display='none';
   document.getElementById('btn-cont').style.display='none';
   document.getElementById('btn-skip').style.display='none';
@@ -920,6 +921,7 @@ function startListening(){
 
 // ── Next question ──────────────────────────────────────────────────
 async function nextQuestion(){
+  document.getElementById('btn-nextq').textContent='▶ 다음 문제 시작';
   revealInProgress=false;
   currentQIdx++;
   if(currentQIdx>=sessionQuestions.length){await endGame();return;}
