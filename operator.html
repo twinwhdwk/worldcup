@@ -805,7 +805,7 @@ async function openSession(){
 }
 
 // ── Start game (within open session, preserves players & scores) ────
-async async function startGame(){
+async function startGame(){
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
   if(!sessionOpen){toast('⚠️ 먼저 세션을 열어주세요.',true);return;}
   const n=parseInt(document.getElementById('qcount').value);
