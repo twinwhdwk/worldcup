@@ -1455,7 +1455,7 @@ tvShow('tv-lobby');
         document.getElementById('tv-q-text').textContent=q.text;
         document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
         document.getElementById('tv-q-game').textContent=fbSess.game||selectedGame;
-        q.options.forEach((o,i)=>{const _ot=document.getElementById('tv-ot'+i);_ot.textContent=o;twparse(_ot);});
+        q.options.forEach((o,i)=>{const _ot=document.getElementById('tv-ot'+i);_ot.innerHTML=renderOptHtml(o);});
         if(q.startAt){startTvTimer(q.startAt,q.timeLimit||20);}
       }
     } else if(fbSess.state==='reveal'){

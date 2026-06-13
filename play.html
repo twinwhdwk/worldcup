@@ -328,7 +328,7 @@ function join(){
   show('s-lobby');
   listen();
   startSyncPoll();
-  fbGet('/scores/'+enc(n)).then(d=>{if(d){myScore=d.total||0;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;}});
+  fbGet('/scores/'+enc(n)).then(d=>{if(d){myScore=d.total||0;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore.toLocaleString();}});
   // Immediately show player count without waiting for first poll tick
   fbGet('/players').then(d=>{if(d&&typeof d==='object'){const _pls=Object.values(d).filter(p=>p&&p.name);totalPlayers=_pls.length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';const _lbp=document.getElementById('lb-players');if(_lbp)_lbp.textContent=_pls.map(p=>p.name).slice(0,12).join(' · ');}});
   sndJoin();
@@ -358,7 +358,7 @@ function startSyncPoll(){
     _pollTick=(_pollTick+1)%2;
     if(_pollTick===0){
       if(sid==='s-lobby'){
-        fbGet('/scores/'+enc(myName)).then(d=>{if(d){const fbTotal=d.total||0;if(fbTotal>=myScore&&_pendingGain>0){_pendingGain=0;}if(fbTotal>myScore){myScore=fbTotal;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore;}}});
+        fbGet('/scores/'+enc(myName)).then(d=>{if(d){const fbTotal=d.total||0;if(fbTotal>=myScore&&_pendingGain>0){_pendingGain=0;}if(fbTotal>myScore){myScore=fbTotal;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore.toLocaleString();}}});
         fbGet('/players').then(d=>{if(d&&typeof d==='object'){const _pls=Object.values(d).filter(p=>p&&p.name);totalPlayers=_pls.length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';const _lbp=document.getElementById('lb-players');if(_lbp)_lbp.textContent=_pls.map(p=>p.name).slice(0,12).join(' · ');}});
       }
     }
@@ -420,7 +420,7 @@ function onSession(s){
     // Sync score from Firebase on lobby entry to catch score resets between sessions
     if(myName)fbGet('/scores/'+enc(myName)).then(d=>{
       const fbTotal=d?d.total||0:0;
-      if(fbTotal!==myScore){myScore=fbTotal;myStreak=d?d.streak||0:0;document.getElementById('lb-score').textContent=myScore;}
+      if(fbTotal!==myScore){myScore=fbTotal;myStreak=d?d.streak||0:0;document.getElementById('lb-score').textContent=myScore.toLocaleString();}
     });
     updateLobbyRank();
     return;
@@ -539,7 +539,7 @@ async function renderQ(s){
     const _ws=document.getElementById('wait-sub');if(_ws)_ws.textContent='정답 발표를 기다리세요...';
     show('s-question');
     document.getElementById('q-lbl').textContent=s.game||'퀴즈';
-    document.getElementById('q-score').textContent=myScore+'점';
+    document.getElementById('q-score').textContent=myScore.toLocaleString()+'점';
     const emojiEl=document.getElementById('q-emoji');
     if(q.img){const _is=q.bigImg?'max-height:160px;max-width:220px':'max-height:88px;max-width:140px';emojiEl.innerHTML=`<img src="${q.img}" data-emoji="${q.emoji||'⚽'}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg';else{this.style.display='none';this.parentElement.textContent=this.dataset.emoji||'⚽';}}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
     else{emojiEl.textContent=q.emoji||'⚽';if(typeof twemoji!=='undefined')twemoji.parse(emojiEl);}
@@ -636,7 +636,7 @@ function showReveal(s){
   } else {
     totalEl.textContent='총 점수: '+myScore.toLocaleString()+'점';
   }
-  document.getElementById('lb-score').textContent=myScore;
+  document.getElementById('lb-score').textContent=myScore.toLocaleString();
 
   // Rank display
   const rankEl=document.getElementById('rv-rank');
