@@ -787,14 +787,16 @@ async function openSession(){
   if(finalLbEl)finalLbEl.style.display='none';
   updateQR(getPlayUrl(),'📱 스캔해서 참가');
   tvShow('tv-lobby');
-  startListening();
   sndStart();
   toast('⏳ 세션 초기화 중...');
 
-  // Wipe all data then open session — don't revert UI on failure, just report
+  // Delete fires before startListening so SSE isn't killed mid-setup
   try{await fetch(FB+'.json',{method:'DELETE'});}catch{}
   try{
     await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
+    // Start listening AFTER Firebase is clean — prevents SSE being killed by DELETE
+    if(_listenDebounceTimer){clearTimeout(_listenDebounceTimer);_listenDebounceTimer=null;}
+    startListening();
     toast('✅ 세션 오픈! 참가자를 기다리는 중...');
   }catch(err){
     toast('⚠️ Firebase 오류: '+err.message+' (새로고침 후 다시 시도)',true);
@@ -802,7 +804,7 @@ async function openSession(){
 }
 
 // ── Start game (within open session, preserves players & scores) ────
-async async function startGame(){
+async function startGame(){
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
   if(!sessionOpen){toast('⚠️ 먼저 세션을 열어주세요.',true);return;}
   const n=parseInt(document.getElementById('qcount').value);
