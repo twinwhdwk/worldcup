@@ -704,17 +704,6 @@ function confetti(){
 const saved=localStorage.getItem('wc_player_name');
 if(saved){
   document.getElementById('name-in').value=saved;
-  if(USE_FB){
-    // Auto-join returning players after 1.5s with toast
-    const aj=document.createElement('div');
-    aj.className='aj-toast';aj.id='aj-toast';
-    aj.textContent='안녕하세요, '+saved+'님! 자동 참가 중...';
-    document.body.appendChild(aj);
-    setTimeout(()=>{
-      const t=document.getElementById('aj-toast');if(t)t.remove();
-      join();
-    },1500);
-  }
 }
 document.getElementById('name-in').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
 if(!USE_FB)document.getElementById('no-fb-warn').classList.remove('hidden');
