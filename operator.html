@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -152,6 +152,7 @@
     .btn-reveal.pulsing{animation:revealPulse .5s ease infinite alternate;}
     .btn-next{background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;box-shadow:0 4px 16px rgba(59,130,246,.35);}
     .btn-skip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted2);font-size:14px;padding:10px;}
+    #btn-nextq .kbd-hint,#btn-cont .kbd-hint{font-size:10px;opacity:.5;font-family:monospace;background:rgba(0,0,0,.25);padding:1px 5px;border-radius:3px;margin-left:6px;vertical-align:middle;pointer-events:none;}
     .btn-lobby{background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.25);color:#fca5a5;font-size:14px;padding:10px;}
     .ctrl-btn:disabled{opacity:.35;cursor:not-allowed;}
 
@@ -380,7 +381,7 @@
     <div class="ctrl-section" id="active-ctrl" style="display:none">
       <div class="ctrl-title">⚡ 진행 컨트롤 <span id="ctrl-q-indicator" style="font-size:12px;font-weight:400;color:var(--muted2);font-family:monospace;"></span></div>
       <div id="ctrl-prog-wrap" style="display:none;width:100%;height:5px;background:rgba(255,255,255,.08);border-radius:100px;margin:8px 0 4px;overflow:hidden;"><div id="ctrl-prog-bar" style="height:100%;background:linear-gradient(90deg,#059669,#10b981);border-radius:100px;transition:width .5s ease;width:0%;"></div></div>
-      <button class="ctrl-btn btn-start" id="btn-nextq" onclick="nextQuestion()">▶ 다음 문제 시작</button>
+      <button class="ctrl-btn btn-start" id="btn-nextq" onclick="nextQuestion()">▶ 다음 문제 시작<span class="kbd-hint">Space</span></button>
       <button class="ctrl-btn btn-reveal" id="btn-reveal" onclick="revealAnswer()" style="display:none">🎯 정답 공개 <span style="font-size:11px;opacity:.6;font-family:monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;margin-left:4px;">Space</span></button>
       <button class="ctrl-btn btn-next" id="btn-cont" onclick="nextQuestion()" style="display:none">➡ 다음 문제 <span style="font-size:11px;opacity:.6;font-family:monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;margin-left:4px;">Space</span></button>
       <button class="ctrl-btn btn-skip" id="btn-skip" onclick="skipQuestion()" style="display:none">⏭ 문제 건너뛰기</button>
@@ -892,7 +893,7 @@ async function startGame(){
     _startingGame=false;
     sessionActive=false;
     document.getElementById('btn-nextq').disabled=false;
-    document.getElementById('btn-nextq').textContent='▶ 다음 문제 시작';
+    document.getElementById('btn-nextq').innerHTML='▶ 다음 문제 시작<span class="kbd-hint">Space</span>';
     document.getElementById('active-ctrl').style.display='none';
     document.getElementById('game-setup').style.display='block';
     toast('⚠️ Firebase 초기화 실패: '+err.message,true);
@@ -1006,7 +1007,7 @@ async function nextQuestion(){
   document.getElementById('btn-nextq').style.display='none';
   document.getElementById('btn-cont').style.display='none';
   toast('⏳ 문제 '+(currentQIdx+2)+'/'+sessionQuestions.length+' 준비 중...');
-  document.getElementById('btn-nextq').textContent='▶ 다음 문제 시작';
+  document.getElementById('btn-nextq').innerHTML='▶ 다음 문제 시작<span class="kbd-hint">Space</span>';
   revealInProgress=false;
   currentQIdx++;
   if(currentQIdx>=sessionQuestions.length){_nqRunning=false;await endGame();return;}
@@ -1580,7 +1581,7 @@ document.addEventListener('keydown',e=>{
     if(nextq&&nextq.style.display!=='none'&&sessionQuestions&&sessionQuestions.length){nextq.click();return;}
   }
 });
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!playersES){_reconnDelayOp=3000;scheduleReconnect();}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!playersES){setTimeout(()=>{if(!playersES){_reconnDelayOp=3000;scheduleReconnect();}});
 window.addEventListener('online',()=>{if(!playersES){toast('📶 인터넷 재연결 — Firebase 재시도');_reconnDelayOp=3000;scheduleReconnect();}});
 </script>
 </body>
