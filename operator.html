@@ -167,7 +167,9 @@
     .ad-row.b .ad-bar{background:#1050c0;}
     .ad-row.c .ad-bar{background:#c08000;}
     .ad-row.d .ad-bar{background:#008542;}
-    .ad-row.correct-row .ad-bar{background:#22c55e!important;}
+    .ad-row.correct-row .ad-bar{background:#22c55e!important;box-shadow:0 0 12px rgba(34,197,94,.4);}
+    .ans-dist.revealed .ad-row:not(.correct-row) .ad-bar{opacity:.35;}
+    .ans-dist.revealed .ad-row:not(.correct-row) .ad-letter{opacity:.4;}
     .ans-total{font-size:12px;color:var(--muted2);text-align:right;margin-top:4px;}
 
     /* Leaderboard */
@@ -323,6 +325,11 @@
 
     <!-- Session setup (before session is opened) -->
     <div class="ctrl-section" id="session-setup">
+      <div id="export-result-area" style="display:none;margin-bottom:12px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:12px 14px;">
+        <div style="font-size:11px;color:#86efac;font-weight:700;letter-spacing:1px;margin-bottom:8px;">🏆 게임 결과</div>
+        <div id="export-result-text" style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.8;white-space:pre;font-family:monospace;max-height:120px;overflow-y:auto;"></div>
+        <button onclick="(()=>{const t=document.getElementById('export-result-text').textContent;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>{this.textContent='✅ 복사됨!';setTimeout(()=>this.textContent='📋 결과 복사',1800);}).catch(()=>{});})();" style="margin-top:8px;width:100%;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:6px;color:#86efac;font-size:12px;cursor:pointer;font-family:inherit;">📋 결과 복사</button>
+      </div>
       <div class="ctrl-title">🎮 세션 관리</div>
       <button class="ctrl-btn btn-start" onclick="openSession()" id="btn-open-session">🎮 세션 열기</button>
       <div style="font-size:11px;color:var(--muted2);margin-top:8px;text-align:center;">세션을 열면 참가자·점수가 초기화되고<br>QR 링크로 참가자를 모집합니다.</div>
@@ -1027,6 +1034,7 @@ async function nextQuestion(){
   document.querySelectorAll('.player-chip').forEach(ch=>ch.classList.remove('answered'));
   const _hbtnReset=document.getElementById('btn-hint-toggle');if(_hbtnReset){_hbtnReset.style.display='none';_hbtnReset.style.opacity='1';_hbtnReset.textContent='💡 힌트 보기';}
   const _chbReset=document.getElementById('ctrl-hint-box');if(_chbReset){_chbReset.style.opacity='1';}
+  document.querySelector('.ans-dist')?.classList.remove('revealed');
   ['a','b','c','d'].forEach(_x=>{const _r=document.querySelector('.ad-row.'+_x);if(_r)_r.classList.remove('correct-row');});
   const miniLbEl=document.getElementById('tv-mini-lb');if(miniLbEl)miniLbEl.classList.remove('show');
   const tvBar2=document.getElementById('tv-ans-bar');const tvLbl2=document.getElementById('tv-ans-lbl');
@@ -1223,6 +1231,7 @@ async function revealAnswer(){
 
   document.getElementById('st-state').textContent='🎯 정답 공개';
   ['a','b','c','d'].forEach(_x=>{const _r=document.querySelector('.ad-row.'+_x);if(_r)_r.classList.remove('correct-row');});
+  const _adWrap=document.querySelector('.ans-dist');if(_adWrap)_adWrap.classList.add('revealed');
   const _corrRow=document.querySelector('.ad-row.'+['a','b','c','d'][ci]);if(_corrRow)_corrRow.classList.add('correct-row');
   document.getElementById('btn-reveal').style.display='none';
   document.getElementById('btn-skip').style.display='none';
@@ -1337,6 +1346,10 @@ async function endSession(){
     if(pcw)pcw.style.display='none';
   }
   // Swap QR to scoreboard so players can scan to see final ranking
+  // 결과 내보내기 채우기
+  const _era=document.getElementById('export-result-area'),_ert=document.getElementById('export-result-text');
+  if(_era&&_ert){const _allScores=Object.values(currentScores).filter(p=>p&&p.name).sort((a,b)=>b.total-a.total);const _medals=['🥇','🥈','🥉'];_ert.textContent=_allScores.map((p,i)=>(_medals[i]||(_+i+1+'위'))+' '+p.name+' '+((p.total||0).toLocaleString())+'점').join('
+');_era.style.display='block';}
   const sbUrl=USE_FB?BASE_URL+'/scoreboard.html?db='+btoa(FIREBASE_URL):BASE_URL+'/scoreboard.html';
   updateQR(sbUrl,'🏆 순위 보기');
   toast('🏁 세션 종료!');
