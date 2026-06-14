@@ -951,6 +951,7 @@ function startListening(){
     _newP.forEach(p=>_knownNames.add(p.name));
     if(n>prevPlayerCount){sndJoin();}
     if(_kWasInit)_newP.forEach(p=>toast('🙋 '+esc(p.name)+' 참가!'));
+    if(_kWasInit&&n<prevPlayerCount)toast('👋 '+(prevPlayerCount-n)+'명 이탈 (현재 '+n+'명)');
     prevPlayerCount=n;
     document.getElementById('st-players').textContent=n;
     document.getElementById('tv-lobby-count').textContent=n>0?'👥 '+n+'명 참가중':'';
@@ -1078,7 +1079,7 @@ async function nextQuestion(){
 }
 
 function startTvTimer(startAt,limit){
-  clearInterval(tvTimerInt);clearInterval(cntdownInt);
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);if(window._elapsedInt){clearInterval(window._elapsedInt);window._elapsedInt=null;}
   const bar=document.getElementById('tv-tbar');
   const cntEl=document.getElementById('tv-countdown');
   const run=()=>{
@@ -1087,8 +1088,7 @@ function startTvTimer(startAt,limit){
     bar.style.width=pct+'%';
     bar.style.background=rem<5?'#ef4444':rem<10?'#f59e0b':'var(--green)';
     const remSec=Math.ceil(rem);
-    cntEl.textContent=rem>0?remSec+'초':'⏰';
-    cntEl.className='tv-countdown'+(rem<6?' urgent':'');
+    cntEl.textContent=rem>0?remSec+'초':'⏰';const _cqi2=document.getElementById('ctrl-q-indicator');if(_cqi2)_cqi2.textContent='('+(currentQIdx+1)+'/'+sessionQuestions.length+(rem>0?' · ⏱'+remSec+'s':' · ⏰')+')';cntEl.className='tv-countdown'+(rem<6?' urgent':'');
     if(rem<6&&rem>0&&!beepedSeconds.has(remSec)){beepedSeconds.add(remSec);sndUrgent();}
     if(rem<=0){
       clearInterval(tvTimerInt);clearInterval(cntdownInt);cntEl.textContent='';
@@ -1367,7 +1367,7 @@ function renderAnswerDist(){
   const max=Math.max(...counts,1);
   [0,1,2,3].forEach(i=>{
     document.getElementById('abar'+i).style.width=(counts[i]/max*100)+'%';
-    document.getElementById('acnt'+i).textContent=counts[i];
+    document.getElementById('acnt'+i).textContent=counts[i]+(total>0?' ('+Math.round(counts[i]/total*100)+'%)':'');
   });
   const label=total>=playerCount&&playerCount>0?'✅ 전원 응답!':total+' / '+playerCount+' 응답';
   document.getElementById('ans-total').textContent=label;
