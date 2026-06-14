@@ -1393,7 +1393,7 @@ function renderAnswerDist(){
   if(total>=playerCount&&playerCount>=2&&!allAnsweredPending&&sessionActive&&
      document.getElementById('btn-reveal').style.display!=='none'){
     allAnsweredPending=true;
-    toast('✅ 전원 응답! 곧 정답이 공개됩니다...');
+    toast('✅ 전원 응답! 곧 정답이 공개됩니다...');sndReveal();
     const _brp=document.getElementById('btn-reveal');if(_brp)_brp.classList.add('pulsing');
     setTimeout(()=>{
       if(_brp)_brp.classList.remove('pulsing');
