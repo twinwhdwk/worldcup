@@ -613,7 +613,7 @@ async function renderQ(s){
       b.disabled=false;
     });
     beepedSecs=new Set();
-    _curHint=q.hint||';
+    _curHint=q.hint||'';
     const _hb=document.getElementById('q-hint-box');if(_hb){_hb.style.display='none';}
     tick(q.startAt||Date.now(),q.timeLimit||20);
   };
@@ -719,17 +719,12 @@ function showReveal(s){
   } else {rankEl.textContent='';}
 
   document.getElementById('rv-streak').textContent=myStreak>=2?'🔥 '+myStreak+'연속 정답!':'';
-  show('s-reveal');
-
-  if(correct){
-    sndCorrect();
-    if(navigator.vibrate)navigator.vibrate([60,40,60,40,180]); // 짧-짧-길 (정답 패턴)
-    if(gain>0)floatScore('+'+gain+'점','#FFD700');
-    setTimeout(confetti,200);
-  } else {
-    sndWrong();
-    if(navigator.vibrate)navigator.vibrate([400,100,400]); // 길-길 (오답 패턴)
-  }
+  if(ci>=0){[0,1,2,3].forEach(i=>{const b=document.getElementById('o'+i);if(!b)return;if(i===ci)b.classList.add('correct');else b.classList.add('wrong');});}
+  const _wasOnQ=document.querySelector('.screen:not(.hidden)')?.id==='s-question';
+  setTimeout(()=>{
+    show('s-reveal');
+    if(correct){sndCorrect();if(navigator.vibrate)navigator.vibrate([60,40,60,40,180]);if(gain>0)floatScore('+'+gain+'점','#FFD700');setTimeout(confetti,200);}else{sndWrong();if(navigator.vibrate)navigator.vibrate([400,100,400]);}
+  },_wasOnQ?380:0);
 }
 
 function prizeCelebration(){
@@ -811,6 +806,7 @@ function confetti(){
 const saved=localStorage.getItem('wc_player_name');
 if(saved){
   document.getElementById('name-in').value=saved;
+  document.querySelector('.login-sub').textContent='이전 닉네임으로 재참가합니다!';
 }
 document.getElementById('name-in').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
 document.addEventListener('keydown',e=>{
