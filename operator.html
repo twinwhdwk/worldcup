@@ -312,6 +312,7 @@
         <div class="stat"><div class="stat-val" id="st-answered">0</div><div class="stat-lbl">응답</div></div>
         <div class="stat"><div class="stat-val" id="st-q">—</div><div class="stat-lbl">문제</div></div>
         <div class="stat"><div class="stat-val" id="st-state">대기</div><div class="stat-lbl">상태</div></div>
+        <div class="stat"><div class="stat-val" id="st-elapsed" style="font-size:18px;">—</div><div class="stat-lbl">경과</div></div>
       </div>
     </div>
 
@@ -368,6 +369,7 @@
       </div>
       <button class="ctrl-btn btn-start" onclick="startGame()">▶ 게임 시작</button>
       <button class="ctrl-btn btn-lobby" style="margin-top:4px;" onclick="endSession()">🏁 세션 종료</button>
+      <div id="ctrl-curr-q-text" style="display:none;margin-top:10px;font-size:12px;color:rgba(255,255,255,.62);background:rgba(255,255,255,.04);border-radius:10px;padding:7px 12px;line-height:1.55;border-left:2px solid rgba(255,255,255,.15);"></div>
       <div id="ctrl-hint-box" style="display:none;margin-top:14px;background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.18);border-radius:12px;padding:10px 14px;"><div style="font-size:10px;color:var(--muted2);letter-spacing:1px;font-weight:700;margin-bottom:5px;">💡 현재 힌트</div><div id="ctrl-hint-text" style="font-size:13px;color:rgba(255,255,255,.82);line-height:1.55;"></div></div>
     </div>
 
@@ -852,7 +854,7 @@ async function startGame(){
   const qs=QB[selectedGame]().slice(0,n).map(shuffleOptions);
   sessionQuestions=qs;
   currentQIdx=-1;
-  sessionActive=true;
+  sessionActive=true;window._gameStartAt=Date.now();if(window._gameElapsedInt)clearInterval(window._gameElapsedInt);window._gameElapsedInt=setInterval(()=>{const _ge=document.getElementById('st-elapsed');if(_ge&&window._gameStartAt){const _gs=Math.floor((Date.now()-window._gameStartAt)/1000);_ge.textContent=(_gs>=60?Math.floor(_gs/60)+'m ':'')+(_gs%60)+'s';}},1000);
   revealInProgress=false;
   allAnsweredPending=false;
   localStorage.setItem('wc_op_session',JSON.stringify({qs,game:selectedGame,qIdx:-1}));
@@ -1038,6 +1040,7 @@ async function nextQuestion(){
   document.getElementById('tv-q-text').textContent=q.text;
   const _chb=document.getElementById('ctrl-hint-box'),_cht=document.getElementById('ctrl-hint-text');
   if(_chb){_chb.style.opacity='1';if(q.hint){_cht.textContent=q.hint;_chb.style.display='block';}else{_chb.style.display='none';}}
+  const _cqt=document.getElementById('ctrl-curr-q-text');if(_cqt){_cqt.textContent=q.text;_cqt.style.display='block';_cqt.style.opacity='1';}
   const _cpw=document.getElementById('ctrl-prog-wrap'),_cpb=document.getElementById('ctrl-prog-bar');
   if(_cpw&&_cpb){_cpw.style.display='block';_cpb.style.width=((currentQIdx+1)/sessionQuestions.length*100)+'%';}
   q.options.forEach((o,i)=>{
@@ -1114,7 +1117,7 @@ async function skipQuestion(){
 let revealInProgress=false;
 async function revealAnswer(){
   if(revealInProgress)return;
-  const _chb2=document.getElementById('ctrl-hint-box');if(_chb2&&_chb2.style.display!=='none')_chb2.style.opacity='.25';
+  const _chb2=document.getElementById('ctrl-hint-box');if(_chb2&&_chb2.style.display!=='none')_chb2.style.opacity='.25';const _cqt2=document.getElementById('ctrl-curr-q-text');if(_cqt2)_cqt2.style.opacity='.25';
   revealInProgress=true;
   allAnsweredPending=false;
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
@@ -1222,7 +1225,7 @@ async function revealAnswer(){
 let _endingSession=false;
 // ── End current game, return to game selection within session ───────
 async function endGame(){
-  clearInterval(tvTimerInt);clearInterval(cntdownInt);
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);if(window._gameElapsedInt){clearInterval(window._gameElapsedInt);window._gameElapsedInt=null;}const _ge2=document.getElementById('st-elapsed');if(_ge2)_ge2.textContent='—';
   sessionActive=false;
   localStorage.removeItem('wc_op_session');
   try{await fbPatch('/session',{state:'lobby',question:null,scoreGains:{}});}catch{}
@@ -1268,7 +1271,7 @@ async function goHome(){
 
 async function endSession(){
   if(_endingSession)return;_endingSession=true;
-  clearInterval(tvTimerInt);clearInterval(cntdownInt);
+  clearInterval(tvTimerInt);clearInterval(cntdownInt);if(window._gameElapsedInt){clearInterval(window._gameElapsedInt);window._gameElapsedInt=null;}
   sessionActive=false;
   sessionOpen=false;
   localStorage.removeItem('wc_op_session');
