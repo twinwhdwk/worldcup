@@ -55,7 +55,7 @@
     .qr-label{font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;}
     .qr-url{font-size:10px;color:var(--muted2);word-break:break-all;max-width:240px;text-align:center;}
     .player-chips{display:flex;flex-wrap:wrap;gap:8px;max-width:360px;align-content:flex-start;max-height:200px;overflow:hidden;padding-top:4px;}
-    .player-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:6px 14px;font-size:13px;font-weight:700;animation:chipPop .4s cubic-bezier(.34,1.56,.64,1);}
+    .player-chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:6px 14px;font-size:13px;font-weight:700;animation:chipPop .4s cubic-bezier(.34,1.56,.64,1);}
     @keyframes chipPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
     .player-chips-title{font-size:11px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
     .tv-fact-ticker{margin-top:14px;background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.15);border-radius:14px;padding:10px 22px;max-width:680px;text-align:center;font-size:14px;color:var(--muted2);line-height:1.5;min-height:42px;}
@@ -120,7 +120,7 @@
     .ctrl-title{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;font-weight:700;}
 
     /* Stats */
-    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+    .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;}
     .stat{background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:10px;text-align:center;}
     .stat-val{font-family:'Black Han Sans',sans-serif;font-size:24px;color:var(--gold);}
     .stat-lbl{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
@@ -177,8 +177,8 @@
     .sound-toggle input{accent-color:var(--green);width:16px;height:16px;}
 
     /* Toast */
-    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#fff;padding:10px 22px;border-radius:100px;font-weight:700;font-size:13px;transition:transform .3s;z-index:999;pointer-events:none;}
-    .toast.show{transform:translateX(-50%) translateY(0);}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--green);color:#fff;padding:11px 24px;border-radius:100px;font-weight:700;font-size:13px;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .35s;z-index:999;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.4);max-width:90vw;text-align:center;opacity:0;}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 
     @keyframes confettiFall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(110vh) rotate(720deg);opacity:0}}
     @keyframes tvPanelIn{from{opacity:0;transform:scale(.97) translateY(-12px)}to{opacity:1;transform:none}}
@@ -302,7 +302,8 @@
     <div class="ctrl-section">
       <div class="ctrl-title">📊 현황</div>
       <div class="stats-grid">
-        <div class="stat"><div class="stat-val" id="st-players">0</div><div class="stat-lbl">참가자</div></div>
+        <div class="stat"><div class="stat-val" id="st-players">0</div><div class="stat-lbl">전체</div></div>
+        <div class="stat"><div class="stat-val" id="st-online" style="color:#22c55e">0</div><div class="stat-lbl">🟢온라인</div></div>
         <div class="stat"><div class="stat-val" id="st-answered">0</div><div class="stat-lbl">응답</div></div>
         <div class="stat"><div class="stat-val" id="st-q">—</div><div class="stat-lbl">문제</div></div>
         <div class="stat"><div class="stat-val" id="st-state">대기</div><div class="stat-lbl">상태</div></div>
@@ -752,7 +753,15 @@ let beepedSeconds = new Set();
 // ── Utils ──────────────────────────────────────────────────────────
 function enc(n){return n.replace(/[.#$[\]/]/g,'_');}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'#ef4444':'var(--green)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function toast(msg,err=false,dur=0){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'#ef4444':'var(--green)';t.classList.add('show');if(t._toastTimer)clearTimeout(t._toastTimer);t._toastTimer=setTimeout(()=>{t.classList.remove('show');t._toastTimer=null;},dur||(err?4000:2500));}
+// 30초 이내 lastSeen 기준 온라인 카운트
+function updateOnlineCount(){
+  const now=Date.now();
+  const online=Object.values(currentPlayers||{}).filter(p=>p&&p.name&&p.lastSeen&&(now-p.lastSeen)<30000).length;
+  const el=document.getElementById('st-online');
+  if(el)el.textContent=online;
+}
+setInterval(updateOnlineCount,5000);
 function tvShow(id){
   ['tv-lobby','tv-question','tv-reveal'].forEach(x=>{const el=document.getElementById(x);if(el)el.style.display=x===id?'flex':'none';});
   const el=document.getElementById(id);
@@ -760,9 +769,9 @@ function tvShow(id){
 }
 
 // ── Firebase ───────────────────────────────────────────────────────
-async function fbPut(p,d){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
-async function fbPatch(p,d){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PATCH '+r.status);}
-async function fbDelete(p){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'DELETE'});if(!r.ok)throw new Error('Firebase DELETE '+r.status);}
+async function fbPut(p,d){if(!USE_FB)return;const _ac=new AbortController();const _t=setTimeout(()=>_ac.abort(),9000);try{const r=await fetch(FB+p+'.json',{method:'PUT',signal:_ac.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}finally{clearTimeout(_t);}}
+async function fbPatch(p,d){if(!USE_FB)return;const _ac=new AbortController();const _t=setTimeout(()=>_ac.abort(),9000);try{const r=await fetch(FB+p+'.json',{method:'PATCH',signal:_ac.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PATCH '+r.status);}finally{clearTimeout(_t);}}
+async function fbDelete(p){if(!USE_FB)return;const _ac=new AbortController();const _t=setTimeout(()=>_ac.abort(),9000);try{const r=await fetch(FB+p+'.json',{method:'DELETE',signal:_ac.signal});if(!r.ok)throw new Error('Firebase DELETE '+r.status);}finally{clearTimeout(_t);}}
 
 // ── Game select ────────────────────────────────────────────────────
 function selectGame(name,el){
