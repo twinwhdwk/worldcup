@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -20,7 +20,7 @@
     .login-sub{color:var(--muted2);font-size:14px;text-align:center;margin-bottom:32px;}
     .login-input{width:100%;max-width:300px;background:var(--card);border:2px solid rgba(255,255,255,.1);border-radius:16px;padding:16px 20px;font-size:20px;color:var(--text);font-family:'Black Han Sans',sans-serif;text-align:center;outline:none;transition:border-color .2s;margin-bottom:16px;}
     .login-input:focus{border-color:var(--green);}
-    .login-btn{width:100%;max-width:300px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:16px;padding:18px;font-size:20px;font-family:'Black Han Sans',sans-serif;cursor:pointer;transition:opacity .2s,transform .15s,background .3s;box-shadow:0 4px 20px rgba(16,185,129,.3);}
+    .login-btn{width:100%;max-width:300px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:16px;padding:18px;font-size:20px;font-family:'Black Han Sans',sans-serif;touch-action:manipulation;cursor:pointer;transition:opacity .2s,transform .15s,background .3s;box-shadow:0 4px 20px rgba(16,185,129,.3);}
     .login-btn:hover:not(:disabled){background:linear-gradient(135deg,#047857,#059669);}
     .login-btn:active{transform:scale(0.97);}
     .login-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;}
@@ -67,7 +67,7 @@
     .q-text{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:clamp(17px,4vw,24px);line-height:1.35;}
     .q-num{font-size:11px;color:var(--muted2);margin-top:8px;}
     .q-opts{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;}
-    .opt{border:none;border-radius:16px;padding:0 10px;font-size:15px;font-family:'Noto Sans KR',sans-serif;font-weight:700;cursor:pointer;transition:transform .1s,opacity .15s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:7px;height:72px;text-align:center;line-height:1.2;position:relative;overflow:hidden;color:#fff;}
+    .opt{border:none;border-radius:16px;padding:0 10px;font-size:15px;font-family:'Noto Sans KR',sans-serif;font-weight:700;cursor:pointer;touch-action:manipulation;transition:transform .1s,opacity .15s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:7px;height:72px;text-align:center;line-height:1.2;position:relative;overflow:hidden;color:#fff;}
     .opt::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.18);opacity:0;transition:opacity .1s;}
     .opt:active::after{opacity:1;}
     .opt:not(:disabled):hover{filter:brightness(1.12);transform:scale(1.01);}
@@ -157,7 +157,11 @@
       @keyframes spin{to{transform:rotate(360deg)}}
       .login-btn.loading{position:relative;color:transparent!important;pointer-events:none;}
       .login-btn.loading::after{content:'';position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
-      </style>
+  
+    button,a{-webkit-tap-highlight-color:transparent;}
+    .screen:not(#s-login) input,.screen:not(#s-login) textarea{-webkit-user-select:auto;user-select:auto;}
+    .q-opts,.login-btn,.ctrl-btn{-webkit-user-select:none;user-select:none;}
+    </style>
   <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -407,6 +411,7 @@ function startSyncPoll(){
       )){_sessState=cur;onSession(cur);}
     }
     _pollTick=(_pollTick+1)%2;
+    if(sid==='s-lobby')updateLobbyRank();
     if(sid==='s-wait'){const ac=await fbGet('/answers');const ct=ac?Object.keys(ac).length:0;const we=document.getElementById('wait-ans-count');if(we){if(ct>0){const _tp=totalPlayers||0;if(_tp>0&&ct>=_tp){if(!_allVibDone){_allVibDone=true;if(navigator.vibrate)navigator.vibrate([40,20,40]);}we.textContent='✅ 전원 제출!';we.style.color='#4ade80';}else{we.textContent=_tp>0?ct+'/'+_tp+'명 제출':ct+'명 제출';we.style.color='';}}}  }
     if(_pollTick===0){
       if(sid==='s-lobby'){
@@ -603,7 +608,7 @@ async function renderQ(s){
     document.getElementById('q-lbl').textContent=s.game||'퀴즈';
     document.getElementById('q-score').textContent=myScore.toLocaleString()+'점';
     const emojiEl=document.getElementById('q-emoji');
-    if(q.img){const _is=q.bigImg?'max-height:208px;max-width:286px':'max-height:114px;max-width:182px';emojiEl.innerHTML=`<img src="${q.img}" data-emoji="${q.emoji||'⚽'}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg';else{this.style.display='none';this.parentElement.textContent=this.dataset.emoji||'⚽';}}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
+    if(q.img){const _is=q.bigImg?'max-height:208px;max-width:286px':'max-height:114px;max-width:182px';emojiEl.innerHTML=`<img src="${q.img}" data-emoji="${q.emoji||'⚽'}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg';else{this.style.display='none';this.parentElement.textContent=this.dataset.emoji||'⚽';}}" style="${_is};width:auto;border-radius:8px;object-fit:contain;opacity:0;transition:opacity .3s;" onload="this.style.opacity='1';" alt="">`;}
     else{emojiEl.textContent=q.emoji||'⚽';if(typeof twemoji!=='undefined')twemoji.parse(emojiEl);}
     document.getElementById('q-text').textContent=q.text;
     document.getElementById('q-num').textContent='문제 '+(s.questionIdx+1)+' / '+s.totalQuestions;
