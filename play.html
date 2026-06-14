@@ -212,6 +212,7 @@
   <div class="q-card">
     <span class="q-emoji" id="q-emoji">⚽</span>
     <div class="q-text" id="q-text">로딩 중...</div>
+    <div id="q-prog-dots" style="display:flex;gap:5px;justify-content:center;margin-top:6px;margin-bottom:2px;flex-shrink:0;min-height:8px;"></div>
     <div class="q-num" id="q-num">문제 1</div>
   </div>
   <div class="q-opts">
@@ -273,6 +274,7 @@
   <div class="rv-gain" id="rv-gain">+100점</div>
   <div class="rv-total" id="rv-total">총 점수: 0점</div>
   <div class="rv-rank" id="rv-rank"></div>
+  <div id="rv-rank-change" style="display:none;font-size:13px;font-weight:700;margin-top:2px;animation:slideUpIn .3s ease both;"></div>
   <div class="rv-streak" id="rv-streak"></div>
 </div>
 
@@ -612,6 +614,7 @@ async function renderQ(s){
     else{emojiEl.textContent=q.emoji||'⚽';if(typeof twemoji!=='undefined')twemoji.parse(emojiEl);}
     document.getElementById('q-text').textContent=q.text;
     document.getElementById('q-num').textContent='문제 '+(s.questionIdx+1)+' / '+s.totalQuestions;
+    const _pd=document.getElementById('q-prog-dots');if(_pd&&s.totalQuestions>0){_pd.innerHTML='';for(let _i=0;_i<s.totalQuestions;_i++){const _dot=document.createElement('div');_dot.style.cssText='width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:background .3s;background:'+(_i<s.questionIdx+1?'#22c55e':'rgba(255,255,255,.18)');_pd.appendChild(_dot);}}
     _lastOpts=q.options.slice();
     q.options.forEach((o,i)=>{
       const otEl=document.getElementById('ot'+i);otEl.innerHTML=renderOptHtml(o);
@@ -675,6 +678,7 @@ async function answer(idx){
 // ── Reveal ────────────────────────────────────────────────────────
 function showReveal(s){
   clearInterval(timerInt);
+  const _rcdInit=document.getElementById('rv-rank-change');if(_rcdInit)_rcdInit.style.display='none';
   const ci=s.question?.correctIdx??-1;
   const correct=myAnswerIdx===ci&&ci>=0;
   const answered=myAnswerIdx>=0;
@@ -719,6 +723,9 @@ function showReveal(s){
     lastKnownRank=r;
     rankEl.textContent=r<=10?r+'위 🎁 상품권 확정!':r+'위';
     rankEl.style.color=r<=10?'var(--gold)':'var(--muted2)';
+    // 순위 변동 배지
+    const _rcd=document.getElementById('rv-rank-change');
+    if(_rcd&&prevRank>0&&r!==prevRank){const diff=prevRank-r;_rcd.textContent=diff>0?'↑ '+diff+'계단 상승!':'↓ '+Math.abs(diff)+'계단 하락';_rcd.style.color=diff>0?'#4ade80':'#f87171';_rcd.style.display='block';}else if(_rcd){_rcd.style.display='none';}
     // Prize zone entry celebration
     if(r<=10&&(prevRank>10||prevRank===0)){
       setTimeout(prizeCelebration,400);
