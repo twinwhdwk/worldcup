@@ -140,11 +140,14 @@
     input[type=range]{flex:1;accent-color:var(--green);}
 
     /* Buttons */
-    .ctrl-btn{width:100%;border:none;border-radius:14px;padding:16px;font-size:18px;font-family:'Black Han Sans',sans-serif;cursor:pointer;transition:opacity .2s,transform .1s;margin-bottom:10px;letter-spacing:1px;}
-    .ctrl-btn:active{transform:scale(0.97);}
-    .btn-start{background:var(--green);color:#fff;}
-    .btn-reveal{background:#f59e0b;color:#000;}
-    .btn-next{background:#3b82f6;color:#fff;}
+    .ctrl-btn{width:100%;border:none;border-radius:14px;padding:16px;font-size:18px;font-family:'Black Han Sans',sans-serif;cursor:pointer;transition:opacity .2s,transform .15s,box-shadow .2s;margin-bottom:10px;letter-spacing:1px;}
+    .ctrl-btn:hover:not(:disabled){filter:brightness(1.08);}
+    .ctrl-btn:active{transform:scale(0.96);}
+    .btn-start{background:linear-gradient(135deg,#059669,#10b981);color:#fff;box-shadow:0 4px 16px rgba(16,185,129,.35);}
+    .btn-start.pulse{animation:btnPulse 1.5s ease-in-out infinite;}
+    @keyframes btnPulse{0%,100%{box-shadow:0 4px 16px rgba(16,185,129,.35);}50%{box-shadow:0 4px 30px rgba(16,185,129,.7);}}
+    .btn-reveal{background:linear-gradient(135deg,#d97706,#f59e0b);color:#000;box-shadow:0 4px 16px rgba(245,158,11,.35);}
+    .btn-next{background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;box-shadow:0 4px 16px rgba(59,130,246,.35);}
     .btn-skip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted2);font-size:14px;padding:10px;}
     .btn-lobby{background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.25);color:#fca5a5;font-size:14px;padding:10px;}
     .ctrl-btn:disabled{opacity:.35;cursor:not-allowed;}
@@ -313,7 +316,7 @@
     <!-- Session setup (before session is opened) -->
     <div class="ctrl-section" id="session-setup">
       <div class="ctrl-title">🎮 세션 관리</div>
-      <button class="ctrl-btn btn-start" onclick="openSession()">🎮 세션 열기</button>
+      <button class="ctrl-btn btn-start" onclick="openSession()" id="btn-open-session">🎮 세션 열기</button>
       <div style="font-size:11px;color:var(--muted2);margin-top:8px;text-align:center;">세션을 열면 참가자·점수가 초기화되고<br>QR 링크로 참가자를 모집합니다.</div>
     </div>
 
@@ -367,7 +370,7 @@
 
     <!-- Active controls -->
     <div class="ctrl-section" id="active-ctrl" style="display:none">
-      <div class="ctrl-title">⚡ 진행 컨트롤</div>
+      <div class="ctrl-title">⚡ 진행 컨트롤 <span id="ctrl-q-indicator" style="font-size:12px;font-weight:400;color:var(--muted2);font-family:monospace;"></span></div>
       <button class="ctrl-btn btn-start" id="btn-nextq" onclick="nextQuestion()">▶ 다음 문제 시작</button>
       <button class="ctrl-btn btn-reveal" id="btn-reveal" onclick="revealAnswer()" style="display:none">🎯 정답 공개 <span style="font-size:11px;opacity:.6;font-family:monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;margin-left:4px;">Space</span></button>
       <button class="ctrl-btn btn-next" id="btn-cont" onclick="nextQuestion()" style="display:none">➡ 다음 문제 <span style="font-size:11px;opacity:.6;font-family:monospace;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;margin-left:4px;">Space</span></button>
@@ -760,7 +763,9 @@ function updateOnlineCount(){
   const online=Object.values(currentPlayers||{}).filter(p=>p&&p.name&&p.lastSeen&&(now-p.lastSeen)<30000).length;
   const el=document.getElementById('st-online');
   if(el)el.textContent=online;
-}
+  // 각 플레이어 칩에 온라인/오프라인 표시 (startListening 코드 외부에서 스타일만)
+  const chips=document.getElementById('player-chips');
+  if(chips){const names=Object.values(currentPlayers||{}).filter(p=>p&&p.name&&p.lastSeen&&(now-p.lastSeen)<30000).map(p=>p.name);chips.querySelectorAll('.player-chip').forEach(ch=>{const isOnline=names.includes(ch.textContent.trim());ch.style.borderColor=isOnline?'rgba(34,197,94,.5)':'rgba(255,255,255,.08)';ch.style.opacity=isOnline?'1':'.4';});}}}
 setInterval(updateOnlineCount,5000);
 function tvShow(id){
   ['tv-lobby','tv-question','tv-reveal'].forEach(x=>{const el=document.getElementById(x);if(el)el.style.display=x===id?'flex':'none';});
@@ -849,7 +854,7 @@ async function startGame(){
 
   // Show UI immediately
   document.getElementById('game-setup').style.display='none';
-  document.getElementById('active-ctrl').style.display='block';
+  document.getElementById('active-ctrl').style.display='block';const _nb=document.getElementById('btn-nextq');if(_nb){_nb.classList.add('pulse');setTimeout(()=>_nb.classList.remove('pulse'),6000);}
   document.getElementById('btn-nextq').style.display='block';
   document.getElementById('btn-nextq').disabled=true;
   document.getElementById('btn-nextq').textContent='⏳ 초기화 중...';
@@ -1033,6 +1038,7 @@ async function nextQuestion(){
   startTvTimer(startAt,limit);
 
   document.getElementById('st-q').textContent=(currentQIdx+1)+'/'+sessionQuestions.length;
+  const _qi=document.getElementById('ctrl-q-indicator');if(_qi)_qi.textContent='('+（currentQIdx+1)+'/'+sessionQuestions.length+')';
   document.getElementById('st-state').textContent='문제 진행중';
   document.getElementById('btn-nextq').style.display='none';
   document.getElementById('btn-reveal').style.display='block';
