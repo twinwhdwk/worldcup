@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -55,7 +55,8 @@
     .qr-label{font-size:14px;color:var(--gold);font-weight:700;letter-spacing:1px;}
     .qr-url{font-size:10px;color:var(--muted2);word-break:break-all;max-width:240px;text-align:center;}
     .player-chips{display:flex;flex-wrap:wrap;gap:8px;max-width:360px;align-content:flex-start;max-height:272px;overflow-y:auto;padding-top:4px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;}
-    .player-chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:6px 14px;font-size:13px;font-weight:700;transition:border-color .4s,opacity .4s;animation:chipPop .4s cubic-bezier(.34,1.56,.64,1);}
+    .player-chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:6px 14px;font-size:13px;font-weight:700;transition:border-color .4s,opacity .4s,background .3s,color .3s;animation:chipPop .4s cubic-bezier(.34,1.56,.64,1);}
+    .player-chip.answered{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.55);color:#86efac;}
     @keyframes chipPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
     .player-chips-title{font-size:11px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
     .tv-fact-ticker{margin-top:14px;background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.15);border-radius:14px;padding:10px 22px;max-width:680px;text-align:center;font-size:14px;color:var(--muted2);line-height:1.5;min-height:42px;}
@@ -1018,6 +1019,7 @@ async function nextQuestion(){
 
   currentAnswers={};
   allAnsweredPending=false;
+  document.querySelectorAll('.player-chip').forEach(ch=>ch.classList.remove('answered'));
   ['a','b','c','d'].forEach(_x=>{const _r=document.querySelector('.ad-row.'+_x);if(_r)_r.classList.remove('correct-row');});
   const miniLbEl=document.getElementById('tv-mini-lb');if(miniLbEl)miniLbEl.classList.remove('show');
   const tvBar2=document.getElementById('tv-ans-bar');const tvLbl2=document.getElementById('tv-ans-lbl');
@@ -1370,9 +1372,10 @@ function renderAnswerDist(){
     document.getElementById('abar'+i).style.width=(counts[i]/max*100)+'%';
     document.getElementById('acnt'+i).textContent=counts[i]+(total>0?' ('+Math.round(counts[i]/total*100)+'%)':'');
   });
-  const label=total>=playerCount&&playerCount>0?'✅ 전원 응답!':total+' / '+playerCount+' 응답';
+  const _noAns=playerCount-total;const label=total>=playerCount&&playerCount>0?'✅ 전원 응답!':(total+' / '+playerCount+' 응답'+(_noAns>0&&sessionActive?' · 미응답 '+_noAns+'명':''));
   document.getElementById('ans-total').textContent=label;
   document.getElementById('st-answered').textContent=total;
+  const _ansKeys=new Set(Object.keys(currentAnswers).filter(k=>{const a=currentAnswers[k];return a&&typeof a==='object'&&a.idx>=0;}));document.querySelectorAll('.player-chip').forEach(ch=>{ch.classList.toggle('answered',_ansKeys.has(enc(ch.textContent.trim())));});
   // TV live meter
   const pct=playerCount>0?Math.min(100,total/playerCount*100):0;
   const tvBar=document.getElementById('tv-ans-bar');
