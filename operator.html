@@ -812,6 +812,7 @@ async function openSession(){
   if(_openingSession)return;
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
   _openingSession=true;
+  if(Object.keys(currentPlayers).length===0)toast('ℹ️ 아직 참가자가 없습니다. 게임 시작 후 입장 가능합니다.');
   _endingSession=false;
   sessionActive=false;
   sessionOpen=true;
