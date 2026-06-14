@@ -805,11 +805,10 @@ async function openSession(){
   toast('⏳ 세션 초기화 중...');
 
   try{
+    await Promise.all([fbDelete('/players'),fbDelete('/answers'),fbDelete('/scores')]).catch(()=>{});
     await fbPut('/session',{state:'lobby',lastClearedAt:Date.now()});
     if(_listenDebounceTimer){clearTimeout(_listenDebounceTimer);_listenDebounceTimer=null;}
     startListening();
-    fbPut('/answers',null).catch(()=>{});
-    fbPut('/scores',null).catch(()=>{});
     toast('✅ 세션 오픈! 참가자를 기다리는 중...');
   }catch(err){
     sessionOpen=false;
