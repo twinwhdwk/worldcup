@@ -207,6 +207,7 @@
   <div class="topbar-title">👑 운영자 컨트롤 <span class="live-pill">LIVE</span><span id="op-conn-dot" title="Firebase 연결 상태" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-left:8px;vertical-align:middle;transition:background .6s;"></span><span id="op-offline-cnt" style="display:none;font-size:11px;color:#f87171;font-weight:700;margin-left:8px;vertical-align:middle;"></span></div>
   <div class="topbar-links">
     <span class="topbar-link" onclick="openPlayLink()">📱 참가자 링크</span>
+    <span class="topbar-link" onclick="document.getElementById('kbd-panel').style.display='flex'" title="키보드 단축키 (?)">⌨️</span>
     <a href="scoreboard.html" class="topbar-link" target="_blank" id="sb-link">🏆 스코어보드</a>
   </div>
 </div>
@@ -956,7 +957,7 @@ function startListening(){
     const _kWasInit=_knownNames.size>0;
     _newP.forEach(p=>_knownNames.add(p.name));
     if(n>prevPlayerCount){sndJoin();}
-    if(_kWasInit)_newP.forEach(p=>toast('🙋 '+esc(p.name)+' 참가!'));
+    if(_kWasInit)_newP.forEach(p=>toast(sessionActive?'🙋 '+esc(p.name)+' 게임 중 입장 (이번 문제부터 참여)':'🙋 '+esc(p.name)+' 참가!'));
     if(_kWasInit&&n<prevPlayerCount)toast('👋 '+(prevPlayerCount-n)+'명 이탈 (현재 '+n+'명)');
     prevPlayerCount=n;
     document.getElementById('st-players').textContent=n;
@@ -1577,6 +1578,7 @@ if(USE_FB) updateQR(getPlayUrl(),'📱 스캔해서 참가');
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
   if(e.code==='KeyH'){e.preventDefault();const _hbtn=document.getElementById('btn-hint-toggle');if(_hbtn&&_hbtn.style.display!=='none')_hbtn.click();return;}
+  if(e.key==='?'||e.code==='Slash'&&e.shiftKey){e.preventDefault();const _kp=document.getElementById('kbd-panel');if(_kp){_kp.style.display=_kp.style.display==='none'?'flex':'none';}return;}
   if(e.code==='Space'||e.code==='Enter'){
     e.preventDefault();
     const reveal=document.getElementById('btn-reveal');
@@ -1590,6 +1592,17 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!playersES){setTimeout(()=>{if(!playersES){_reconnDelayOp=3000;scheduleReconnect();}});
 window.addEventListener('online',()=>{if(!playersES){toast('📶 인터넷 재연결 — Firebase 재시도');_reconnDelayOp=3000;scheduleReconnect();}});
 </script>
+<div id="kbd-panel" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.75);align-items:center;justify-content:center;" onclick="this.style.display='none'">
+  <div style="background:#0f1020;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:28px 36px;min-width:260px;max-width:360px;" onclick="event.stopPropagation()">
+    <div style="font-family:'Black Han Sans',sans-serif;font-size:18px;margin-bottom:18px;text-align:center;">⌨️ 키보드 단축키</div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><span>정답 공개 / 다음 문제</span><kbd style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:3px 10px;font-family:monospace;font-size:12px;">Space</kbd></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;"><span>힌트 보기/숨기기</span><kbd style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:3px 10px;font-family:monospace;font-size:12px;">H</kbd></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;"><span>단축키 안내 닫기</span><kbd style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:3px 10px;font-family:monospace;font-size:12px;">?</kbd></div>
+    </div>
+    <div style="text-align:center;margin-top:20px;"><button onclick="document.getElementById('kbd-panel').style.display='none'" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 24px;color:var(--text);cursor:pointer;font-size:13px;">닫기</button></div>
+  </div>
+</div>
 </body>
 </html>
 
