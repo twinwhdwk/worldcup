@@ -20,7 +20,8 @@
     .login-sub{color:var(--muted2);font-size:14px;text-align:center;margin-bottom:32px;}
     .login-input{width:100%;max-width:300px;background:var(--card);border:2px solid rgba(255,255,255,.1);border-radius:16px;padding:16px 20px;font-size:20px;color:var(--text);font-family:'Black Han Sans',sans-serif;text-align:center;outline:none;transition:border-color .2s;margin-bottom:16px;}
     .login-input:focus{border-color:var(--green);}
-    .login-btn{width:100%;max-width:300px;background:var(--green);color:#fff;border:none;border-radius:16px;padding:18px;font-size:20px;font-family:'Black Han Sans',sans-serif;cursor:pointer;transition:opacity .2s,transform .15s;}
+    .login-btn{width:100%;max-width:300px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:16px;padding:18px;font-size:20px;font-family:'Black Han Sans',sans-serif;cursor:pointer;transition:opacity .2s,transform .15s,background .3s;box-shadow:0 4px 20px rgba(16,185,129,.3);}
+    .login-btn:hover:not(:disabled){background:linear-gradient(135deg,#047857,#059669);}
     .login-btn:active{transform:scale(0.97);}
     .login-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;}
     @keyframes inputShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
@@ -162,7 +163,7 @@
   <div class="lobby-title">참가 완료!</div>
   <div style="display:flex;align-items:center;justify-content:center;margin-top:4px;font-size:12px;color:rgba(255,255,255,.55);gap:4px;"><span id="conn-dot" class="conn-dot ok"></span><span id="conn-label">연결됨</span></div>
   <div class="lobby-name" id="lb-name">이름 로딩 중</div>
-  <div class="lobby-badge"><span class="ldot"></span>게임 시작을 기다리는 중</div>
+  <div class="lobby-badge"><span class="ldot"></span><span id="lobby-wait-txt">게임 시작을 기다리는 중</span></div>
   <div class="lobby-count" id="lb-count"></div>
   <div id="lb-players" style="font-size:11px;color:var(--muted2);max-width:260px;text-align:center;line-height:1.6;margin-top:2px;word-break:break-word;"></div>
   <div class="my-score-box">
@@ -199,6 +200,7 @@
   <div class="wait-icon" id="wait-icon-el">✋</div>
   <div class="wait-title" id="wait-title-el">제출 완료!</div>
   <div class="wait-sub" id="wait-sub">정답 발표를 기다리세요...</div>
+  <div id="wait-ans-count" style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px;min-height:16px;"></div>
   <div class="ans-preview" id="wait-prev">—</div>
   <div class="wait-dots"><div class="wd"></div><div class="wd"></div><div class="wd"></div></div>
   <div class="wait-fact" id="wait-fact"><div class="wait-fact-label">⚽ 축구 상식</div><div id="wait-fact-text">로딩 중...</div></div>
@@ -220,7 +222,8 @@
     <div style="font-family:'Black Han Sans',sans-serif;font-size:56px;color:var(--gold);" id="done-score">0</div>
     <div style="font-size:15px;font-weight:700;margin-top:4px;" id="done-rank"></div>
   </div>
-  <a id="done-sb-link" href="scoreboard.html" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;text-decoration:none;border-radius:14px;padding:14px 28px;font-family:'Black Han Sans',sans-serif;font-size:17px;letter-spacing:1px;">📊 최종 랭킹 보기</a>
+  <a id="done-sb-link" href="scoreboard.html" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;text-decoration:none;border-radius:14px;padding:14px 28px;font-family:'Black Han Sans',sans-serif;font-size:17px;letter-spacing:1px;box-shadow:0 4px 16px rgba(245,158,11,.4);transition:transform .15s;">📊 최종 랭킹 보기</a>
+<div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,.3);">함께해 주셔서 감사합니다 ⚽</div>
 </div>
 
 <!-- REVEAL -->
@@ -294,7 +297,7 @@ function sndJoin(){snd(440,.1);setTimeout(()=>snd(550,.18),120);}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
 function enc(n){return n.replace(/[.#$[\]/]/g,'_');}
 function setStatus(msg,type='ok'){const el=document.getElementById('status');el.textContent=msg;el.className='status-bar '+type;el.classList.remove('hidden');if(type==='ok')setTimeout(()=>el.classList.add('hidden'),2000);}
-function setConnDot(state){const d=document.getElementById('conn-dot');const l=document.getElementById('conn-label');if(d)d.className='conn-dot '+state;if(l)l.textContent={ok:'연결됨',warn:'재연결 중...',err:'오프라인'}[state]||'';}
+function setConnDot(state){const d=document.getElementById('conn-dot');const l=document.getElementById('conn-label');if(d)d.className='conn-dot '+state;if(l)l.textContent={ok:'연결됨',warn:'재연결 중...',err:'오프라인'}[state]||'';const wt=document.getElementById('lobby-wait-txt');if(wt)wt.textContent=state==='ok'?'게임 시작을 기다리는 중':state==='warn'?'재연결 중...':'연결이 끊어졌습니다';}
 
 // ── Floating score animation ──────────────────────────────────────
 function floatScore(text, color='#FFD700'){
@@ -372,6 +375,7 @@ function startSyncPoll(){
       )){_sessState=cur;onSession(cur);}
     }
     _pollTick=(_pollTick+1)%2;
+    if(sid==='s-wait'){const ac=await fbGet('/answers');const ct=ac?Object.keys(ac).length:0;const we=document.getElementById('wait-ans-count');if(we&&ct>0)we.textContent=ct+'명 제출 완료';}
     if(_pollTick===0){
       if(sid==='s-lobby'){
         fbGet('/scores/'+enc(myName)).then(d=>{if(d){const fbTotal=d.total||0;if(fbTotal>=myScore&&_pendingGain>0){_pendingGain=0;}if(fbTotal>myScore){myScore=fbTotal;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore.toLocaleString();}}});
@@ -765,6 +769,29 @@ if(saved){
 }
 document.getElementById('name-in').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
 if(!USE_FB)document.getElementById('no-fb-warn').classList.remove('hidden');
+
+// ── 모바일 탭 전환 / 화면 잠금 복귀 시 즉시 재연결 ──────────────
+document.addEventListener('visibilitychange',()=>{
+  if(!joined)return;
+  if(document.visibilityState==='visible'){
+    // SSE가 닫혔거나 오류 상태면 즉시 재연결
+    if(!sessionES||sessionES.readyState===EventSource.CLOSED){
+      _reconnDelay=3000;setConnDot('warn');listen();
+    }
+    // 놓친 세션 변경 즉시 동기화
+    fbGet('/session',5000).then(cur=>{if(cur&&JSON.stringify(cur)!==JSON.stringify(_sessState)){_sessState=cur;onSession(cur);}});
+  }
+});
+// ── 네트워크 끊김 / 복귀 처리 ────────────────────────────────────
+window.addEventListener('online',()=>{
+  if(!joined)return;
+  setConnDot('warn');setStatus('📶 인터넷 재연결, 동기화 중...','warn');
+  _reconnDelay=3000;listen();
+  fbGet('/session',5000).then(cur=>{if(cur){_sessState=cur;onSession(cur);}});
+});
+window.addEventListener('offline',()=>{
+  setConnDot('err');setStatus('📵 인터넷 연결 끊김','err');
+});
 </script>
 </body>
 </html>
