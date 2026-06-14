@@ -177,7 +177,8 @@
   <div class="login-ball">⚽</div>
   <div class="login-title">월드컵 QUIZ</div>
   <div class="login-sub">닉네임을 입력하고 참가하세요!</div>
-  <input class="login-input" id="name-in" type="text" placeholder="예: 홍길동" maxlength="8" autocomplete="off" inputmode="text" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <input class="login-input" id="name-in" type="text" placeholder="예: 홍길동" maxlength="8" autocomplete="off" inputmode="text" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="(()=>{const _nc=document.getElementById('name-counter');if(_nc){const _l=this.value.length;_nc.textContent=_l+'/8';_nc.style.color=_l>=7?'#f87171':'rgba(255,255,255,.3)';}})();">
+  <div id="name-counter" style="font-size:11px;color:rgba(255,255,255,.3);text-align:right;max-width:300px;width:100%;margin-top:-10px;margin-bottom:8px;font-family:monospace;letter-spacing:.5px;">0/8</div>
   <button class="login-btn" id="join-btn" onclick="join()">✅ 참가하기</button>
   <div class="no-fb-warn hidden" id="no-fb-warn">
     ⚠️ Firebase가 연결되지 않았습니다.<br>운영자에게 올바른 QR 코드를 요청하세요.
@@ -257,6 +258,7 @@
   </div>
   <div id="done-game-stats" style="display:none;font-size:13px;color:var(--muted2);margin:-8px 0 12px;text-align:center;letter-spacing:.3px;"></div>
   <div id="done-top3" style="width:100%;max-width:360px;margin-bottom:14px;"></div>
+  <button id="done-next-btn" onclick="(()=>{const _dnb=document.getElementById('done-next-btn');if(_dnb)_dnb.style.display='none';_doneShown=false;lastQId='';_revealQId='';show('s-lobby');document.getElementById('lb-count').textContent='다음 게임을 기다리는 중...';startSyncPoll();})()" style="display:block;margin-top:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 24px;color:rgba(255,255,255,.7);font-size:13px;font-weight:700;cursor:pointer;width:100%;max-width:320px;text-align:center;touch-action:manipulation;">🔄 다음 게임 대기</button>
   <a id="done-sb-link" href="scoreboard.html" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;text-decoration:none;border-radius:14px;padding:14px 28px;font-family:'Black Han Sans',sans-serif;font-size:17px;letter-spacing:1px;box-shadow:0 4px 16px rgba(245,158,11,.4);transition:transform .15s;">📊 최종 랭킹 보기</a>
 <button id="done-share-btn" onclick="(()=>{const txt=`${myName||'나'}: ${myScore.toLocaleString()}점 (${lastKnownRank>0?lastKnownRank+'위':'순위 집계 중'}) — 월드컵 퀴즈`;if(navigator.share){navigator.share({title:'⚽ 월드컵 퀴즈',text:txt}).catch(()=>{});}else{navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>{this.textContent='✅ 복사됨!';setTimeout(()=>{this.textContent='📋 점수 복사';},1500);}).catch(()=>{this.textContent='복사 실패';});}})();" style="margin-top:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 24px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;" >📋 점수 복사</button>
 <div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,.3);">함께해 주셔서 감사합니다 ⚽</div>
