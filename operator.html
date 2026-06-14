@@ -202,7 +202,7 @@
 <body>
 
 <div class="topbar">
-  <div class="topbar-title">👑 운영자 컨트롤 <span class="live-pill">LIVE</span><span id="op-conn-dot" title="Firebase 연결 상태" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-left:8px;vertical-align:middle;transition:background .6s;"></span></div>
+  <div class="topbar-title">👑 운영자 컨트롤 <span class="live-pill">LIVE</span><span id="op-conn-dot" title="Firebase 연결 상태" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-left:8px;vertical-align:middle;transition:background .6s;"></span><span id="op-offline-cnt" style="display:none;font-size:11px;color:#f87171;font-weight:700;margin-left:8px;vertical-align:middle;"></span></div>
   <div class="topbar-links">
     <span class="topbar-link" onclick="openPlayLink()">📱 참가자 링크</span>
     <a href="scoreboard.html" class="topbar-link" target="_blank" id="sb-link">🏆 스코어보드</a>
@@ -773,6 +773,10 @@ function updateOnlineCount(){
   const online=Object.values(currentPlayers||{}).filter(p=>p&&p.name&&p.lastSeen&&(now-p.lastSeen)<30000).length;
   const el=document.getElementById('st-online');
   if(el)el.textContent=online;
+  const _total=Object.values(currentPlayers||{}).filter(p=>p&&p.name).length;
+  const _offCnt=_total-online;
+  const _offEl=document.getElementById('op-offline-cnt');
+  if(_offEl){if(_offCnt>0){_offEl.textContent=_offCnt+'명 오프라인';_offEl.style.display='';}else{_offEl.style.display='none';}}
   // 각 플레이어 칩에 온라인/오프라인 표시 (startListening 코드 외부에서 스타일만)
   const chips=document.getElementById('player-chips');
   if(chips){const names=Object.values(currentPlayers||{}).filter(p=>p&&p.name&&p.lastSeen&&(now-p.lastSeen)<30000).map(p=>p.name);chips.querySelectorAll('.player-chip').forEach(ch=>{const isOnline=names.includes(ch.textContent.trim());ch.style.borderColor=isOnline?'rgba(34,197,94,.5)':'rgba(255,255,255,.08)';ch.style.opacity=isOnline?'1':'.4';});}}}
