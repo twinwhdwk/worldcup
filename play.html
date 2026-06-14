@@ -109,11 +109,16 @@
     @keyframes streakIn{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
 
     /* ── STATUS BAR ── */
-    .status-bar{position:fixed;top:0;left:0;right:0;text-align:center;padding:8px;font-size:12px;font-weight:700;z-index:999;transition:all .3s;}
-    .status-bar.ok{background:rgba(0,132,61,.9);color:#fff;}
-    .status-bar.err{background:rgba(239,68,68,.9);color:#fff;}
-    .status-bar.warn{background:rgba(245,158,11,.9);color:#000;}
-    .status-bar.hidden{transform:translateY(-100%);}
+    .status-bar{position:fixed;top:0;left:0;right:0;text-align:center;padding:9px 12px;font-size:13px;font-weight:700;z-index:999;transition:transform .3s,opacity .3s;letter-spacing:.01em;}
+    .status-bar.ok{background:linear-gradient(90deg,#059669,#10b981);color:#fff;}
+    .status-bar.err{background:linear-gradient(90deg,#dc2626,#ef4444);color:#fff;}
+    .status-bar.warn{background:linear-gradient(90deg,#d97706,#f59e0b);color:#fff;}
+    .status-bar.hidden{transform:translateY(-100%);opacity:0;pointer-events:none;}
+    .conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;transition:background .5s;flex-shrink:0;}
+    .conn-dot.ok{background:#22c55e;box-shadow:0 0 6px #22c55e88;}
+    .conn-dot.warn{background:#f59e0b;box-shadow:0 0 6px #f59e0b88;animation:dotPulse .8s ease-in-out infinite;}
+    .conn-dot.err{background:#ef4444;box-shadow:0 0 6px #ef444488;animation:dotPulse .8s ease-in-out infinite;}
+    @keyframes dotPulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
     /* ── FLOATING SCORE ── */
     .float-score{position:fixed;pointer-events:none;font-family:'Black Han Sans',sans-serif;font-size:36px;color:var(--gold);text-shadow:0 2px 8px rgba(0,0,0,.5);z-index:9000;animation:floatUp .9s ease forwards;}
@@ -155,6 +160,7 @@
 <div class="screen hidden" id="s-lobby">
   <div class="lobby-icon">✅</div>
   <div class="lobby-title">참가 완료!</div>
+  <div style="display:flex;align-items:center;justify-content:center;margin-top:4px;font-size:12px;color:rgba(255,255,255,.55);gap:4px;"><span id="conn-dot" class="conn-dot ok"></span><span id="conn-label">연결됨</span></div>
   <div class="lobby-name" id="lb-name">이름 로딩 중</div>
   <div class="lobby-badge"><span class="ldot"></span>게임 시작을 기다리는 중</div>
   <div class="lobby-count" id="lb-count"></div>
@@ -287,7 +293,8 @@ function sndJoin(){snd(440,.1);setTimeout(()=>snd(550,.18),120);}
 // ── Utils ─────────────────────────────────────────────────────────
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
 function enc(n){return n.replace(/[.#$[\]/]/g,'_');}
-function setStatus(msg,type='ok'){const el=document.getElementById('status');el.textContent=msg;el.className='status-bar '+type;el.classList.remove('hidden');if(type==='ok')setTimeout(()=>el.classList.add('hidden'),2500);}
+function setStatus(msg,type='ok'){const el=document.getElementById('status');el.textContent=msg;el.className='status-bar '+type;el.classList.remove('hidden');if(type==='ok')setTimeout(()=>el.classList.add('hidden'),2000);}
+function setConnDot(state){const d=document.getElementById('conn-dot');const l=document.getElementById('conn-label');if(d)d.className='conn-dot '+state;if(l)l.textContent={ok:'연결됨',warn:'재연결 중...',err:'오프라인'}[state]||'';}
 
 // ── Floating score animation ──────────────────────────────────────
 function floatScore(text, color='#FFD700'){
@@ -303,29 +310,36 @@ function floatScore(text, color='#FFD700'){
 
 // ── Firebase ──────────────────────────────────────────────────────
 async function fbPut(p,d){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
-async function fbGet(p){try{const r=await fetch(FB+p+'.json');return r.ok?r.json():null;}catch(e){return null;}}
+async function fbGet(p,ms=8000){const ac=new AbortController();const t=setTimeout(()=>ac.abort(),ms);try{const r=await fetch(FB+p+'.json',{signal:ac.signal});return r.ok?r.json():null;}catch(e){return null;}finally{clearTimeout(t);}}
 
 // ── Join ──────────────────────────────────────────────────────────
 let joined=false;
 function _resetJoinBtn(){const b=document.getElementById('join-btn');if(b){b.disabled=false;b.textContent='✅ 참가하기';}}
-function join(){
+async function join(){
   if(joined)return;
   const btn=document.getElementById('join-btn');
-  if(btn){btn.disabled=true;btn.textContent='⏳ 참가 중...';}
-  joined=true;
-  getAC(); // unlock audio on user gesture
   const nameIn=document.getElementById('name-in');
   const n=nameIn.value.trim().slice(0,8);
   if(!n){
-    joined=false;_resetJoinBtn();
     nameIn.classList.remove('shake');void nameIn.offsetWidth;nameIn.classList.add('shake');
-    nameIn.focus();
-    setTimeout(()=>nameIn.classList.remove('shake'),400);
-    return;
+    nameIn.focus();setTimeout(()=>nameIn.classList.remove('shake'),400);return;
   }
-  if(!USE_FB){joined=false;_resetJoinBtn();setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
+  if(!USE_FB){setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
+  if(btn){btn.disabled=true;btn.textContent='⏳ 확인 중...';}
+  getAC();
+  // 중복 닉네임 체크
+  const existing=await fbGet('/players/'+enc(n),5000);
+  if(existing&&existing.lastSeen&&(Date.now()-existing.lastSeen)<25000){
+    nameIn.classList.remove('shake');void nameIn.offsetWidth;nameIn.classList.add('shake');
+    setStatus('⚠️ 이미 사용 중인 닉네임입니다. 다른 이름을 입력하세요','err');
+    if(btn){btn.disabled=false;btn.textContent='✅ 참가하기';}return;
+  }
+  joined=true;
   myName=n;myJoinedAt=Date.now();localStorage.setItem('wc_player_name',n);
-  fetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:myJoinedAt,lastSeen:myJoinedAt})}).catch(()=>setStatus('⚠️ 서버 연결 실패 — 잠시 후 자동 재시도','warn'));
+  const ac2=new AbortController();const t2=setTimeout(()=>ac2.abort(),8000);
+  try{await fetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',signal:ac2.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:myJoinedAt,lastSeen:myJoinedAt})});}
+  catch{setStatus('⚠️ 서버 연결 실패. 계속 진행합니다.','warn');}
+  finally{clearTimeout(t2);}
   document.getElementById('lb-name').textContent=n+' 님 참가 완료';
   show('s-lobby');
   listen();
@@ -348,7 +362,7 @@ function startSyncPoll(){
     if(!sid||sid==='s-done')return;
     // Heartbeat: update lastSeen every ~15s so operator knows who's live
     _heartTick=(_heartTick+1)%4;
-    if(_heartTick===0&&myName)fetch(FB+'/players/'+enc(myName)+'.json',{method:'PATCH',body:JSON.stringify({name:myName,joinedAt:myJoinedAt,lastSeen:Date.now()}),headers:{'Content-Type':'application/json'}}).catch(()=>{});
+    if(_heartTick===0&&myName){const _hac=new AbortController();setTimeout(()=>_hac.abort(),5000);fetch(FB+'/players/'+enc(myName)+'.json',{method:'PATCH',signal:_hac.signal,body:JSON.stringify({name:myName,joinedAt:myJoinedAt,lastSeen:Date.now()}),headers:{'Content-Type':'application/json'}}).catch(()=>{});}
     if(sid==='s-lobby'||sid==='s-wait'||sid==='s-reveal'||sid==='s-question'){
       const cur=await fbGet('/session');
       if(cur&&(
@@ -382,14 +396,15 @@ function updateWaitSub(){
     el.textContent=rem>0?`${n}/${totalPlayers}명 응답 · ${rem}명 대기중`:'✅ 전원 응답! 곧 공개됩니다...';
   }
 }
+let _reconnDelay=3000;
 function listen(){
   clearTimeout(_listenTimer);_listenTimer=null;
   if(sessionES){try{sessionES.close();}catch{}}
   sessionES=new EventSource(FB+'/session.json');
-  sessionES.addEventListener('put',e=>{const d=JSON.parse(e.data);_sessState=d.data;onSession(_sessState);});
-  sessionES.addEventListener('patch',e=>{const d=JSON.parse(e.data);if(!d.data)return;_sessState=Object.assign(_sessState||{},d.data);onSession(_sessState);});
-  sessionES.onerror=()=>{if(!joined||_listenTimer)return;setStatus('⚠️ 연결 끊김, 재연결 중...','err');_listenTimer=setTimeout(listen,3000);};
-  sessionES.onopen=()=>setStatus('✅ 연결됨','ok');
+  sessionES.addEventListener('put',e=>{const d=JSON.parse(e.data);_sessState=d.data;_reconnDelay=3000;setConnDot('ok');onSession(_sessState);});
+  sessionES.addEventListener('patch',e=>{const d=JSON.parse(e.data);if(!d.data)return;_sessState=Object.assign(_sessState||{},d.data);_reconnDelay=3000;setConnDot('ok');onSession(_sessState);});
+  sessionES.onerror=()=>{if(!joined||_listenTimer)return;setConnDot('warn');setStatus('⚠️ 연결 끊김, 재연결 중... ('+Math.round(_reconnDelay/1000)+'s)','err');_listenTimer=setTimeout(()=>{_reconnDelay=Math.min(_reconnDelay*2,30000);listen();},_reconnDelay);};
+  sessionES.onopen=()=>{_reconnDelay=3000;setConnDot('ok');setStatus('✅ 연결됨','ok');};
 }
 
 // ── Session handler ───────────────────────────────────────────────
