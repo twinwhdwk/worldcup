@@ -27,6 +27,8 @@
     @keyframes inputShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
     .login-input.shake{animation:inputShake .35s ease;border-color:#ef4444!important;}
     .no-fb-warn{color:#fcd34d;font-size:12px;text-align:center;margin-top:14px;max-width:280px;line-height:1.5;}
+    .lby-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-top:6px;}
+    .lby-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap;}
 
     /* ── LOBBY ── */
     #s-lobby{background:var(--dark);}
@@ -69,7 +71,8 @@
     .opt.b{background:#1050c0;}
     .opt.c{background:#c08000;}
     .opt.d{background:#008542;}
-    .opt.selected{box-shadow:0 0 0 3px #fff,0 0 24px rgba(255,255,255,.25);}
+    .opt.selected{box-shadow:0 0 0 3px #fff,0 0 24px rgba(255,255,255,.25);animation:selectedBounce .22s ease;}
+    @keyframes selectedBounce{0%,100%{transform:scale(1)}45%{transform:scale(.92)}}
     .opt.correct{background:#22c55e!important;animation:correctPop .5s ease;}
     .opt.wrong{background:#374151!important;opacity:.5;}
     @keyframes correctPop{0%{transform:scale(1)}50%{transform:scale(1.07)}100%{transform:scale(1)}}
@@ -201,6 +204,7 @@
   <div class="wait-title" id="wait-title-el">제출 완료!</div>
   <div class="wait-sub" id="wait-sub">정답 발표를 기다리세요...</div>
   <div id="wait-ans-count" style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px;min-height:16px;"></div>
+  <div id="wait-elapsed" style="font-size:11px;color:rgba(255,255,255,.22);margin-top:2px;min-height:14px;letter-spacing:.5px;"></div>
   <div class="ans-preview" id="wait-prev">—</div>
   <div class="wait-dots"><div class="wd"></div><div class="wd"></div><div class="wd"></div></div>
   <div class="wait-fact" id="wait-fact"><div class="wait-fact-label">⚽ 축구 상식</div><div id="wait-fact-text">로딩 중...</div></div>
@@ -255,7 +259,7 @@ const FB = FIREBASE_URL + '/wc_live';
 const USE_FB = FIREBASE_URL.startsWith('https://');
 
 const LETTERS = ['A','B','C','D'];
-let myName='', myScore=0, myStreak=0, myRank=0;
+let myName='', myScore=0, myStreak=0, myRank=0, _waitStartAt=0, _waitElInt=null;
 let myAnswerIdx=-1, lastQId='', timerInt=null, _lastOpts=[], _curHint=';
 let sessionES=null, beepedSecs=new Set();
 let myJoinedAt=0, _pendingGain=0;
@@ -349,7 +353,7 @@ async function join(){
   startSyncPoll();
   fbGet('/scores/'+enc(n)).then(d=>{if(d){myScore=d.total||0;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore.toLocaleString();}});
   // Immediately show player count without waiting for first poll tick
-  fbGet('/players').then(d=>{if(d&&typeof d==='object'){const _pls=Object.values(d).filter(p=>p&&p.name);totalPlayers=_pls.length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';const _lbp=document.getElementById('lb-players');if(_lbp)_lbp.textContent=_pls.map(p=>p.name).slice(0,12).join(' · ');}});
+  fbGet('/players').then(d=>{if(d&&typeof d==='object'){const _pls=Object.values(d).filter(p=>p&&p.name);totalPlayers=_pls.length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';const _lbp=document.getElementById('lb-players');if(_lbp)_lbp.innerHTML='<div class="lby-chips">'+_pls.slice(0,20).map(p=>'<span class="lby-chip">'+p.name.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>').join('')+'</div>';}});
   sndJoin();
 }
 
@@ -379,7 +383,7 @@ function startSyncPoll(){
     if(_pollTick===0){
       if(sid==='s-lobby'){
         fbGet('/scores/'+enc(myName)).then(d=>{if(d){const fbTotal=d.total||0;if(fbTotal>=myScore&&_pendingGain>0){_pendingGain=0;}if(fbTotal>myScore){myScore=fbTotal;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore.toLocaleString();}}});
-        fbGet('/players').then(d=>{if(d&&typeof d==='object'){const _pls=Object.values(d).filter(p=>p&&p.name);totalPlayers=_pls.length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';const _lbp=document.getElementById('lb-players');if(_lbp)_lbp.textContent=_pls.map(p=>p.name).slice(0,12).join(' · ');}});
+        fbGet('/players').then(d=>{if(d&&typeof d==='object'){const _pls=Object.values(d).filter(p=>p&&p.name);totalPlayers=_pls.length;document.getElementById('lb-count').textContent=totalPlayers>0?totalPlayers+'명 참가 중':'';const _lbp=document.getElementById('lb-players');if(_lbp)_lbp.innerHTML='<div class="lby-chips">'+_pls.slice(0,20).map(p=>'<span class="lby-chip">'+p.name.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>').join('')+'</div>';}});
       }
     }
     if(sid==='s-wait'){
@@ -615,8 +619,10 @@ async function answer(idx){
   const payload={idx,at:Date.now(),name:myName};
   const submitAnswer=async(attempt=0)=>{
     if(_sessState&&_sessState.state!=='question')return;
-    try{await fetch(FB+'/answers/'+enc(myName)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
-    catch{if(attempt<3){setTimeout(()=>submitAnswer(attempt+1),1000*(attempt+1));}else{setStatus('⚠️ 답변 전송 실패. 연결 상태를 확인하세요.','err');}}
+    const _sac=new AbortController();const _st=setTimeout(()=>_sac.abort(),8000);
+    try{await fetch(FB+'/answers/'+enc(myName)+'.json',{method:'PATCH',signal:_sac.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
+    catch{if(attempt<5){const _jt=Math.floor(Math.random()*600);setTimeout(()=>submitAnswer(attempt+1),700*(attempt+1)+_jt);}else{setStatus('⚠️ 답변 전송 실패. 잠시 후 다시 시도하세요.','err');}}
+    finally{clearTimeout(_st);}
   };
   submitAnswer();
   if(navigator.vibrate)navigator.vibrate(40);
@@ -737,7 +743,10 @@ const FOOTBALL_FACTS=[
 ];
 let _factIdx=0,_factTimer=null;
 function startFactRotation(){
-  if(_factTimer)return; // already running
+  if(_factTimer)return;
+  _waitStartAt=Date.now();
+  clearInterval(_waitElInt);
+  _waitElInt=setInterval(()=>{const _we=document.getElementById('wait-elapsed');if(_we)_we.textContent='제출 후 '+Math.floor((Date.now()-_waitStartAt)/1000)+'초 경과';},1000);
   const el=document.getElementById('wait-fact-text');
   if(!el)return;
   _factIdx=~~(Math.random()*FOOTBALL_FACTS.length);
@@ -749,7 +758,7 @@ function startFactRotation(){
     if(fEl){fEl.style.opacity='0';setTimeout(()=>{fEl.textContent=FOOTBALL_FACTS[_factIdx];fEl.style.opacity='1';fEl.style.transition='opacity .4s';},300);}
   },5000);
 }
-function stopFactRotation(){clearInterval(_factTimer);_factTimer=null;}
+function stopFactRotation(){clearInterval(_factTimer);_factTimer=null;clearInterval(_waitElInt);_waitElInt=null;const _we=document.getElementById('wait-elapsed');if(_we)_we.textContent='';}
 
 // ── Confetti ──────────────────────────────────────────────────────
 function confetti(){
