@@ -405,7 +405,7 @@ function startSyncPoll(){
       )){_sessState=cur;onSession(cur);}
     }
     _pollTick=(_pollTick+1)%2;
-    if(sid==='s-wait'){const ac=await fbGet('/answers');const ct=ac?Object.keys(ac).length:0;const we=document.getElementById('wait-ans-count');if(we&&ct>0)we.textContent=ct+'명 제출 완료';}
+    if(sid==='s-wait'){const ac=await fbGet('/answers');const ct=ac?Object.keys(ac).length:0;const we=document.getElementById('wait-ans-count');if(we){if(ct>0){const _tp=totalPlayers||0;if(_tp>0&&ct>=_tp){we.textContent='✅ 전원 제출!';we.style.color='#4ade80';}else{we.textContent=_tp>0?ct+'/'+_tp+'명 제출':ct+'명 제출';we.style.color='';}}}  }
     if(_pollTick===0){
       if(sid==='s-lobby'){
         fbGet('/scores/'+enc(myName)).then(d=>{if(d){const fbTotal=d.total||0;if(fbTotal>=myScore&&_pendingGain>0){_pendingGain=0;}if(fbTotal>myScore){myScore=fbTotal;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore.toLocaleString();}}});
