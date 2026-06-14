@@ -995,6 +995,7 @@ async function nextQuestion(){
 
   currentAnswers={};
   allAnsweredPending=false;
+  ['a','b','c','d'].forEach(_x=>{const _r=document.querySelector('.ad-row.'+_x);if(_r)_r.classList.remove('correct-row');});
   const miniLbEl=document.getElementById('tv-mini-lb');if(miniLbEl)miniLbEl.classList.remove('show');
   const tvBar2=document.getElementById('tv-ans-bar');const tvLbl2=document.getElementById('tv-ans-lbl');
   if(tvBar2){tvBar2.style.width='0%';tvBar2.style.background='var(--green)';}
@@ -1040,6 +1041,9 @@ async function nextQuestion(){
   document.getElementById('st-q').textContent=(currentQIdx+1)+'/'+sessionQuestions.length;
   const _qi=document.getElementById('ctrl-q-indicator');if(_qi)_qi.textContent='('+(currentQIdx+1)+'/'+sessionQuestions.length+')';
   document.getElementById('st-state').textContent='▶ 진행중';
+  if(window._elapsedInt)clearInterval(window._elapsedInt);
+  const _elStart=Date.now();
+  window._elapsedInt=setInterval(()=>{const el=document.getElementById('ctrl-q-indicator');if(el)el.textContent='('+(currentQIdx+1)+'/'+sessionQuestions.length+' · '+Math.floor((Date.now()-_elStart)/1000)+'s)';},1000);
   document.getElementById('btn-nextq').style.display='none';
   document.getElementById('btn-reveal').style.display='block';
   document.getElementById('btn-cont').style.display='none';
@@ -1103,6 +1107,7 @@ async function revealAnswer(){
   revealInProgress=true;
   allAnsweredPending=false;
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
+  if(window._elapsedInt){clearInterval(window._elapsedInt);window._elapsedInt=null;}
   document.getElementById('tv-countdown').textContent='';
   const _revBtn=document.getElementById('btn-reveal');
   if(_revBtn)_revBtn.disabled=true;
@@ -1171,6 +1176,8 @@ async function revealAnswer(){
   // O/X highlight removed — operator already knows correct answer; reveal panel shows it clearly
 
   document.getElementById('st-state').textContent='🎯 정답 공개';
+  ['a','b','c','d'].forEach(_x=>{const _r=document.querySelector('.ad-row.'+_x);if(_r)_r.classList.remove('correct-row');});
+  const _corrRow=document.querySelector('.ad-row.'+['a','b','c','d'][ci]);if(_corrRow)_corrRow.classList.add('correct-row');
   document.getElementById('btn-reveal').style.display='none';
   document.getElementById('btn-skip').style.display='none';
   const isLast=currentQIdx+1>=sessionQuestions.length;
