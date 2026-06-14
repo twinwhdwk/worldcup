@@ -931,7 +931,7 @@ function scheduleReconnect(){
 }
 
 // ── Listening (단일 루트 SSE — HTTP 연결 1개만 사용) ───────────────
-let prevPlayerCount=0;
+let prevPlayerCount=0,_knownNames=new Set();
 function startListening(){
   if(playersES){try{playersES.close();}catch{}}
   playersES=new EventSource(FB+'.json');
@@ -939,7 +939,11 @@ function startListening(){
   const onPlayers=d=>{
     const players=Object.values(d||{}).filter(p=>p&&typeof p==='object'&&p.name);
     const n=players.length;
+    const _newP=players.filter(p=>!_knownNames.has(p.name));
+    const _kWasInit=_knownNames.size>0;
+    _newP.forEach(p=>_knownNames.add(p.name));
     if(n>prevPlayerCount){sndJoin();}
+    if(_kWasInit)_newP.forEach(p=>toast('🙋 '+esc(p.name)+' 참가!'));
     prevPlayerCount=n;
     document.getElementById('st-players').textContent=n;
     document.getElementById('tv-lobby-count').textContent=n>0?'👥 '+n+'명 참가중':'';
@@ -1088,10 +1092,19 @@ function startTvTimer(startAt,limit){
 }
 
 // ── Skip question ──────────────────────────────────────────────────
-let _skipping=false;
+let _skipping=false,_skipWarn=false,_skipWarnTimer=null;
 async function skipQuestion(){
   if(_skipping)return;
-  if(!confirm('이 문제를 건너뛰겠습니까?'))return;
+  const _sb=document.getElementById('btn-skip');
+  if(!_skipWarn){
+    _skipWarn=true;
+    if(_sb){_sb.textContent='⚠️ 한번 더 클릭!';_sb.style.background='rgba(239,68,68,.18)';_sb.style.border='1px solid rgba(239,68,68,.55)';_sb.style.color='#f87171';}
+    clearTimeout(_skipWarnTimer);
+    _skipWarnTimer=setTimeout(()=>{_skipWarn=false;const sb=document.getElementById('btn-skip');if(sb){sb.textContent='⏭ 문제 건너뛰기';sb.style.background='';sb.style.border='';sb.style.color='';}},3000);
+    return;
+  }
+  _skipWarn=false;clearTimeout(_skipWarnTimer);
+  if(_sb){_sb.textContent='⏭ 문제 건너뛰기';_sb.style.background='';_sb.style.border='';_sb.style.color='';}
   _skipping=true;
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
   revealInProgress=false;allAnsweredPending=false;
