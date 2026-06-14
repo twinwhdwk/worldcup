@@ -1038,7 +1038,7 @@ async function nextQuestion(){
   startTvTimer(startAt,limit);
 
   document.getElementById('st-q').textContent=(currentQIdx+1)+'/'+sessionQuestions.length;
-  const _qi=document.getElementById('ctrl-q-indicator');if(_qi)_qi.textContent='('+（currentQIdx+1)+'/'+sessionQuestions.length+')';
+  const _qi=document.getElementById('ctrl-q-indicator');if(_qi)_qi.textContent='('+(currentQIdx+1)+'/'+sessionQuestions.length+')';
   document.getElementById('st-state').textContent='문제 진행중';
   document.getElementById('btn-nextq').style.display='none';
   document.getElementById('btn-reveal').style.display='block';
