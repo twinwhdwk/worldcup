@@ -249,7 +249,8 @@
   </div>
   <div id="done-top3" style="width:100%;max-width:360px;margin-bottom:14px;"></div>
   <a id="done-sb-link" href="scoreboard.html" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;text-decoration:none;border-radius:14px;padding:14px 28px;font-family:'Black Han Sans',sans-serif;font-size:17px;letter-spacing:1px;box-shadow:0 4px 16px rgba(245,158,11,.4);transition:transform .15s;">📊 최종 랭킹 보기</a>
-<div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,.3);">함께해 주셔서 감사합니다 ⚽</div>
+<button onclick="(()=>{const txt=`${myName||'나'}: ${myScore.toLocaleString()}점 (${lastKnownRank>0?lastKnownRank+'위':'순위 집계 중'}) — 월드컵 퀴즈`;navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>{this.textContent='✅ 복사됨!';setTimeout(()=>{this.textContent='📋 점수 복사';},1500);}).catch(()=>{this.textContent='복사 실패';});})();" style="margin-top:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 24px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;" >📋 점수 복사</button>
+<div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,.3);">함께해 주셔서 감사합니다 ⚽</div>
 </div>
 
 <!-- REVEAL -->
@@ -283,7 +284,7 @@ const USE_FB = FIREBASE_URL.startsWith('https://');
 const LETTERS = ['A','B','C','D'];
 let myName='', myScore=0, myStreak=0, myRank=0, _waitStartAt=0, _waitElInt=null;
 let _wakeLock=null;
-let myAnswerIdx=-1, lastQId='', timerInt=null, _lastOpts=[], _curHint=';
+let myAnswerIdx=-1, lastQId='', timerInt=null, _lastOpts=[], _curHint='';
 let sessionES=null, beepedSecs=new Set();
 let myJoinedAt=0, _pendingGain=0;
 let _revealQId='', _doneShown=false, _allVibDone=false;
@@ -656,7 +657,7 @@ async function answer(idx){
     if(_sessState&&_sessState.state!=='question')return;
     const _sac=new AbortController();const _st=setTimeout(()=>_sac.abort(),8000);
     try{await fetch(FB+'/answers/'+enc(myName)+'.json',{method:'PATCH',signal:_sac.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
-    catch{if(attempt<5){const _jt=Math.floor(Math.random()*600);setTimeout(()=>submitAnswer(attempt+1),700*(attempt+1)+_jt);}else{setStatus('⚠️ 답변 전송 실패.','err');const _rrb=document.getElementById('wait-retry-btn');if(_rrb){_rrb.style.display='block';_rrb.onclick=()=>{_rrb.style.display='none';submitAnswer();};}}}
+    catch{if(attempt<5){const _jt=Math.floor(Math.random()*600);setStatus('⏳ 답변 재시도 중... ('+(attempt+2)+'/5)','warn');setTimeout(()=>submitAnswer(attempt+1),700*(attempt+1)+_jt);}else{setStatus('⚠️ 답변 전송 실패. 버튼을 눌러 다시 시도하세요.','err');const _rrb=document.getElementById('wait-retry-btn');if(_rrb){_rrb.style.display='block';_rrb.onclick=()=>{_rrb.style.display='none';submitAnswer();};}}}
     finally{clearTimeout(_st);}
   };
   submitAnswer();
