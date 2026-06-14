@@ -72,7 +72,8 @@
     .opt:active::after{opacity:1;}
     .opt:not(:disabled):hover{filter:brightness(1.12);transform:scale(1.01);}
     .opt:active:not(:disabled){transform:scale(0.94);}
-    .opt:disabled{cursor:not-allowed;}
+    .opt:disabled{cursor:not-allowed;opacity:.42;transform:scale(.97);transition:opacity .25s,transform .25s;}
+    .opt.selected:disabled,.opt.correct,.opt.wrong{opacity:1!important;transform:none!important;}
     .opt.a{background:#c9003b;}
     .opt.b{background:#1050c0;}
     .opt.c{background:#c08000;}
@@ -242,7 +243,7 @@
 <div class="screen hidden" id="s-done" style="background:radial-gradient(ellipse at 50% 20%,rgba(255,215,0,.12),transparent 65%),var(--dark);overflow-y:auto;justify-content:flex-start;padding-top:32px;">
   <div style="font-size:90px;animation:popIn .6s cubic-bezier(.34,1.56,.64,1);" id="done-emoji">🏆</div>
   <div style="font-family:'Black Han Sans',sans-serif;font-size:32px;margin:10px 0 6px;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">게임 종료!</div>
-  <div style="font-size:14px;color:var(--muted2);margin-bottom:20px;">고생하셨습니다 🎉</div>
+  <div id="done-greeting" style="font-size:14px;color:var(--muted2);margin-bottom:20px;">고생하셨습니다 🎉</div>
   <!-- Prize winner banner (shown when top 10) -->
   <div id="done-prize-banner" style="display:none;width:100%;max-width:320px;background:linear-gradient(135deg,#FFD700,#f59e0b);color:#000;border-radius:20px;padding:20px 24px;text-align:center;margin-bottom:18px;animation:popIn .6s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 40px rgba(255,215,0,.4);">
     <div style="font-size:44px;margin-bottom:6px;">🎁</div>
@@ -518,6 +519,7 @@ function onSession(s){
       } else {rankEl.textContent='';}
       const sbLink=document.getElementById('done-sb-link');
       if(USE_FB)sbLink.href='scoreboard.html?db='+btoa(FIREBASE_URL);
+      const _dgr=document.getElementById('done-greeting');if(_dgr&&myName)_dgr.textContent=myName+'님, 수고하셨습니다! 🎉';
       const _dgs=document.getElementById('done-game-stats');if(_dgs&&myCorrectCount>0){_dgs.style.display='block';_dgs.textContent=myCorrectCount+'문제 정답'+(myBestStreak>=3?' · 🔥 최고 '+myBestStreak+'연속':'');}const _dsb=document.getElementById('done-share-btn');if(_dsb&&navigator.share)_dsb.textContent='🔗 결과 공유';show('s-done');
       setTimeout(confetti,400);
       const _dt3=document.getElementById('done-top3');
