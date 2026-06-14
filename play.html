@@ -52,6 +52,8 @@
     .q-time-num{text-align:right;font-family:'Black Han Sans',sans-serif;font-size:15px;color:var(--muted2);margin-bottom:8px;}
     .q-time-num.urgent{color:#ef4444;animation:urgentPulse .3s ease infinite alternate;}
     @keyframes urgentPulse{from{transform:scale(1)}to{transform:scale(1.2)}}
+    #q-hint-box{display:none;background:rgba(255,215,0,.13);border:1px solid rgba(255,215,0,.35);border-radius:14px;padding:9px 14px;margin:6px 0 2px;text-align:center;font-size:13px;color:var(--gold);animation:hintPop .4s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes hintPop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
     .q-card{width:100%;background:var(--card);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:20px;text-align:center;margin-bottom:12px;flex-shrink:0;}
     .q-emoji{font-size:52px;display:block;margin-bottom:10px;}
     .q-text{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:clamp(17px,4vw,24px);line-height:1.35;}
@@ -172,6 +174,7 @@
   </div>
   <div class="timer-wrap"><div id="q-tbar"></div></div>
   <div class="q-time-num" id="q-time-num">20</div>
+  <div id="q-hint-box">💡 <span id="q-hint-text"></span></div>
   <div class="q-card">
     <span class="q-emoji" id="q-emoji">⚽</span>
     <div class="q-text" id="q-text">로딩 중...</div>
@@ -244,7 +247,7 @@ const USE_FB = FIREBASE_URL.startsWith('https://');
 
 const LETTERS = ['A','B','C','D'];
 let myName='', myScore=0, myStreak=0, myRank=0;
-let myAnswerIdx=-1, lastQId='', timerInt=null, _lastOpts=[];
+let myAnswerIdx=-1, lastQId='', timerInt=null, _lastOpts=[], _curHint=';
 let sessionES=null, beepedSecs=new Set();
 let myJoinedAt=0, _pendingGain=0;
 let _revealQId='', _doneShown=false;
@@ -552,6 +555,8 @@ async function renderQ(s){
       b.disabled=false;
     });
     beepedSecs=new Set();
+    _curHint=q.hint||';
+    const _hb=document.getElementById('q-hint-box');if(_hb){_hb.style.display='none';}
     tick(q.startAt||Date.now(),q.timeLimit||20);
   };
   const elapsed=(Date.now()-(q.startAt||Date.now()))/1000;
@@ -570,6 +575,7 @@ function tick(startAt,limit){
     timeEl.textContent=rem>0?remSec:'⏰';
     timeEl.className='q-time-num'+(rem<6&&rem>0?' urgent':'');
     if(rem<6&&rem>0&&!beepedSecs.has(remSec)){beepedSecs.add(remSec);sndUrgent();}
+    if(rem<=5&&rem>0&&_curHint){const _hb=document.getElementById('q-hint-box');if(_hb&&_hb.style.display==='none'){document.getElementById('q-hint-text').textContent=_curHint;_hb.style.display='block';}}
     if(rem<=0){clearInterval(timerInt);[0,1,2,3].forEach(i=>document.getElementById('o'+i).disabled=true);const _as=document.querySelector('.screen:not(.hidden)')?.id;if(myAnswerIdx<0&&_as==='s-question'){const _wp=document.getElementById('wait-prev');if(_wp)_wp.textContent='— (미응답)';const _wi=document.getElementById('wait-icon-el');if(_wi)_wi.textContent='⏰';const _wt=document.getElementById('wait-title-el');if(_wt)_wt.textContent='시간 초과!';const _wsub=document.getElementById('wait-sub');if(_wsub)_wsub.textContent='⏰ 시간 초과! 정답을 기다리세요...';show('s-wait');startFactRotation();}}
   };
   run();timerInt=setInterval(run,200);
