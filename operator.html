@@ -374,6 +374,7 @@
       <button class="ctrl-btn btn-start" onclick="startGame()">▶ 게임 시작</button>
       <button class="ctrl-btn btn-lobby" style="margin-top:4px;" onclick="endSession()">🏁 세션 종료</button>
       <div id="ctrl-curr-q-text" style="display:none;margin-top:10px;font-size:12px;color:rgba(255,255,255,.62);background:rgba(255,255,255,.04);border-radius:10px;padding:7px 12px;line-height:1.55;border-left:2px solid rgba(255,255,255,.15);"></div>
+      <button id="btn-hint-toggle" onclick="(()=>{const b=document.getElementById('ctrl-hint-box');if(b){const on=b.style.display==='block';b.style.display=on?'none':'block';document.getElementById('btn-hint-toggle').textContent=on?'💡 힌트 보기':'💡 힌트 숨기기';}})()" style="display:none;margin-top:8px;width:100%;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:7px 14px;font-size:13px;color:rgba(255,215,0,.8);cursor:pointer;font-family:inherit;">💡 힌트 보기</button>
       <div id="ctrl-hint-box" style="display:none;margin-top:14px;background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.18);border-radius:12px;padding:10px 14px;"><div style="font-size:10px;color:var(--muted2);letter-spacing:1px;font-weight:700;margin-bottom:5px;">💡 현재 힌트</div><div id="ctrl-hint-text" style="font-size:13px;color:rgba(255,255,255,.82);line-height:1.55;"></div></div>
     </div>
 
@@ -828,6 +829,8 @@ async async function openSession(){
   document.getElementById('st-state').textContent='⏸ 대기중';
   document.getElementById('st-players').textContent='0';
   renderAnswerDist();renderLeaderboard();
+  const _hbtnOs=document.getElementById('btn-hint-toggle');if(_hbtnOs){_hbtnOs.style.display='none';_hbtnOs.textContent='💡 힌트 보기';}
+  const _chbOs=document.getElementById('ctrl-hint-box');if(_chbOs){_chbOs.style.display='none';_chbOs.style.opacity='1';}
   const finalLbEl=document.getElementById('tv-final-lb');
   if(finalLbEl)finalLbEl.style.display='none';
   updateQR(getPlayUrl(),'📱 스캔해서 참가');
@@ -1021,6 +1024,8 @@ async function nextQuestion(){
   currentAnswers={};
   allAnsweredPending=false;
   document.querySelectorAll('.player-chip').forEach(ch=>ch.classList.remove('answered'));
+  const _hbtnReset=document.getElementById('btn-hint-toggle');if(_hbtnReset){_hbtnReset.style.display='none';_hbtnReset.style.opacity='1';_hbtnReset.textContent='💡 힌트 보기';}
+  const _chbReset=document.getElementById('ctrl-hint-box');if(_chbReset){_chbReset.style.opacity='1';}
   ['a','b','c','d'].forEach(_x=>{const _r=document.querySelector('.ad-row.'+_x);if(_r)_r.classList.remove('correct-row');});
   const miniLbEl=document.getElementById('tv-mini-lb');if(miniLbEl)miniLbEl.classList.remove('show');
   const tvBar2=document.getElementById('tv-ans-bar');const tvLbl2=document.getElementById('tv-ans-lbl');
@@ -1057,7 +1062,7 @@ async function nextQuestion(){
   else{_emojiEl.textContent=q.emoji||'⚽';twparse(_emojiEl);}
   document.getElementById('tv-q-text').textContent=q.text;
   const _chb=document.getElementById('ctrl-hint-box'),_cht=document.getElementById('ctrl-hint-text');
-  if(_chb){_chb.style.opacity='1';if(q.hint){_cht.textContent=q.hint;_chb.style.display='block';}else{_chb.style.display='none';}}
+  if(_chb){_chb.style.opacity='1';const _hbt=document.getElementById('btn-hint-toggle');if(q.hint){_cht.textContent=q.hint;_chb.style.display='block';if(_hbt){_hbt.style.display='block';_hbt.textContent='💡 힌트 숨기기';}}else{_chb.style.display='none';if(_hbt)_hbt.style.display='none';}}
   const _cqt=document.getElementById('ctrl-curr-q-text');if(_cqt){_cqt.textContent=q.text;_cqt.style.display='block';_cqt.style.opacity='1';}
   const _cpw=document.getElementById('ctrl-prog-wrap'),_cpb=document.getElementById('ctrl-prog-bar');
   if(_cpw&&_cpb){_cpw.style.display='block';_cpb.style.width=((currentQIdx+1)/sessionQuestions.length*100)+'%';}
@@ -1143,7 +1148,7 @@ async function skipQuestion(){
 let revealInProgress=false;
 async function revealAnswer(){
   if(revealInProgress)return;
-  const _chb2=document.getElementById('ctrl-hint-box');if(_chb2&&_chb2.style.display!=='none')_chb2.style.opacity='.25';const _cqt2=document.getElementById('ctrl-curr-q-text');if(_cqt2)_cqt2.style.opacity='.25';
+  const _chb2=document.getElementById('ctrl-hint-box');if(_chb2&&_chb2.style.display!=='none')_chb2.style.opacity='.25';const _hbt2=document.getElementById('btn-hint-toggle');if(_hbt2)_hbt2.style.opacity='.4';const _cqt2=document.getElementById('ctrl-curr-q-text');if(_cqt2)_cqt2.style.opacity='.25';
   revealInProgress=true;
   allAnsweredPending=false;
   clearInterval(tvTimerInt);clearInterval(cntdownInt);
@@ -1571,6 +1576,7 @@ if(USE_FB) updateQR(getPlayUrl(),'📱 스캔해서 참가');
 // ── Keyboard shortcuts ─────────────────────────────────────────────
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.code==='KeyH'){e.preventDefault();const _hbtn=document.getElementById('btn-hint-toggle');if(_hbtn&&_hbtn.style.display!=='none')_hbtn.click();return;}
   if(e.code==='Space'||e.code==='Enter'){
     e.preventDefault();
     const reveal=document.getElementById('btn-reveal');
