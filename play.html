@@ -543,7 +543,7 @@ async function renderQ(s){
     document.getElementById('q-lbl').textContent=s.game||'퀴즈';
     document.getElementById('q-score').textContent=myScore.toLocaleString()+'점';
     const emojiEl=document.getElementById('q-emoji');
-    if(q.img){const _is=q.bigImg?'max-height:160px;max-width:220px':'max-height:88px;max-width:140px';emojiEl.innerHTML=`<img src="${q.img}" data-emoji="${q.emoji||'⚽'}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg';else{this.style.display='none';this.parentElement.textContent=this.dataset.emoji||'⚽';}}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
+    if(q.img){const _is=q.bigImg?'max-height:208px;max-width:286px':'max-height:114px;max-width:182px';emojiEl.innerHTML=`<img src="${q.img}" data-emoji="${q.emoji||'⚽'}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg';else{this.style.display='none';this.parentElement.textContent=this.dataset.emoji||'⚽';}}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
     else{emojiEl.textContent=q.emoji||'⚽';if(typeof twemoji!=='undefined')twemoji.parse(emojiEl);}
     document.getElementById('q-text').textContent=q.text;
     document.getElementById('q-num').textContent='문제 '+(s.questionIdx+1)+' / '+s.totalQuestions;
