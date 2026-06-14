@@ -432,7 +432,8 @@ function exportCSV(){
   const sorted = Object.values(allScores).filter(p=>p&&p.name).sort((a,b)=>b.total-a.total);
   const rows = [['순위','이름','점수','정답수','연속정답']];
   sorted.forEach((p,i)=>rows.push([i+1, p.name, p.total||0, p.correct||0, p.streak||0]));
-  const csv = rows.map(r=>r.join(',')).join('\n');
+  const escCSV=v=>{const s=String(v);return(s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s;};
+  const csv = rows.map(r=>r.map(escCSV).join(',')).join('\n');
   const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

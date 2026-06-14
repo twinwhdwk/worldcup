@@ -299,9 +299,8 @@ function floatScore(text, color='#FFD700'){
 }
 
 // ── Firebase ──────────────────────────────────────────────────────
-async function _fbFetch(url,opts,ms=9000){const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);try{const r=await fetch(url,{...opts,signal:ctrl.signal});clearTimeout(t);return r;}catch(e){clearTimeout(t);if(e.name==='AbortError')throw new Error('Firebase 응답 없음 (9초 초과)');throw e;}}
-async function fbPut(p,d){if(!USE_FB)return;const r=await _fbFetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
-async function fbGet(p){try{const r=await _fbFetch(FB+p+'.json',{},9000);return r.json();}catch(e){return null;}}
+async function fbPut(p,d){if(!USE_FB)return;const r=await fetch(FB+p+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Firebase PUT '+r.status);}
+async function fbGet(p){try{const r=await fetch(FB+p+'.json');return r.ok?r.json():null;}catch(e){return null;}}
 
 // ── Join ──────────────────────────────────────────────────────────
 let joined=false;
@@ -323,7 +322,7 @@ function join(){
   }
   if(!USE_FB){joined=false;_resetJoinBtn();setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
   myName=n;myJoinedAt=Date.now();localStorage.setItem('wc_player_name',n);
-  _fbFetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:myJoinedAt,lastSeen:myJoinedAt})}).catch(()=>setStatus('⚠️ 서버 연결 실패 — 잠시 후 자동 재시도','warn'));
+  fetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:myJoinedAt,lastSeen:myJoinedAt})}).catch(()=>setStatus('⚠️ 서버 연결 실패 — 잠시 후 자동 재시도','warn'));
   document.getElementById('lb-name').textContent=n+' 님 참가 완료';
   show('s-lobby');
   listen();
@@ -346,7 +345,7 @@ function startSyncPoll(){
     if(!sid||sid==='s-done')return;
     // Heartbeat: update lastSeen every ~15s so operator knows who's live
     _heartTick=(_heartTick+1)%4;
-    if(_heartTick===0&&myName)_fbFetch(FB+'/players/'+enc(myName)+'.json',{method:'PATCH',body:JSON.stringify({name:myName,joinedAt:myJoinedAt,lastSeen:Date.now()}),headers:{'Content-Type':'application/json'}}).catch(()=>{});
+    if(_heartTick===0&&myName)fetch(FB+'/players/'+enc(myName)+'.json',{method:'PATCH',body:JSON.stringify({name:myName,joinedAt:myJoinedAt,lastSeen:Date.now()}),headers:{'Content-Type':'application/json'}}).catch(()=>{});
     if(sid==='s-lobby'||sid==='s-wait'||sid==='s-reveal'||sid==='s-question'){
       const cur=await fbGet('/session');
       if(cur&&(
@@ -402,7 +401,7 @@ function updateLobbyRank(){
 function onSession(s){
   if(s&&s.lastClearedAt&&myJoinedAt>0&&s.lastClearedAt>myJoinedAt){
     // 새 세션 — Firebase에서 내 항목 삭제 후 로그인으로 복귀
-    if(myName)_fbFetch(FB+'/players/'+enc(myName)+'.json',{method:'DELETE'}).catch(()=>{});
+    if(myName)fetch(FB+'/players/'+enc(myName)+'.json',{method:'DELETE'}).catch(()=>{});
     joined=false;myJoinedAt=0;myName='';myScore=0;myStreak=0;_pendingGain=0;lastKnownRank=0;
     clearInterval(timerInt);clearInterval(_pollInt);_pollInt=null;
     if(sessionES){try{sessionES.close();}catch{}}sessionES=null;
@@ -591,7 +590,7 @@ async function answer(idx){
   const payload={idx,at:Date.now(),name:myName};
   const submitAnswer=async(attempt=0)=>{
     if(_sessState&&_sessState.state!=='question')return;
-    try{await _fbFetch(FB+'/answers/'+enc(myName)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
+    try{await fetch(FB+'/answers/'+enc(myName)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
     catch{if(attempt<3){setTimeout(()=>submitAnswer(attempt+1),1000*(attempt+1));}else{setStatus('⚠️ 답변 전송 실패. 연결 상태를 확인하세요.','err');}}
   };
   submitAnswer();
