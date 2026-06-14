@@ -188,7 +188,9 @@
     .tv-panel-anim{animation:tvPanelIn .45s cubic-bezier(.34,1.56,.64,1);}
     @keyframes optFlyIn{from{transform:translateX(-20px) scale(.95);opacity:0}to{transform:none;opacity:1}}
     @media(max-width:900px){.main{flex-direction:column-reverse;}.ctrl-panel{width:100%;border-left:none;border-top:1px solid rgba(255,255,255,.05);}.tv-panel{padding:16px;}}
-  </style>
+    @keyframes toastIn{from{transform:translateX(-50%) translateY(12px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+    .op-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(16,185,129,.95);color:#fff;padding:10px 22px;border-radius:14px;font-weight:700;font-size:14px;z-index:9999;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap;}
+    </style>
   <style>
     img.emoji{height:1em;width:1em;margin:0 .05em 0 .05em;vertical-align:-0.1em;}
     .tv-q-emoji img.emoji{height:80px;width:80px;vertical-align:middle;}
@@ -466,7 +468,9 @@ function getPlayUrl(){
   return BASE_URL + '/play.html?db=' + btoa(FIREBASE_URL);
 }
 function openPlayLink(){
-  window.open(getPlayUrl(),'_blank');
+  const _pu=getPlayUrl();
+  window.open(_pu,'_blank');
+  if(navigator.clipboard){navigator.clipboard.writeText(_pu).then(()=>{const _t=document.createElement('div');_t.className='op-toast';_t.textContent='📋 링크 복사됨!';document.body.appendChild(_t);setTimeout(()=>_t.remove(),2000);}).catch(()=>{});}
 }
 
 // Update scoreboard link with db param
