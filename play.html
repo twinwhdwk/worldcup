@@ -286,7 +286,7 @@ let _wakeLock=null;
 let myAnswerIdx=-1, lastQId='', timerInt=null, _lastOpts=[], _curHint=';
 let sessionES=null, beepedSecs=new Set();
 let myJoinedAt=0, _pendingGain=0;
-let _revealQId='', _doneShown=false;
+let _revealQId='', _doneShown=false, _allVibDone=false;
 
 // ── Sound Effects (Web Audio API) ─────────────────────────────────
 let AC=null;
@@ -405,7 +405,7 @@ function startSyncPoll(){
       )){_sessState=cur;onSession(cur);}
     }
     _pollTick=(_pollTick+1)%2;
-    if(sid==='s-wait'){const ac=await fbGet('/answers');const ct=ac?Object.keys(ac).length:0;const we=document.getElementById('wait-ans-count');if(we){if(ct>0){const _tp=totalPlayers||0;if(_tp>0&&ct>=_tp){we.textContent='✅ 전원 제출!';we.style.color='#4ade80';}else{we.textContent=_tp>0?ct+'/'+_tp+'명 제출':ct+'명 제출';we.style.color='';}}}  }
+    if(sid==='s-wait'){const ac=await fbGet('/answers');const ct=ac?Object.keys(ac).length:0;const we=document.getElementById('wait-ans-count');if(we){if(ct>0){const _tp=totalPlayers||0;if(_tp>0&&ct>=_tp){if(!_allVibDone){_allVibDone=true;if(navigator.vibrate)navigator.vibrate([40,20,40]);}we.textContent='✅ 전원 제출!';we.style.color='#4ade80';}else{we.textContent=_tp>0?ct+'/'+_tp+'명 제출':ct+'명 제출';we.style.color='';}}}  }
     if(_pollTick===0){
       if(sid==='s-lobby'){
         fbGet('/scores/'+enc(myName)).then(d=>{if(d){const fbTotal=d.total||0;if(fbTotal>=myScore&&_pendingGain>0){_pendingGain=0;}if(fbTotal>myScore){myScore=fbTotal;myStreak=d.streak||0;document.getElementById('lb-score').textContent=myScore.toLocaleString();}}});
@@ -581,7 +581,7 @@ function renderOptHtml(text){
 // ── Render question ───────────────────────────────────────────────
 async function renderQ(s){
   const q=s.question;if(!q)return;
-  const capturedQId=lastQId;const _rrb0=document.getElementById('wait-retry-btn');if(_rrb0)_rrb0.style.display='none';
+  const capturedQId=lastQId;const _rrb0=document.getElementById('wait-retry-btn');if(_rrb0)_rrb0.style.display='none';_allVibDone=false;
   // Check if player already answered this question (page reload guard)
   const existingAns=await fbGet('/answers/'+enc(myName));
   if(lastQId!==capturedQId||_sessState?.state!=='question')return; // state changed during async
@@ -634,7 +634,7 @@ function tick(startAt,limit){
     timeEl.className='q-time-num'+(rem<6&&rem>0?' urgent':'');
     if(rem<6&&rem>0&&!beepedSecs.has(remSec)){beepedSecs.add(remSec);sndUrgent();}
     if(rem<=5&&rem>0&&_curHint){const _hb=document.getElementById('q-hint-box');if(_hb&&_hb.style.display==='none'){document.getElementById('q-hint-text').textContent=_curHint;_hb.style.display='block';}}
-    if(rem<=0){clearInterval(timerInt);[0,1,2,3].forEach(i=>document.getElementById('o'+i).disabled=true);const _as=document.querySelector('.screen:not(.hidden)')?.id;if(myAnswerIdx<0&&_as==='s-question'){const _wp=document.getElementById('wait-prev');if(_wp)_wp.textContent='— (미응답)';const _wi=document.getElementById('wait-icon-el');if(_wi)_wi.textContent='⏰';const _wt=document.getElementById('wait-title-el');if(_wt)_wt.textContent='시간 초과!';const _wsub=document.getElementById('wait-sub');if(_wsub)_wsub.textContent='⏰ 시간 초과! 정답을 기다리세요...';show('s-wait');startFactRotation();}}
+    if(rem<=0){clearInterval(timerInt);[0,1,2,3].forEach(i=>document.getElementById('o'+i).disabled=true);const _as=document.querySelector('.screen:not(.hidden)')?.id;if(myAnswerIdx<0&&_as==='s-question'){if(navigator.vibrate)navigator.vibrate([200,100,200]);const _wp=document.getElementById('wait-prev');if(_wp)_wp.textContent='— (미응답)';const _wi=document.getElementById('wait-icon-el');if(_wi)_wi.textContent='⏰';const _wt=document.getElementById('wait-title-el');if(_wt)_wt.textContent='시간 초과!';const _wsub=document.getElementById('wait-sub');if(_wsub)_wsub.textContent='⏰ 시간 초과! 정답을 기다리세요...';show('s-wait');startFactRotation();}}
   };
   run();timerInt=setInterval(run,200);
 }
