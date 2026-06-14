@@ -808,7 +808,7 @@ async function openSession(){
   document.getElementById('game-setup').style.display='block';
   document.getElementById('active-ctrl').style.display='none';
   document.getElementById('ans-dist-section').style.display='none';
-  document.getElementById('st-state').textContent='대기중';
+  document.getElementById('st-state').textContent='⏸ 대기중';
   document.getElementById('st-players').textContent='0';
   renderAnswerDist();renderLeaderboard();
   const finalLbEl=document.getElementById('tv-final-lb');
@@ -862,7 +862,7 @@ async function startGame(){
   document.getElementById('btn-cont').style.display='none';
   document.getElementById('btn-skip').style.display='none';
   document.getElementById('ans-dist-section').style.display='block';
-  document.getElementById('st-state').textContent='대기중';
+  document.getElementById('st-state').textContent='⏸ 대기중';
   document.getElementById('st-answered').textContent='0';
   renderAnswerDist();
   const finalLbEl=document.getElementById('tv-final-lb');
@@ -1039,7 +1039,7 @@ async function nextQuestion(){
 
   document.getElementById('st-q').textContent=(currentQIdx+1)+'/'+sessionQuestions.length;
   const _qi=document.getElementById('ctrl-q-indicator');if(_qi)_qi.textContent='('+(currentQIdx+1)+'/'+sessionQuestions.length+')';
-  document.getElementById('st-state').textContent='문제 진행중';
+  document.getElementById('st-state').textContent='▶ 진행중';
   document.getElementById('btn-nextq').style.display='none';
   document.getElementById('btn-reveal').style.display='block';
   document.getElementById('btn-cont').style.display='none';
@@ -1090,7 +1090,7 @@ async function skipQuestion(){
   document.getElementById('btn-skip').style.display='none';
   document.getElementById('btn-skip').disabled=false;
   document.getElementById('btn-nextq').style.display='block';
-  document.getElementById('st-state').textContent='대기';
+  document.getElementById('st-state').textContent='⏸ 대기';
   toast('⏭ 문제 건너뜀');
   // adjust index so nextQuestion increments correctly
   // (next call will do currentQIdx++ first)
@@ -1170,7 +1170,7 @@ async function revealAnswer(){
 
   // O/X highlight removed — operator already knows correct answer; reveal panel shows it clearly
 
-  document.getElementById('st-state').textContent='정답 공개';
+  document.getElementById('st-state').textContent='🎯 정답 공개';
   document.getElementById('btn-reveal').style.display='none';
   document.getElementById('btn-skip').style.display='none';
   const isLast=currentQIdx+1>=sessionQuestions.length;
@@ -1211,7 +1211,7 @@ async function endGame(){
   document.getElementById('active-ctrl').style.display='none';
   document.getElementById('game-setup').style.display='block';
   document.getElementById('ans-dist-section').style.display='none';
-  document.getElementById('st-state').textContent='대기중';
+  document.getElementById('st-state').textContent='⏸ 대기중';
   document.getElementById('tv-lobby-sub').textContent='다음 게임을 준비 중...(운영자가 다음 게임을 선택합니다)';
   document.getElementById('tv-lobby-count').textContent='🏆 현재 누적 순위';
   tvShow('tv-lobby');
@@ -1241,7 +1241,7 @@ async function goHome(){
   document.getElementById('active-ctrl').style.display='none';
   document.getElementById('ans-dist-section').style.display='none';
   document.getElementById('game-setup').style.display='block';
-  document.getElementById('st-state').textContent='대기중';
+  document.getElementById('st-state').textContent='⏸ 대기중';
   document.getElementById('tv-lobby-sub').textContent='다음 게임을 준비 중... 잠시만 기다려주세요!';
   tvShow('tv-lobby');
   toast('🏠 홈으로 돌아왔습니다. 스코어는 유지됩니다.');
@@ -1261,7 +1261,7 @@ async function endSession(){
   document.getElementById('game-setup').style.display='none';
   document.getElementById('session-setup').style.display='block';
   document.getElementById('ans-dist-section').style.display='none';
-  document.getElementById('st-state').textContent='종료';
+  document.getElementById('st-state').textContent='🏁 종료';
   document.getElementById('tv-lobby-sub').textContent='게임 종료! 최종 순위를 확인하세요.';
   document.getElementById('tv-lobby-count').textContent='🏆 최종 순위 발표!';
   tvShow('tv-lobby');
@@ -1447,7 +1447,7 @@ tvShow('tv-lobby');
     document.getElementById('active-ctrl').style.display='block';
     document.getElementById('ans-dist-section').style.display='block';
     document.getElementById('st-q').textContent=(currentQIdx+1)+'/'+sessionQuestions.length;
-    document.getElementById('st-state').textContent=fbSess.state==='reveal'?'정답 공개':'문제 진행중';
+    document.getElementById('st-state').textContent=fbSess.state==='reveal'?'🎯 정답 공개':'▶ 진행중';
     if(fbSess.state==='question'){
       document.getElementById('btn-reveal').style.display='block';
       document.getElementById('btn-nextq').style.display='none';
@@ -1497,7 +1497,7 @@ tvShow('tv-lobby');
       sessionOpen=true;
       document.getElementById('session-setup').style.display='none';
       document.getElementById('game-setup').style.display='block';
-      document.getElementById('st-state').textContent='대기중';
+      document.getElementById('st-state').textContent='⏸ 대기중';
       document.getElementById('st-players').textContent='0';
       renderAnswerDist();renderLeaderboard();
       const finalLbEl=document.getElementById('tv-final-lb');
