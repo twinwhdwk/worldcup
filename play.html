@@ -117,6 +117,8 @@
     .rv-total{font-size:15px;color:var(--muted2);margin-top:8px;animation:slideUpIn .3s .36s ease both;}
     .rv-rank{font-size:16px;color:var(--gold);margin-top:6px;font-weight:700;animation:slideUpIn .3s .46s ease both;}
     .rv-streak{margin-top:12px;font-size:20px;animation:streakIn .4s .4s ease both;}
+    .rv-streak.super-streak{font-size:26px;color:var(--gold);text-shadow:0 0 12px rgba(255,215,0,.5);animation:streakIn .4s .4s ease both,streakShake .5s .85s ease both;}
+    @keyframes streakShake{0%{transform:rotate(0deg)}20%{transform:rotate(-8deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(5deg)}100%{transform:rotate(0deg)}}
     @keyframes streakIn{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
 
     /* ── STATUS BAR ── */
@@ -742,7 +744,7 @@ function showReveal(s){
     }
   } else {rankEl.textContent='';}
 
-  document.getElementById('rv-streak').textContent=myStreak>=2?'🔥 '+myStreak+'연속 정답!':'';
+  const _rvs=document.getElementById('rv-streak');if(myStreak>=3){_rvs.className='rv-streak super-streak';_rvs.textContent='🔥🔥 '+myStreak+'연속 정답! 대박!';} else if(myStreak>=2){_rvs.className='rv-streak';_rvs.textContent='🔥 '+myStreak+'연속 정답!';} else {_rvs.className='rv-streak';_rvs.textContent='';}
   if(ci>=0){[0,1,2,3].forEach(i=>{const b=document.getElementById('o'+i);if(!b)return;if(i===ci)b.classList.add('correct');else b.classList.add('wrong');});}
   const _wasOnQ=document.querySelector('.screen:not(.hidden)')?.id==='s-question';
   setTimeout(()=>{
