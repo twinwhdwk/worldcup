@@ -106,15 +106,15 @@
     .rv-bg{position:absolute;inset:0;pointer-events:none;}
     .rv-icon{font-size:80px;animation:popIn .45s cubic-bezier(.34,1.56,.64,1);margin-bottom:14px;position:relative;}
     @keyframes popIn{from{transform:scale(0) rotate(-5deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
-    .rv-title{font-family:'Black Han Sans',sans-serif;font-size:34px;margin-bottom:8px;position:relative;}
-    .rv-correct-box{background:rgba(34,197,94,.15);border:2px solid rgba(34,197,94,.4);border-radius:14px;padding:12px 22px;margin-bottom:18px;position:relative;}
+    .rv-title{font-family:'Black Han Sans',sans-serif;font-size:34px;margin-bottom:8px;position:relative;animation:slideUpIn .35s .12s ease both;}
+    .rv-correct-box{background:rgba(34,197,94,.15);border:2px solid rgba(34,197,94,.4);border-radius:14px;padding:12px 22px;margin-bottom:18px;position:relative;animation:slideUpIn .38s .22s ease both;}
     .rv-correct-lbl{font-size:11px;color:#4ade80;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
     .rv-correct-val{font-family:'Black Han Sans',sans-serif;font-size:22px;color:#4ade80;}
     .rv-gain{font-family:'Black Han Sans',sans-serif;font-size:52px;color:var(--gold);animation:gainPop .6s .1s cubic-bezier(.34,1.56,.64,1) both;position:relative;}
     @keyframes gainPop{from{transform:scale(.4) translateY(24px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
     .rv-gain.zero{color:#6b7280;}
-    .rv-total{font-size:15px;color:var(--muted2);margin-top:8px;}
-    .rv-rank{font-size:16px;color:var(--gold);margin-top:6px;font-weight:700;}
+    .rv-total{font-size:15px;color:var(--muted2);margin-top:8px;animation:slideUpIn .3s .36s ease both;}
+    .rv-rank{font-size:16px;color:var(--gold);margin-top:6px;font-weight:700;animation:slideUpIn .3s .46s ease both;}
     .rv-streak{margin-top:12px;font-size:20px;animation:streakIn .4s .4s ease both;}
     @keyframes streakIn{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
 
@@ -151,7 +151,10 @@
     .done-lb-name{flex:1;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .done-lb-score{font-family:'Black Han Sans',sans-serif;font-size:16px;color:var(--gold);}
     .done-lb-row.me{background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.25);}
-    </style>
+      @keyframes slideUpIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    @keyframes shakeWrong{0%,100%{transform:scale(1)}15%{transform:rotate(-14deg) scale(1.1)}35%{transform:rotate(13deg) scale(1.1)}55%{transform:rotate(-7deg)}75%{transform:rotate(5deg)}}
+      .s-reveal-wrong .rv-icon{animation:shakeWrong .55s .38s ease!important;}
+      </style>
   <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -672,6 +675,7 @@ function showReveal(s){
   myStreak=correct?(myStreak+1):0;
 
   document.getElementById('rv-icon').textContent=!answered?'⏰':correct?'🎉':'❌';
+  document.getElementById('s-reveal').classList.toggle('s-reveal-wrong',!correct&&answered);
   document.getElementById('rv-title').textContent=!answered?'시간 초과!':correct?'정답! 🎊':'아쉽다! ❌';
   const rvCorr=document.getElementById('rv-correct');
   rvCorr.innerHTML=renderOptHtml(s.question?.options?.[ci]||'—');
