@@ -620,7 +620,7 @@ const QB = {
       {emoji:'🇭🇹',img:'https://flagcdn.com/w160/ht.png',text:'이 국기는 어느 나라?',options:['도미니카공화국','자메이카','아이티','쿠바'],correct:2,hint:'카리브해, 세계 최초 흑인 공화국'},
       {emoji:'🇵🇦',img:'https://flagcdn.com/w160/pa.png',text:'이 국기는 어느 나라?',options:['코스타리카','온두라스','과테말라','파나마'],correct:3,hint:'두 대양을 잋는 운하의 나라'},
       {emoji:'🇨🇴',img:'https://flagcdn.com/w160/co.png',text:'이 국기는 어느 나라?',options:['베네수엘라','에콰도르','콜롬비아','페루'],correct:2,hint:'남미 북부, 커피의 나라'},
-      {emoji:'🇪🇨',img:'https://flagcdn.com/w160/ec.png',text:'이 국기는 어느 나라?',options:['콜롬비아','에콰도르','페루','볼리비아'],correct:1,hint:'국명이 '적도'라는 뜻'},
+      {emoji:'🇪🇨',img:'https://flagcdn.com/w160/ec.png',text:'이 국기는 어느 나라?',options:['콜롬비아','에콰도르','페루','볼리비아'],correct:1,hint:"국명이 '적도'라는 뜻"},
       {emoji:'🇵🇾',img:'https://flagcdn.com/w160/py.png',text:'이 국기는 어느 나라?',options:['볼리비아','파라과이','우루과이','아르헨티나'],correct:1,hint:'남미 내륙국, 과라니어 사용'},
       {emoji:'🇺🇾',img:'https://flagcdn.com/w160/uy.png',text:'이 국기는 어느 나라?',options:['아르헨티나','파라과이','우루과이','볼리비아'],correct:2,hint:'1930년 첫 월드컵 우승, 남미 소국'},
       {emoji:'🇳🇿',img:'https://flagcdn.com/w160/nz.png',text:'이 국기는 어느 나라?',options:['호주','캐나다','아일랜드','뉴질랜드'],correct:3,hint:'오세아니아 섬나라, 유니온잭+남십자성'},
@@ -793,7 +793,7 @@ function updateOnlineCount(){
   if(_offEl){if(_offCnt>0){_offEl.textContent=_offCnt+'명 오프라인';_offEl.style.display='';}else{_offEl.style.display='none';}}
   // 각 플레이어 칩에 온라인/오프라인 표시 (startListening 코드 외부에서 스타일만)
   const chips=document.getElementById('player-chips');
-  if(chips){const names=Object.values(currentPlayers||{}).filter(p=>p&&p.name&&p.lastSeen&&(now-p.lastSeen)<30000).map(p=>p.name);chips.querySelectorAll('.player-chip').forEach(ch=>{const isOnline=names.includes(ch.textContent.trim());ch.style.borderColor=isOnline?'rgba(34,197,94,.5)':'rgba(255,255,255,.08)';ch.style.opacity=isOnline?'1':'.4';});}}}
+  if(chips){const names=Object.values(currentPlayers||{}).filter(p=>p&&p.name&&p.lastSeen&&(now-p.lastSeen)<30000).map(p=>p.name);chips.querySelectorAll('.player-chip').forEach(ch=>{const isOnline=names.includes(ch.textContent.trim());ch.style.borderColor=isOnline?'rgba(34,197,94,.5)':'rgba(255,255,255,.08)';ch.style.opacity=isOnline?'1':'.4';});}}
 setInterval(updateOnlineCount,5000);
 function tvShow(id){
   ['tv-lobby','tv-question','tv-reveal'].forEach(x=>{const el=document.getElementById(x);if(el)el.style.display=x===id?'flex':'none';});
@@ -822,7 +822,7 @@ function selectGame(name,el){
 // ── Open session (reset everything, let players join) ──────────────
 let sessionOpen=false;
 let _openingSession=false;
-async async function openSession(){
+async function openSession(){
   if(_openingSession)return;
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
   _openingSession=true;
@@ -1351,8 +1351,7 @@ async function endSession(){
   // Swap QR to scoreboard so players can scan to see final ranking
   // 결과 내보내기 채우기
   const _era=document.getElementById('export-result-area'),_ert=document.getElementById('export-result-text');
-  if(_era&&_ert){const _allScores=Object.values(currentScores).filter(p=>p&&p.name).sort((a,b)=>b.total-a.total);const _medals=['🥇','🥈','🥉'];_ert.textContent=_allScores.map((p,i)=>(_medals[i]||(i+1+'위'))+' '+p.name+' '+((p.total||0).toLocaleString())+'점').join('
-');_era.style.display='block';}
+  if(_era&&_ert){const _allScores=Object.values(currentScores).filter(p=>p&&p.name).sort((a,b)=>b.total-a.total);const _medals=['🥇','🥈','🥉'];_ert.textContent=_allScores.map((p,i)=>(_medals[i]||(i+1+'위'))+' '+p.name+' '+((p.total||0).toLocaleString())+'점').join(String.fromCharCode(10));_era.style.display='block';}
   const sbUrl=USE_FB?BASE_URL+'/scoreboard.html?db='+btoa(FIREBASE_URL):BASE_URL+'/scoreboard.html';
   updateQR(sbUrl,'🏆 순위 보기');
   toast('🏁 세션 종료!');
@@ -1605,7 +1604,7 @@ document.addEventListener('keydown',e=>{
     if(nextq&&nextq.style.display!=='none'&&sessionQuestions&&sessionQuestions.length){nextq.click();return;}
   }
 });
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!playersES){setTimeout(()=>{if(!playersES){_reconnDelayOp=3000;scheduleReconnect();}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!playersES){setTimeout(()=>{if(!playersES){_reconnDelayOp=3000;scheduleReconnect();}},3000);}});
 window.addEventListener('online',()=>{if(!playersES){toast('📶 인터넷 재연결 — Firebase 재시도');_reconnDelayOp=3000;scheduleReconnect();}});
 </script>
 <div id="kbd-panel" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.75);align-items:center;justify-content:center;" onclick="this.style.display='none'">

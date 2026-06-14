@@ -842,8 +842,8 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='2'||e.key==='b'||e.key==='B')answer(1);
   else if(e.key==='3'||e.key==='c'||e.key==='C')answer(2);
   else if(e.key==='4'||e.key==='d'||e.key==='D')answer(3);
-}
-window.addEventListener('beforeunload',e=>{if(joined&&_sessState&&(_sessState.state==='question'||_sessState.state==='reveal')){e.preventDefault();e.returnValue='';}}););
+});
+window.addEventListener('beforeunload',e=>{if(joined&&_sessState&&(_sessState.state==='question'||_sessState.state==='reveal')){e.preventDefault();e.returnValue='';}});
 if(!USE_FB)document.getElementById('no-fb-warn').classList.remove('hidden');
 
 // ── 모바일 탭 전환 / 화면 잠금 복귀 시 즉시 재연결 ──────────────
