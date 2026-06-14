@@ -247,9 +247,10 @@
     <div style="font-family:'Black Han Sans',sans-serif;font-size:56px;color:var(--gold);" id="done-score">0</div>
     <div style="font-size:15px;font-weight:700;margin-top:4px;" id="done-rank"></div>
   </div>
+  <div id="done-game-stats" style="display:none;font-size:13px;color:var(--muted2);margin:-8px 0 12px;text-align:center;letter-spacing:.3px;"></div>
   <div id="done-top3" style="width:100%;max-width:360px;margin-bottom:14px;"></div>
   <a id="done-sb-link" href="scoreboard.html" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;text-decoration:none;border-radius:14px;padding:14px 28px;font-family:'Black Han Sans',sans-serif;font-size:17px;letter-spacing:1px;box-shadow:0 4px 16px rgba(245,158,11,.4);transition:transform .15s;">📊 최종 랭킹 보기</a>
-<button onclick="(()=>{const txt=`${myName||'나'}: ${myScore.toLocaleString()}점 (${lastKnownRank>0?lastKnownRank+'위':'순위 집계 중'}) — 월드컵 퀴즈`;navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>{this.textContent='✅ 복사됨!';setTimeout(()=>{this.textContent='📋 점수 복사';},1500);}).catch(()=>{this.textContent='복사 실패';});})();" style="margin-top:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 24px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;" >📋 점수 복사</button>
+<button id="done-share-btn" onclick="(()=>{const txt=`${myName||'나'}: ${myScore.toLocaleString()}점 (${lastKnownRank>0?lastKnownRank+'위':'순위 집계 중'}) — 월드컵 퀴즈`;if(navigator.share){navigator.share({title:'⚽ 월드컵 퀴즈',text:txt}).catch(()=>{});}else{navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>{this.textContent='✅ 복사됨!';setTimeout(()=>{this.textContent='📋 점수 복사';},1500);}).catch(()=>{this.textContent='복사 실패';});}})();" style="margin-top:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 24px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;" >📋 점수 복사</button>
 <div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,.3);">함께해 주셔서 감사합니다 ⚽</div>
 </div>
 
@@ -282,7 +283,7 @@ const FB = FIREBASE_URL + '/wc_live';
 const USE_FB = FIREBASE_URL.startsWith('https://');
 
 const LETTERS = ['A','B','C','D'];
-let myName='', myScore=0, myStreak=0, myRank=0, _waitStartAt=0, _waitElInt=null;
+let myName='', myScore=0, myStreak=0, myBestStreak=0, myCorrectCount=0, myRank=0, _waitStartAt=0, _waitElInt=null;
 let _wakeLock=null;
 let myAnswerIdx=-1, lastQId='', timerInt=null, _lastOpts=[], _curHint='';
 let sessionES=null, beepedSecs=new Set();
@@ -360,13 +361,13 @@ async function join(){
   getAC();
   // 중복 닉네임 체크
   const existing=await fbGet('/players/'+enc(n),5000);
-  if(existing&&existing.lastSeen&&(Date.now()-existing.lastSeen)<25000){
+  const _savedAt=parseInt(localStorage.getItem('wc_joined_at')||'0');if(existing&&existing.lastSeen&&(Date.now()-existing.lastSeen)<25000&&(!_savedAt||existing.joinedAt!==_savedAt)){
     nameIn.classList.remove('shake');void nameIn.offsetWidth;nameIn.classList.add('shake');
     setStatus('⚠️ 이미 사용 중인 닉네임입니다. 다른 이름을 입력하세요','err');
     if(btn){btn.disabled=false;btn.textContent='✅ 참가하기';}return;
   }
   joined=true;
-  myName=n;myJoinedAt=Date.now();localStorage.setItem('wc_player_name',n);
+  myName=n;myJoinedAt=Date.now();localStorage.setItem('wc_player_name',n);localStorage.setItem('wc_joined_at',String(myJoinedAt));
   const ac2=new AbortController();const t2=setTimeout(()=>ac2.abort(),8000);
   try{await fetch(FB+'/players/'+enc(n)+'.json',{method:'PATCH',signal:ac2.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,joinedAt:myJoinedAt,lastSeen:myJoinedAt})});}
   catch{setStatus('⚠️ 서버 연결 실패. 계속 진행합니다.','warn');}
@@ -456,7 +457,7 @@ function onSession(s){
   if(s&&s.lastClearedAt&&myJoinedAt>0&&s.lastClearedAt>myJoinedAt){
     // 새 세션 — Firebase에서 내 항목 삭제 후 로그인으로 복귀
     if(myName)fetch(FB+'/players/'+enc(myName)+'.json',{method:'DELETE'}).catch(()=>{});
-    joined=false;myJoinedAt=0;myName='';myScore=0;myStreak=0;_pendingGain=0;lastKnownRank=0;
+    joined=false;myJoinedAt=0;myName='';myScore=0;myStreak=0;myBestStreak=0;myCorrectCount=0;_pendingGain=0;lastKnownRank=0;
     clearInterval(timerInt);clearInterval(_pollInt);_pollInt=null;
     if(sessionES){try{sessionES.close();}catch{}}sessionES=null;
     _resetJoinBtn();
@@ -507,7 +508,7 @@ function onSession(s){
       } else {rankEl.textContent='';}
       const sbLink=document.getElementById('done-sb-link');
       if(USE_FB)sbLink.href='scoreboard.html?db='+btoa(FIREBASE_URL);
-      show('s-done');
+      const _dgs=document.getElementById('done-game-stats');if(_dgs&&myCorrectCount>0){_dgs.style.display='block';_dgs.textContent=myCorrectCount+'문제 정답'+(myBestStreak>=3?' · 🔥 최고 '+myBestStreak+'연속':'');}const _dsb=document.getElementById('done-share-btn');if(_dsb&&navigator.share)_dsb.textContent='🔗 결과 공유';show('s-done');
       setTimeout(confetti,400);
       const _dt3=document.getElementById('done-top3');
       if(_dt3&&USE_FB){fbGet('/scores').then(_sc=>{
@@ -677,7 +678,7 @@ function showReveal(s){
   // Only add gain locally if Firebase score hasn't arrived yet (_pendingGain still set means
   // we applied it last reveal and server hasn't confirmed; 0 means server confirmed or first reveal)
   if(gain>0&&_pendingGain===0){myScore+=gain;_pendingGain=gain;}
-  myStreak=correct?(myStreak+1):0;
+  myStreak=correct?(myStreak+1):0;if(myStreak>myBestStreak)myBestStreak=myStreak;if(correct)myCorrectCount++;
 
   document.getElementById('rv-icon').textContent=!answered?'⏰':correct?'🎉':'❌';
   document.getElementById('s-reveal').classList.toggle('s-reveal-wrong',!correct&&answered);
