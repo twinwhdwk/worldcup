@@ -322,7 +322,7 @@ function sndUrgent(){snd(880,.07,'square',.13);}
 function sndJoin(){snd(440,.1);setTimeout(()=>snd(550,.18),120);}
 
 // ── Utils ─────────────────────────────────────────────────────────
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));const _se=document.getElementById(id);_se.classList.remove('hidden');_se.scrollTop=0;}
 function enc(n){return n.replace(/[.#$[\]/]/g,'_');}
 function setStatus(msg,type='ok'){const el=document.getElementById('status');el.textContent=msg;el.className='status-bar '+type;el.classList.remove('hidden');if(type==='ok')setTimeout(()=>el.classList.add('hidden'),2000);}
 function setConnDot(state){const d=document.getElementById('conn-dot');const l=document.getElementById('conn-label');if(d)d.className='conn-dot '+state;if(l)l.textContent={ok:'연결됨',warn:'재연결 중...',err:'오프라인'}[state]||'';const qd=document.getElementById('q-conn-dot');if(qd)qd.className='conn-dot '+state;;const wt=document.getElementById('lobby-wait-txt');if(wt)wt.textContent=state==='ok'?'게임 시작을 기다리는 중':state==='warn'?'재연결 중...':'연결이 끊어졌습니다';}
@@ -439,7 +439,7 @@ function listen(){
   sessionES=new EventSource(FB+'/session.json');
   sessionES.addEventListener('put',e=>{const d=JSON.parse(e.data);_sessState=d.data;_reconnDelay=3000;setConnDot('ok');onSession(_sessState);});
   sessionES.addEventListener('patch',e=>{const d=JSON.parse(e.data);if(!d.data)return;_sessState=Object.assign(_sessState||{},d.data);_reconnDelay=3000;setConnDot('ok');onSession(_sessState);});
-  sessionES.onerror=()=>{if(!joined||_listenTimer)return;setConnDot('warn');setStatus('⚠️ 연결 끊김, 재연결 중... ('+Math.round(_reconnDelay/1000)+'s)','err');const _rb=document.getElementById('recon-banner');if(_rb&&_reconnDelay>=6000)_rb.style.display='block';_listenTimer=setTimeout(()=>{_reconnDelay=Math.min(_reconnDelay*2,30000);listen();},_reconnDelay);};
+  sessionES.onerror=()=>{if(!joined||_listenTimer)return;setConnDot('warn');setStatus(_reconnDelay>=24000?'⚠️ 연결 실패 반복 — 페이지를 새로고침해 보세요.':'⚠️ 연결 끊김, 재연결 중... ('+Math.round(_reconnDelay/1000)+'s)','err');const _rb=document.getElementById('recon-banner');if(_rb&&_reconnDelay>=6000)_rb.style.display='block';_listenTimer=setTimeout(()=>{_reconnDelay=Math.min(_reconnDelay*2,30000);listen();},_reconnDelay);};
   sessionES.onopen=()=>{_reconnDelay=3000;setConnDot('ok');setStatus('✅ 연결됨','ok');const _rb=document.getElementById('recon-banner');if(_rb)_rb.style.display='none';};
 }
 
