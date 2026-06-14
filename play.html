@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap');
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     :root{--dark:#06060f;--card:#0f1020;--green:#00843D;--gold:#FFD700;--text:#f0f0f0;--muted:#555;--muted2:#888;}
-    html,body{height:100%;background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sans-serif;overflow:hidden;}
+    html,body{height:100%;background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sans-serif;overflow:hidden;overscroll-behavior:none;}
     .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;transition:opacity .25s,transform .25s;}
     .screen.hidden{opacity:0;pointer-events:none;transform:scale(.98);}
 
@@ -176,7 +176,7 @@
   <div class="login-ball">⚽</div>
   <div class="login-title">월드컵 QUIZ</div>
   <div class="login-sub">닉네임을 입력하고 참가하세요!</div>
-  <input class="login-input" id="name-in" type="text" placeholder="예: 홍길동" maxlength="8" autocomplete="off">
+  <input class="login-input" id="name-in" type="text" placeholder="예: 홍길동" maxlength="8" autocomplete="off" inputmode="text" autocorrect="off" autocapitalize="off" spellcheck="false">
   <button class="login-btn" id="join-btn" onclick="join()">✅ 참가하기</button>
   <div class="no-fb-warn hidden" id="no-fb-warn">
     ⚠️ Firebase가 연결되지 않았습니다.<br>운영자에게 올바른 QR 코드를 요청하세요.
@@ -401,7 +401,7 @@ function startSyncPoll(){
     if(!sid||sid==='s-done')return;
     // Heartbeat: update lastSeen every ~15s so operator knows who's live
     _heartTick=(_heartTick+1)%4;
-    if(_heartTick===0&&myName){const _hac=new AbortController();setTimeout(()=>_hac.abort(),5000);fetch(FB+'/players/'+enc(myName)+'.json',{method:'PATCH',signal:_hac.signal,body:JSON.stringify({name:myName,joinedAt:myJoinedAt,lastSeen:Date.now()}),headers:{'Content-Type':'application/json'}}).catch(()=>{});}
+    if(_heartTick===0&&myName&&document.visibilityState!=='hidden'){const _hac=new AbortController();setTimeout(()=>_hac.abort(),5000);fetch(FB+'/players/'+enc(myName)+'.json',{method:'PATCH',signal:_hac.signal,body:JSON.stringify({name:myName,joinedAt:myJoinedAt,lastSeen:Date.now()}),headers:{'Content-Type':'application/json'}}).catch(()=>{});}
     if(sid==='s-lobby'||sid==='s-wait'||sid==='s-reveal'||sid==='s-question'){
       const cur=await fbGet('/session');
       if(cur&&(
@@ -445,7 +445,7 @@ function listen(){
   sessionES=new EventSource(FB+'/session.json');
   sessionES.addEventListener('put',e=>{const d=JSON.parse(e.data);_sessState=d.data;_reconnDelay=3000;setConnDot('ok');onSession(_sessState);});
   sessionES.addEventListener('patch',e=>{const d=JSON.parse(e.data);if(!d.data)return;_sessState=Object.assign(_sessState||{},d.data);_reconnDelay=3000;setConnDot('ok');onSession(_sessState);});
-  sessionES.onerror=()=>{if(!joined||_listenTimer)return;setConnDot('warn');setStatus(_reconnDelay>=24000?'⚠️ 연결 실패 반복 — 페이지를 새로고침해 보세요.':'⚠️ 연결 끊김, 재연결 중... ('+Math.round(_reconnDelay/1000)+'s)','err');const _rb=document.getElementById('recon-banner');if(_rb&&_reconnDelay>=6000)_rb.style.display='block';_listenTimer=setTimeout(()=>{_reconnDelay=Math.min(_reconnDelay*2,30000);listen();},_reconnDelay);};
+  sessionES.onerror=()=>{if(!joined||_listenTimer)return;setConnDot('warn');setStatus(_reconnDelay>=24000?'⚠️ 연결 실패 반복 — 페이지를 새로고침해 보세요.':'⚠️ 연결 끊김, 재연결 중... ('+Math.round(_reconnDelay/1000)+'s)','err');const _rb=document.getElementById('recon-banner');if(_rb&&_reconnDelay>=6000)_rb.style.display='block';_listenTimer=setTimeout(()=>{_reconnDelay=Math.min(_reconnDelay*2,30000);listen();},_reconnDelay+Math.floor(Math.random()*1500));};
   sessionES.onopen=()=>{_reconnDelay=3000;setConnDot('ok');setStatus('✅ 연결됨','ok');const _rb=document.getElementById('recon-banner');if(_rb)_rb.style.display='none';};
 }
 
@@ -848,6 +848,12 @@ window.addEventListener('online',()=>{
 });
 window.addEventListener('offline',()=>{
   setConnDot('err');setStatus('📵 인터넷 연결 끊김','err');
+});
+// iOS Safari: pagehide가 beforeunload보다 안정적
+window.addEventListener('pagehide',()=>{
+  if(joined&&myName&&USE_FB){
+    try{fetch(FB+'/players/'+enc(myName)+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:myName,joinedAt:myJoinedAt,lastSeen:Date.now()}),keepalive:true}).catch(()=>{});}catch{}
+  }
 });
 </script>
 </body>
