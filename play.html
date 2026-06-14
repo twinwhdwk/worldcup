@@ -146,7 +146,12 @@
     /* ── AUTO-JOIN TOAST ── */
     .aj-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(0,132,61,.9);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-family:'Black Han Sans',sans-serif;z-index:9000;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;}
     @keyframes toastIn{from{transform:translateX(-50%) translateY(12px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
-  </style>
+    .done-lb-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:12px;padding:10px 14px;margin-bottom:6px;}
+    .done-lb-rank{width:28px;flex-shrink:0;text-align:center;font-size:18px;}
+    .done-lb-name{flex:1;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .done-lb-score{font-family:'Black Han Sans',sans-serif;font-size:16px;color:var(--gold);}
+    .done-lb-row.me{background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.25);}
+    </style>
   <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -233,6 +238,7 @@
     <div style="font-family:'Black Han Sans',sans-serif;font-size:56px;color:var(--gold);" id="done-score">0</div>
     <div style="font-size:15px;font-weight:700;margin-top:4px;" id="done-rank"></div>
   </div>
+  <div id="done-top3" style="width:100%;max-width:360px;margin-bottom:14px;"></div>
   <a id="done-sb-link" href="scoreboard.html" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;text-decoration:none;border-radius:14px;padding:14px 28px;font-family:'Black Han Sans',sans-serif;font-size:17px;letter-spacing:1px;box-shadow:0 4px 16px rgba(245,158,11,.4);transition:transform .15s;">📊 최종 랭킹 보기</a>
 <div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,.3);">함께해 주셔서 감사합니다 ⚽</div>
 </div>
@@ -355,6 +361,7 @@ async function join(){
   catch{setStatus('⚠️ 서버 연결 실패. 계속 진행합니다.','warn');}
   finally{clearTimeout(t2);}
   document.getElementById('lb-name').textContent=n+' 님 참가 완료';
+  (function(){const _lic=document.querySelector('.lobby-icon');if(_lic){const _cols=['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899'];const _c=_cols[Array.from(n).reduce((_a,_b)=>_a+_b.charCodeAt(0),0)%_cols.length];_lic.style.cssText='font-size:32px;width:80px;height:80px;border-radius:50%;background:'+_c+';display:flex;align-items:center;justify-content:center;color:#fff;font-family:\'Black Han Sans\',sans-serif;animation:breathe 2.5s ease infinite;margin-bottom:16px;';_lic.textContent=n.slice(0,2);}})();
   show('s-lobby');
   listen();
   startSyncPoll();
@@ -370,7 +377,9 @@ async function join(){
 let _pollInt=null, _pollTick=0, _heartTick=0;
 function startSyncPoll(){
   if(_pollInt)return;
-  _pollInt=setInterval(async()=>{
+  setTimeout(()=>{
+    if(_pollInt)return;
+    _pollInt=setInterval(async()=>{
     if(!joined||!USE_FB)return;
     const sid=document.querySelector('.screen:not(.hidden)')?.id;
     if(!sid||sid==='s-done')return;
@@ -397,7 +406,8 @@ function startSyncPoll(){
       fbGet('/answers').then(d=>{if(d&&typeof d==='object'){answeredKeys=new Set(Object.keys(d));updateWaitSub();}else if(d===null){answeredKeys=new Set();updateWaitSub();}});
       if(!totalPlayers)fbGet('/players').then(d=>{if(d&&typeof d==='object'){totalPlayers=Object.values(d).filter(p=>p&&typeof p==='object').length;}});
     }
-  },2500);
+    },2500);
+  },Math.floor(Math.random()*2000));
 }
 
 // ── Listen (1 SSE only — session state) ───────────────────────────
@@ -488,6 +498,13 @@ function onSession(s){
       if(USE_FB)sbLink.href='scoreboard.html?db='+btoa(FIREBASE_URL);
       show('s-done');
       setTimeout(confetti,400);
+      const _dt3=document.getElementById('done-top3');
+      if(_dt3&&USE_FB){fbGet('/scores').then(_sc=>{
+        if(!_sc)return;
+        const _sorted=Object.values(_sc).filter(_p=>_p&&_p.name).sort((_a,_b)=>(_b.total||0)-(_a.total||0)).slice(0,3);
+        const _medals=['🥇','🥈','🥉'];
+        _dt3.innerHTML='<div style="font-size:12px;color:var(--muted2);text-align:center;margin-bottom:8px;letter-spacing:1px;font-weight:700;">TOP 3</div>'+_sorted.map((_p,_i)=>'<div class="done-lb-row'+(_p.name===myName?' me':'')+'">' +'<div class="done-lb-rank">'+_medals[_i]+'</div><div class="done-lb-name">'+_p.name.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div><div class="done-lb-score">'+(_p.total||0).toLocaleString()+'</div></div>').join('');
+      });}
     };
     // Fetch final score from Firebase to fix race condition on page reload
     if(myName&&myScore===0){
