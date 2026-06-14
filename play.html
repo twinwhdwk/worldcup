@@ -154,6 +154,9 @@
       @keyframes slideUpIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
     @keyframes shakeWrong{0%,100%{transform:scale(1)}15%{transform:rotate(-14deg) scale(1.1)}35%{transform:rotate(13deg) scale(1.1)}55%{transform:rotate(-7deg)}75%{transform:rotate(5deg)}}
       .s-reveal-wrong .rv-icon{animation:shakeWrong .55s .38s ease!important;}
+      @keyframes spin{to{transform:rotate(360deg)}}
+      .login-btn.loading{position:relative;color:transparent!important;pointer-events:none;}
+      .login-btn.loading::after{content:'';position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
       </style>
   <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 </head>
@@ -224,6 +227,7 @@
   <div id="wait-elapsed" style="font-size:11px;color:rgba(255,255,255,.22);margin-top:2px;min-height:14px;letter-spacing:.5px;"></div>
   <div class="ans-preview" id="wait-prev">—</div>
   <div class="wait-dots"><div class="wd"></div><div class="wd"></div><div class="wd"></div></div>
+  <button id="wait-retry-btn" style="display:none;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:12px;padding:10px 28px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:12px;letter-spacing:.5px;">🔄 답변 재전송</button>
   <div class="wait-fact" id="wait-fact"><div class="wait-fact-label">⚽ 축구 상식</div><div id="wait-fact-text">로딩 중...</div></div>
 </div>
 
@@ -340,7 +344,7 @@ async function fbGet(p,ms=8000){const ac=new AbortController();const t=setTimeou
 
 // ── Join ──────────────────────────────────────────────────────────
 let joined=false;
-function _resetJoinBtn(){const b=document.getElementById('join-btn');if(b){b.disabled=false;b.textContent='✅ 참가하기';}}
+function _resetJoinBtn(){const b=document.getElementById('join-btn');if(b){b.disabled=false;b.textContent='✅ 참가하기';b.classList.remove('loading');}}
 async function join(){
   if(joined)return;
   const btn=document.getElementById('join-btn');
@@ -351,7 +355,7 @@ async function join(){
     nameIn.focus();setTimeout(()=>nameIn.classList.remove('shake'),400);return;
   }
   if(!USE_FB){setStatus('⚠️ Firebase 미연결 — 운영자에게 QR 재발급 요청','err');return;}
-  if(btn){btn.disabled=true;btn.textContent='⏳ 확인 중...';}
+  if(btn){btn.disabled=true;btn.textContent='참가 중...';btn.classList.add('loading');}
   getAC();
   // 중복 닉네임 체크
   const existing=await fbGet('/players/'+enc(n),5000);
@@ -577,7 +581,7 @@ function renderOptHtml(text){
 // ── Render question ───────────────────────────────────────────────
 async function renderQ(s){
   const q=s.question;if(!q)return;
-  const capturedQId=lastQId;
+  const capturedQId=lastQId;const _rrb0=document.getElementById('wait-retry-btn');if(_rrb0)_rrb0.style.display='none';
   // Check if player already answered this question (page reload guard)
   const existingAns=await fbGet('/answers/'+enc(myName));
   if(lastQId!==capturedQId||_sessState?.state!=='question')return; // state changed during async
@@ -652,7 +656,7 @@ async function answer(idx){
     if(_sessState&&_sessState.state!=='question')return;
     const _sac=new AbortController();const _st=setTimeout(()=>_sac.abort(),8000);
     try{await fetch(FB+'/answers/'+enc(myName)+'.json',{method:'PATCH',signal:_sac.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
-    catch{if(attempt<5){const _jt=Math.floor(Math.random()*600);setTimeout(()=>submitAnswer(attempt+1),700*(attempt+1)+_jt);}else{setStatus('⚠️ 답변 전송 실패. 잠시 후 다시 시도하세요.','err');}}
+    catch{if(attempt<5){const _jt=Math.floor(Math.random()*600);setTimeout(()=>submitAnswer(attempt+1),700*(attempt+1)+_jt);}else{setStatus('⚠️ 답변 전송 실패.','err');const _rrb=document.getElementById('wait-retry-btn');if(_rrb){_rrb.style.display='block';_rrb.onclick=()=>{_rrb.style.display='none';submitAnswer();};}}}
     finally{clearTimeout(_st);}
   };
   submitAnswer();
@@ -790,7 +794,7 @@ function startFactRotation(){
     if(fEl){fEl.style.opacity='0';setTimeout(()=>{fEl.textContent=FOOTBALL_FACTS[_factIdx];fEl.style.opacity='1';fEl.style.transition='opacity .4s';},300);}
   },5000);
 }
-function stopFactRotation(){clearInterval(_factTimer);_factTimer=null;clearInterval(_waitElInt);_waitElInt=null;const _we=document.getElementById('wait-elapsed');if(_we)_we.textContent='';}
+function stopFactRotation(){clearInterval(_factTimer);_factTimer=null;clearInterval(_waitElInt);_waitElInt=null;const _we=document.getElementById('wait-elapsed');if(_we)_we.textContent='';const _rrb2=document.getElementById('wait-retry-btn');if(_rrb2)_rrb2.style.display='none';}
 
 // ── Confetti ──────────────────────────────────────────────────────
 function confetti(){
