@@ -47,8 +47,13 @@
 
     /* ── QUESTION ── */
     #s-question{padding:16px;justify-content:flex-start;align-items:stretch;background:var(--dark);}
+    @keyframes cardSlideIn{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+    @keyframes optsSlideIn{from{transform:translateY(22px);opacity:0}to{transform:translateY(0);opacity:1}}
+    #s-question.q-fresh .q-card{animation:cardSlideIn .3s ease;}
+    #s-question.q-fresh .q-opts{animation:optsSlideIn .35s .08s cubic-bezier(.34,1.56,.64,1) both;}
     .q-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-shrink:0;}
     .q-game-lbl{font-size:12px;color:var(--muted2);font-weight:700;letter-spacing:1px;}
+    .q-conn-wrap{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.3);}
     .q-score-bdg{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);border-radius:100px;padding:4px 14px;font-family:'Black Han Sans',sans-serif;font-size:16px;color:var(--gold);}
     .timer-wrap{width:100%;height:10px;background:rgba(255,255,255,.06);border-radius:100px;margin-bottom:8px;overflow:hidden;flex-shrink:0;}
     #q-tbar{height:100%;background:var(--green);border-radius:100px;transition:width .25s linear,background .3s;width:100%;}
@@ -65,6 +70,7 @@
     .opt{border:none;border-radius:16px;padding:0 10px;font-size:15px;font-family:'Noto Sans KR',sans-serif;font-weight:700;cursor:pointer;transition:transform .1s,opacity .15s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:7px;height:72px;text-align:center;line-height:1.2;position:relative;overflow:hidden;color:#fff;}
     .opt::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.18);opacity:0;transition:opacity .1s;}
     .opt:active::after{opacity:1;}
+    .opt:not(:disabled):hover{filter:brightness(1.12);transform:scale(1.01);}
     .opt:active:not(:disabled){transform:scale(0.94);}
     .opt:disabled{cursor:not-allowed;}
     .opt.a{background:#c9003b;}
@@ -181,6 +187,7 @@
   <div class="q-top">
     <div class="q-game-lbl" id="q-lbl">퀴즈</div>
     <div class="q-score-bdg" id="q-score">0점</div>
+    <div class="q-conn-wrap"><span id="q-conn-dot" class="conn-dot ok"></span></div>
   </div>
   <div class="timer-wrap"><div id="q-tbar"></div></div>
   <div class="q-time-num" id="q-time-num">20</div>
@@ -301,7 +308,7 @@ function sndJoin(){snd(440,.1);setTimeout(()=>snd(550,.18),120);}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');}
 function enc(n){return n.replace(/[.#$[\]/]/g,'_');}
 function setStatus(msg,type='ok'){const el=document.getElementById('status');el.textContent=msg;el.className='status-bar '+type;el.classList.remove('hidden');if(type==='ok')setTimeout(()=>el.classList.add('hidden'),2000);}
-function setConnDot(state){const d=document.getElementById('conn-dot');const l=document.getElementById('conn-label');if(d)d.className='conn-dot '+state;if(l)l.textContent={ok:'연결됨',warn:'재연결 중...',err:'오프라인'}[state]||'';const wt=document.getElementById('lobby-wait-txt');if(wt)wt.textContent=state==='ok'?'게임 시작을 기다리는 중':state==='warn'?'재연결 중...':'연결이 끊어졌습니다';}
+function setConnDot(state){const d=document.getElementById('conn-dot');const l=document.getElementById('conn-label');if(d)d.className='conn-dot '+state;if(l)l.textContent={ok:'연결됨',warn:'재연결 중...',err:'오프라인'}[state]||'';const qd=document.getElementById('q-conn-dot');if(qd)qd.className='conn-dot '+state;;const wt=document.getElementById('lobby-wait-txt');if(wt)wt.textContent=state==='ok'?'게임 시작을 기다리는 중':state==='warn'?'재연결 중...':'연결이 끊어졌습니다';}
 
 // ── Floating score animation ──────────────────────────────────────
 function floatScore(text, color='#FFD700'){
@@ -563,6 +570,7 @@ async function renderQ(s){
     const _wt=document.getElementById('wait-title-el');if(_wt)_wt.textContent='제출 완료!';
     const _ws=document.getElementById('wait-sub');if(_ws)_ws.textContent='정답 발표를 기다리세요...';
     show('s-question');
+    const _qs2=document.getElementById('s-question');_qs2.classList.remove('q-fresh');void _qs2.offsetWidth;_qs2.classList.add('q-fresh');
     document.getElementById('q-lbl').textContent=s.game||'퀴즈';
     document.getElementById('q-score').textContent=myScore.toLocaleString()+'점';
     const emojiEl=document.getElementById('q-emoji');
@@ -777,6 +785,14 @@ if(saved){
   document.getElementById('name-in').value=saved;
 }
 document.getElementById('name-in').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
+document.addEventListener('keydown',e=>{
+  const sid=document.querySelector('.screen:not(.hidden)')?.id;
+  if(sid!=='s-question')return;
+  if(e.key==='1'||e.key==='a'||e.key==='A')answer(0);
+  else if(e.key==='2'||e.key==='b'||e.key==='B')answer(1);
+  else if(e.key==='3'||e.key==='c'||e.key==='C')answer(2);
+  else if(e.key==='4'||e.key==='d'||e.key==='D')answer(3);
+});
 if(!USE_FB)document.getElementById('no-fb-warn').classList.remove('hidden');
 
 // ── 모바일 탭 전환 / 화면 잠금 복귀 시 즉시 재연결 ──────────────
