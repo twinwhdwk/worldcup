@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -810,7 +810,7 @@ function selectGame(name,el){
 // ── Open session (reset everything, let players join) ──────────────
 let sessionOpen=false;
 let _openingSession=false;
-async function openSession(){
+async async function openSession(){
   if(_openingSession)return;
   if(!USE_FB){toast('⚠️ 상단에서 Firebase URL을 먼저 입력하세요!',true);return;}
   _openingSession=true;
