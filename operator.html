@@ -809,7 +809,7 @@ async function openSession(){
   _endingSession=false;
   sessionActive=false;
   sessionOpen=true;
-  currentAnswers={};currentPlayers={};currentScores={};
+  currentAnswers={};currentPlayers={};currentScores={};_knownNames=new Set();prevPlayerCount=0;
 
   // Show UI immediately — don't wait for Firebase
   document.getElementById('session-setup').style.display='none';
@@ -1565,6 +1565,8 @@ document.addEventListener('keydown',e=>{
     if(nextq&&nextq.style.display!=='none'&&sessionQuestions&&sessionQuestions.length){nextq.click();return;}
   }
 });
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!playersES){_reconnDelayOp=3000;scheduleReconnect();}});
+window.addEventListener('online',()=>{if(!playersES){toast('📶 인터넷 재연결 — Firebase 재시도');_reconnDelayOp=3000;scheduleReconnect();}});
 </script>
 </body>
 </html>
