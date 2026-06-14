@@ -147,6 +147,8 @@
     .btn-start.pulse{animation:btnPulse 1.5s ease-in-out infinite;}
     @keyframes btnPulse{0%,100%{box-shadow:0 4px 16px rgba(16,185,129,.35);}50%{box-shadow:0 4px 30px rgba(16,185,129,.7);}}
     .btn-reveal{background:linear-gradient(135deg,#d97706,#f59e0b);color:#000;box-shadow:0 4px 16px rgba(245,158,11,.35);}
+    @keyframes revealPulse{0%,100%{box-shadow:0 4px 16px rgba(245,158,11,.35)}50%{box-shadow:0 4px 40px rgba(245,158,11,.9),0 0 0 5px rgba(245,158,11,.22)}}
+    .btn-reveal.pulsing{animation:revealPulse .5s ease infinite alternate;}
     .btn-next{background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;box-shadow:0 4px 16px rgba(59,130,246,.35);}
     .btn-skip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted2);font-size:14px;padding:10px;}
     .btn-lobby{background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.25);color:#fca5a5;font-size:14px;padding:10px;}
@@ -200,7 +202,7 @@
 <body>
 
 <div class="topbar">
-  <div class="topbar-title">👑 운영자 컨트롤 <span class="live-pill">LIVE</span></div>
+  <div class="topbar-title">👑 운영자 컨트롤 <span class="live-pill">LIVE</span><span id="op-conn-dot" title="Firebase 연결 상태" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-left:8px;vertical-align:middle;transition:background .6s;"></span></div>
   <div class="topbar-links">
     <span class="topbar-link" onclick="openPlayLink()">📱 참가자 링크</span>
     <a href="scoreboard.html" class="topbar-link" target="_blank" id="sb-link">🏆 스코어보드</a>
@@ -924,10 +926,11 @@ function applyFbPatch(obj, d){
 
 // Debounce for startListening — prevents rapid-fire reconnect storms
 // when multiple SSE connections error at the same time
-let _listenDebounceTimer=null;
+let _listenDebounceTimer=null,_reconnDelayOp=3000;
 function scheduleReconnect(){
   if(_listenDebounceTimer)return; // already queued
-  _listenDebounceTimer=setTimeout(()=>{_listenDebounceTimer=null;startListening();},4500);
+  _listenDebounceTimer=setTimeout(()=>{_listenDebounceTimer=null;startListening();},_reconnDelayOp);
+  _reconnDelayOp=Math.min(_reconnDelayOp*2,30000);
 }
 
 // ── Listening (단일 루트 SSE — HTTP 연결 1개만 사용) ───────────────
@@ -979,9 +982,11 @@ function startListening(){
     else if(top==='answers'){applyFbPatch(currentAnswers,{path:d.path.replace('/answers',''),data:d.data});renderAnswerDist();}
     else if(top==='scores'){applyFbPatch(currentScores,{path:d.path.replace('/scores',''),data:d.data});renderLeaderboard();}
   });
+  playersES.onopen=()=>{_reconnDelayOp=3000;const _cd=document.getElementById('op-conn-dot');if(_cd)_cd.style.background='#22c55e';};
   playersES.onerror=()=>{
+    const _cd=document.getElementById('op-conn-dot');if(_cd)_cd.style.background='#ef4444';
     if(playersES){try{playersES.close();}catch{}}playersES=null;
-    toast('⚠️ Firebase 연결 불안정 — 재연결 시도 중...');scheduleReconnect();
+    toast('⚠️ Firebase 연결 끝김 — '+Math.round(_reconnDelayOp/1000)+'s 후 재시도',true);scheduleReconnect();
   };
 }
 
@@ -1375,7 +1380,9 @@ function renderAnswerDist(){
      document.getElementById('btn-reveal').style.display!=='none'){
     allAnsweredPending=true;
     toast('✅ 전원 응답! 곧 정답이 공개됩니다...');
+    const _brp=document.getElementById('btn-reveal');if(_brp)_brp.classList.add('pulsing');
     setTimeout(()=>{
+      if(_brp)_brp.classList.remove('pulsing');
       if(document.getElementById('btn-reveal').style.display!=='none')revealAnswer();
     },1200);
   }
