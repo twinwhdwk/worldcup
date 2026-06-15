@@ -639,16 +639,23 @@ async function renderQ(s){
     tick(q.startAt||Date.now(),q.timeLimit||20);
   };
   const elapsed=(Date.now()-(q.startAt||Date.now()))/1000;
-  if(elapsed<2){showCountdown(doRender);}else{doRender();}
+  // 수신 지연이 거의 없을 때만 3-2-1 카운트다운 표시 (지연된 경우 카운트다운이
+  // 추가로 시간을 깎아먹어 곧바로 타임아웃되는 문제 방지)
+  if(elapsed<0.8){showCountdown(doRender);}else{doRender();}
 }
 
 function tick(startAt,limit){
   clearInterval(timerInt);
   const bar=document.getElementById('q-tbar');
   const timeEl=document.getElementById('q-time-num');
+  // 수신 지연으로 인해 렌더링 시점에 이미 시간이 거의 다 된 경우,
+  // 최소 응답 가능 시간을 보장 (effective limit 연장)
+  const initialRem=limit-(Date.now()-startAt)/1000;
+  const MIN_GRACE=5; // seconds
+  const effLimit=initialRem<MIN_GRACE?limit+(MIN_GRACE-initialRem):limit;
   const run=()=>{
-    const rem=Math.max(0,limit-(Date.now()-startAt)/1000);
-    bar.style.width=(rem/limit*100)+'%';
+    const rem=Math.max(0,effLimit-(Date.now()-startAt)/1000);
+    bar.style.width=(rem/effLimit*100)+'%';
     bar.style.background=rem<5?'#ef4444':rem<10?'#f59e0b':'var(--green)';
     const remSec=Math.ceil(rem);
     timeEl.textContent=rem>0?remSec:'⏰';
