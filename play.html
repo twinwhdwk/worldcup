@@ -651,7 +651,7 @@ function tick(startAt,limit){
   // 수신 지연으로 인해 렌더링 시점에 이미 시간이 거의 다 된 경우,
   // 최소 응답 가능 시간을 보장 (effective limit 연장)
   const initialRem=limit-(Date.now()-startAt)/1000;
-  const MIN_GRACE=5; // seconds
+  const MIN_GRACE=6; // seconds
   const effLimit=initialRem<MIN_GRACE?limit+(MIN_GRACE-initialRem):limit;
   const run=()=>{
     const rem=Math.max(0,effLimit-(Date.now()-startAt)/1000);

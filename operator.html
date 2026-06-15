@@ -1115,7 +1115,7 @@ function startTvTimer(startAt,limit){
     if(rem<=0){
       clearInterval(tvTimerInt);clearInterval(cntdownInt);cntEl.textContent='';
       if(sessionActive&&!revealInProgress&&document.getElementById('btn-reveal').style.display!=='none'){
-        setTimeout(revealAnswer,700);
+        setTimeout(revealAnswer,3000);
       }
     }
   };
