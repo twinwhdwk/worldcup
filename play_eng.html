@@ -600,6 +600,9 @@ function renderOptHtml(text){
 // ── Render question ───────────────────────────────────────────────
 async function renderQ(s){
   const q=s.question;if(!q)return;
+  const qText=q.en?.text||q.text;
+  const qOptions=q.en?.options||q.options;
+  const qHint=q.en?.hint||q.hint;
   const capturedQId=lastQId;const _rrb0=document.getElementById('wait-retry-btn');if(_rrb0)_rrb0.style.display='none';_allVibDone=false;
   const _wmsReset=document.getElementById('wait-my-score');if(_wmsReset)_wmsReset.style.display='none';
   // Check if player already answered this question (page reload guard)
@@ -608,7 +611,7 @@ async function renderQ(s){
   if(existingAns&&existingAns.idx>=0){
     myAnswerIdx=existingAns.idx;
     const wpEl=document.getElementById('wait-prev');
-    wpEl.innerHTML=LETTERS[existingAns.idx]+' — '+renderOptHtml(q.options?.[existingAns.idx]||'?');
+    wpEl.innerHTML=LETTERS[existingAns.idx]+' — '+renderOptHtml(qOptions?.[existingAns.idx]||'?');
     show('s-wait');startFactRotation();
     return;
   }
@@ -624,18 +627,18 @@ async function renderQ(s){
     const emojiEl=document.getElementById('q-emoji');
     if(q.img){const _is=q.bigImg?'max-height:208px;max-width:286px':'max-height:114px;max-width:182px';emojiEl.innerHTML=`<img src="${q.img}" data-emoji="${q.emoji||'⚽'}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg';else{this.style.display='none';this.parentElement.textContent=this.dataset.emoji||'⚽';}}" style="${_is};width:auto;border-radius:8px;object-fit:contain;opacity:0;transition:opacity .3s;" onload="this.style.opacity='1';" alt="">`;}
     else{emojiEl.textContent=q.emoji||'⚽';if(typeof twemoji!=='undefined')twemoji.parse(emojiEl);}
-    document.getElementById('q-text').textContent=q.text;
+    document.getElementById('q-text').textContent=qText;
     document.getElementById('q-num').textContent='Question '+(s.questionIdx+1)+' / '+s.totalQuestions;
     const _pd=document.getElementById('q-prog-dots');if(_pd&&s.totalQuestions>0){_pd.innerHTML='';for(let _i=0;_i<s.totalQuestions;_i++){const _dot=document.createElement('div');_dot.style.cssText='width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:background .3s;background:'+(_i<s.questionIdx+1?'#22c55e':'rgba(255,255,255,.18)');_pd.appendChild(_dot);}}
-    _lastOpts=q.options.slice();
-    q.options.forEach((o,i)=>{
+    _lastOpts=qOptions.slice();
+    qOptions.forEach((o,i)=>{
       const otEl=document.getElementById('ot'+i);otEl.innerHTML=renderOptHtml(o);
       const b=document.getElementById('o'+i);
       b.className='opt '+['a','b','c','d'][i];
       b.disabled=false;
     });
     beepedSecs=new Set();
-    _curHint=q.hint||'';
+    _curHint=qHint||'';
     const _hb=document.getElementById('q-hint-box');if(_hb){_hb.style.display='none';}
     tick(q.startAt||Date.now(),q.timeLimit||20);
   };
@@ -713,11 +716,12 @@ function showReveal(s){
   document.getElementById('s-reveal').classList.toggle('s-reveal-wrong',!correct&&answered);
   document.getElementById('rv-title').textContent=!answered?'Time\'s up!':correct?'Correct! 🎊':'So close! ❌';
   const rvCorr=document.getElementById('rv-correct');
-  rvCorr.innerHTML=renderOptHtml(s.question?.options?.[ci]||'—');
+  const _rvOpts=s.question?.en?.options||s.question?.options;
+  rvCorr.innerHTML=renderOptHtml(_rvOpts?.[ci]||'—');
   const myAnsEl=document.getElementById('rv-my-answer');
   const myAnsVal=document.getElementById('rv-my-val');
-  if(answered&&!correct&&myAnswerIdx>=0&&s.question?.options){
-    myAnsVal.innerHTML=LETTERS[myAnswerIdx]+' — '+renderOptHtml(s.question.options[myAnswerIdx]||'?');
+  if(answered&&!correct&&myAnswerIdx>=0&&_rvOpts){
+    myAnsVal.innerHTML=LETTERS[myAnswerIdx]+' — '+renderOptHtml(_rvOpts[myAnswerIdx]||'?');
     myAnsEl.style.display='block';
   } else {myAnsEl.style.display='none';}
   document.getElementById('rv-gain').textContent=gain>0?'+'+gain+' pts':'0 pts';
