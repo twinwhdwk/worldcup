@@ -1030,6 +1030,7 @@ async function nextQuestion(){
   const q=sessionQuestions[currentQIdx];
   const limit=parseInt(document.getElementById('qlimit').value)||20;
   const startAt=Date.now()+1500;
+  window._curQStartAt=startAt;
   beepedSeconds=new Set();
 
   currentAnswers={};
@@ -1173,18 +1174,21 @@ async function revealAnswer(){
 
   const gains={};
   let correctCount=0;
-  const answerAt={};
-  Object.entries(currentAnswers).forEach(([k,v])=>{if(v&&typeof v==='object'&&v.idx===ci){correctCount++;answerAt[k]=v.at||Date.now();}});
-  const speedRanking=Object.entries(answerAt).sort((a,b)=>a[1]-b[1]);
+  Object.entries(currentAnswers).forEach(([k,v])=>{if(v&&typeof v==='object'&&v.idx===ci)correctCount++;});
+
+  const qStartAt=window._curQStartAt||0;
 
   for(const[encName,ans] of Object.entries(currentAnswers)){
     if(!ans||typeof ans!=='object'||ans.idx===undefined)continue;
     let gain=0;
     if(ans.idx===ci){
       gain=100;
-      const rank=speedRanking.findIndex(([k])=>k===encName);
-      if(rank<3)gain+=50;
-      else if(rank<Math.ceil(Object.keys(currentAnswers).length/2))gain+=20;
+      const elapsedSec=Math.max(0,((ans.at||Date.now())-qStartAt)/1000);
+      let bonus;
+      if(elapsedSec<=5)bonus=50;
+      else if(elapsedSec<15)bonus=Math.max(0,50-(elapsedSec-5)*5);
+      else bonus=0;
+      gain+=Math.round(bonus);
     }
     gains[encName]=gain;
   }
