@@ -1622,9 +1622,9 @@ async function runStartupRecovery(){
 // ── Initial QR display ────────────────────────────────────────────
 if(USE_FB) updateQR(getPlayUrl(),'📱 스캔해서 참가');
 
-// Run startup recovery now only if already unlocked; otherwise the PIN
-// script will call runStartupRecovery() after a correct PIN is entered.
-if(sessionStorage.getItem('wc_op_unlocked')==='1'){runStartupRecovery();}
+// Run startup recovery immediately on load — the PIN lock is a visual
+// overlay only and does not gate Firebase/session initialization.
+runStartupRecovery();
 
 
 // ── Keyboard shortcuts ─────────────────────────────────────────────
@@ -1666,7 +1666,7 @@ window.addEventListener('online',()=>{if(!playersES){toast('📶 인터넷 재�
   function unlock(){lock.style.display='none';}
   if(sessionStorage.getItem('wc_op_unlocked')==='1'){unlock();}
   function tryUnlock(){
-    if(input.value===PIN){sessionStorage.setItem('wc_op_unlocked','1');unlock();if(typeof runStartupRecovery==='function')runStartupRecovery();}
+    if(input.value===PIN){sessionStorage.setItem('wc_op_unlocked','1');unlock();}
     else{err.textContent='비밀번호가 올바르지 않습니다';input.value='';input.focus();}
   }
   btn.addEventListener('click',tryUnlock);
