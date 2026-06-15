@@ -618,7 +618,7 @@ async function renderQ(s){
     const _ws=document.getElementById('wait-sub');if(_ws)_ws.textContent='정답 발표를 기다리세요...';
     show('s-question');if(navigator.wakeLock&&!_wakeLock){navigator.wakeLock.request('screen').then(_wl=>{_wakeLock=_wl;_wl.addEventListener('release',()=>{_wakeLock=null;});}).catch(()=>{});}
     const _qs2=document.getElementById('s-question');_qs2.classList.remove('q-fresh');void _qs2.offsetWidth;_qs2.classList.add('q-fresh');
-    document.getElementById('q-lbl').textContent=s.game||'퀴즈';
+    document.getElementById('q-lbl').textContent=(s.game||'퀴즈')+(s.game==='한국사퀴즈'?' ⚙️테스트':'');
     document.getElementById('q-score').textContent=myScore.toLocaleString()+'점';
     const _qrb=document.getElementById('q-rank-bdg');if(_qrb&&lastKnownRank>0){_qrb.textContent=lastKnownRank+'위';_qrb.style.display='block';}else if(_qrb)_qrb.style.display='none';
     const emojiEl=document.getElementById('q-emoji');

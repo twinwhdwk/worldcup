@@ -381,6 +381,7 @@
         <div class="game-sel-btn" onclick="selectGame('한국사퀴즈',this)">
           <span class="game-sel-icon">📜</span>
           <div class="game-sel-name">한국사 퀴즈</div>
+          <div style="font-size:9px;color:#f59e0b;font-weight:700;margin-top:2px;">⚙️ 환경 테스트용</div>
         </div>
       </div>
       <div style="font-size:11px;color:var(--muted2);margin-bottom:8px;text-align:center;" id="qbank-info">문제 풀: — 개</div>
@@ -777,11 +778,11 @@ const QB = {
     {bigImg:true,img:"https://upload.wikimedia.org/wikipedia/en/thumb/1/17/2026_FIFA_World_Cup_emblem.svg/330px-2026_FIFA_World_Cup_emblem.svg.png",text:"2026 월드컵 공식 주제가는 누가 불렀나?",options:['BTS','피타 불','샤키라','방탄소년단 정국'],correct:1,hint:'쿠바 출신 래퍼, "국제사랑"으로 유명',en:{text:'Who performed the official 2026 World Cup anthem?',options:['BTS','Pitbull','Shakira','Jungkook of BTS'],hint:'A Cuban-American rapper known for "International Love"'}},
   ]),
   '한국사퀴즈': ()=>shuffle([
-    {bigImg:true,img:"https://commons.wikimedia.org/wiki/Special:FilePath/Hunminjeongeum.jpg?width=400",text:"세종대왕이 1446년에 창제하여 반포한 문자는?",options:['이두','한자','훈민정음(한글)','향찰'],correct:2,hint:'백성을 가르치는 바른 소리라는 뜻',en:{text:'What writing system did King Sejong create and promulgate in 1446?',options:['Idu','Hanja (Chinese characters)','Hunminjeongeum (Hangul)','Hyangchal'],hint:"Means 'the correct sounds for teaching the people'"}},
-    {bigImg:true,img:"https://commons.wikimedia.org/wiki/Special:FilePath/Gyeongbokgung(palace)_Geunjeongjeon(hall).jpg?width=400",text:"이 궁궐은 조선왕조의 법궁(정궁)으로, 이름은?",options:['창덕궁','경복궁','덕수궁','창경궁'],correct:1,hint:'1395년 창건, \'큰 복을 누리라\'는 뜻',en:{text:'This palace was the main royal palace of the Joseon dynasty. What is its name?',options:['Changdeokgung','Gyeongbokgung','Deoksugung','Changgyeonggung'],hint:"Built in 1395, the name means 'greatly blessed'"}},
-    {bigImg:true,img:"https://commons.wikimedia.org/wiki/Special:FilePath/Korea-Tongyeong_Port-Turtle_ship_replica-02.jpg?width=400",text:"임진왜란 때 이순신 장군이 활용한 이 거북 모양의 군함은?",options:['판옥선','거북선','대형 정크선','학익진선'],correct:1,hint:'등 위에 철갑을 두른 조선의 전투함',en:{text:"What is the name of this turtle-shaped warship used by Admiral Yi Sun-sin during the Japanese invasions?",options:['Panokseon','Geobukseon (Turtle Ship)','Large junk ship','Crane-wing ship'],hint:"A Joseon warship covered with an armored shell on its back"}},
-    {bigImg:true,img:"https://commons.wikimedia.org/wiki/Special:FilePath/Korean_plum_blossom_vase,_Koryo_dynasty,_12th_century,_stoneware_with_celadon_glaze_and_black_and_white_slip_inlay,_HAA.JPG?width=400",text:"고려시대를 대표하는 이 도자기 기법의 이름은?",options:['백자','분청사기','고려청자','옹기'],correct:2,hint:'비취색 유약과 상감 기법이 특징',en:{text:'What is this iconic Goryeo-era ceramic technique called?',options:['Baekja (white porcelain)','Buncheong ware','Goryeo celadon','Onggi (earthenware)'],hint:'Known for its jade-green glaze and inlay (sanggam) technique'}},
-    {bigImg:true,img:"https://commons.wikimedia.org/wiki/Special:FilePath/Yu_Gwan-sun.JPG?width=400",text:"1919년 3·1 운동 당시 충남 천안에서 만세운동을 이끈 인물은?",options:['김구','유관순','안중근','윤봉길'],correct:1,hint:'이화학당 출신의 17세 여학생 독립운동가',en:{text:"Who led the independence protests in Cheonan during the March 1st Movement of 1919?",options:['Kim Gu','Yu Gwan-sun','An Jung-geun','Yun Bong-gil'],hint:'A 17-year-old independence activist and Ewha student'}},
+    {bigImg:true,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Hunminjeongeum.jpg/400px-Hunminjeongeum.jpg",text:"세종대왕이 1446년에 창제하여 반포한 문자는?",options:['이두','한자','훈민정음(한글)','향찰'],correct:2,hint:'백성을 가르치는 바른 소리라는 뜻',en:{text:'What writing system did King Sejong create and promulgate in 1446?',options:['Idu','Hanja (Chinese characters)','Hunminjeongeum (Hangul)','Hyangchal'],hint:"Means 'the correct sounds for teaching the people'"}},
+    {bigImg:true,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Gyeongbokgung%28palace%29_Geunjeongjeon%28hall%29.jpg/400px-Gyeongbokgung%28palace%29_Geunjeongjeon%28hall%29.jpg",text:"이 궁궐은 조선왕조의 법궁(정궁)으로, 이름은?",options:['창덕궁','경복궁','덕수궁','창경궁'],correct:1,hint:'1395년 창건, \'큰 복을 누리라\'는 뜻',en:{text:'This palace was the main royal palace of the Joseon dynasty. What is its name?',options:['Changdeokgung','Gyeongbokgung','Deoksugung','Changgyeonggung'],hint:"Built in 1395, the name means 'greatly blessed'"}},
+    {bigImg:true,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Korea-Tongyeong_Port-Turtle_ship_replica-02.jpg/400px-Korea-Tongyeong_Port-Turtle_ship_replica-02.jpg",text:"임진왜란 때 이순신 장군이 활용한 이 거북 모양의 군함은?",options:['판옥선','거북선','대형 정크선','학익진선'],correct:1,hint:'등 위에 철갑을 두른 조선의 전투함',en:{text:"What is the name of this turtle-shaped warship used by Admiral Yi Sun-sin during the Japanese invasions?",options:['Panokseon','Geobukseon (Turtle Ship)','Large junk ship','Crane-wing ship'],hint:"A Joseon warship covered with an armored shell on its back"}},
+    {bigImg:true,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Korean_plum_blossom_vase%2C_Koryo_dynasty%2C_12th_century%2C_stoneware_with_celadon_glaze_and_black_and_white_slip_inlay%2C_HAA.JPG/400px-Korean_plum_blossom_vase%2C_Koryo_dynasty%2C_12th_century%2C_stoneware_with_celadon_glaze_and_black_and_white_slip_inlay%2C_HAA.JPG",text:"고려시대를 대표하는 이 도자기 기법의 이름은?",options:['백자','분청사기','고려청자','옹기'],correct:2,hint:'비취색 유약과 상감 기법이 특징',en:{text:'What is this iconic Goryeo-era ceramic technique called?',options:['Baekja (white porcelain)','Buncheong ware','Goryeo celadon','Onggi (earthenware)'],hint:'Known for its jade-green glaze and inlay (sanggam) technique'}},
+    {bigImg:true,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Yu_Gwan-sun.JPG/400px-Yu_Gwan-sun.JPG",text:"1919년 3·1 운동 당시 충남 천안에서 만세운동을 이끈 인물은?",options:['김구','유관순','안중근','윤봉길'],correct:1,hint:'이화학당 출신의 17세 여학생 독립운동가',en:{text:"Who led the independence protests in Cheonan during the March 1st Movement of 1919?",options:['Kim Gu','Yu Gwan-sun','An Jung-geun','Yun Bong-gil'],hint:'A 17-year-old independence activist and Ewha student'}},
   ]),
 
   '스타디움퀴즈': ()=>shuffle([
@@ -1096,7 +1097,7 @@ async function nextQuestion(){
   _nqRunning=false;
 
   tvShow('tv-question');
-  document.getElementById('tv-q-game').textContent=selectedGame;
+  document.getElementById('tv-q-game').textContent=selectedGame+(selectedGame==='한국사퀴즈'?' ⚙️ 환경 테스트용':'');
   document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
   const _emojiEl=document.getElementById('tv-q-emoji');
   if(q.img){const _is=q.bigImg?'height:260px;max-width:416px':'height:104px;max-width:208px';_emojiEl.innerHTML=`<img src="${q.img}" data-emoji="${q.emoji||'⚽'}" onerror="if(!this.dataset.t){this.dataset.t=1;const m=this.src.match(/\\/([a-z-]+)\\.[pP]/);if(m)this.src='https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/'+m[1]+'.svg';else{this.style.display='none';this.parentElement.textContent=this.dataset.emoji||'⚽';}}" style="${_is};width:auto;border-radius:8px;object-fit:contain;" alt="">`;}
@@ -1564,7 +1565,7 @@ tvShow('tv-lobby');
         else{_ei.textContent=q.emoji||'⚽';twparse(_ei);}
         document.getElementById('tv-q-text').textContent=q.text;
         document.getElementById('tv-q-num').textContent='문제 '+(currentQIdx+1)+' / '+sessionQuestions.length;
-        document.getElementById('tv-q-game').textContent=fbSess.game||selectedGame;
+        document.getElementById('tv-q-game').textContent=(fbSess.game||selectedGame)+((fbSess.game||selectedGame)==='한국사퀴즈'?' ⚙️ 환경 테스트용':'');
         q.options.forEach((o,i)=>{const _ot=document.getElementById('tv-ot'+i);_ot.innerHTML=renderOptHtml(o);});
         if(q.startAt){startTvTimer(q.startAt,q.timeLimit||20);}
       }
