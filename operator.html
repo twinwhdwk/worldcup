@@ -378,9 +378,9 @@
           <span class="game-sel-icon">🌎</span>
           <div class="game-sel-name">2026 월드컵</div>
         </div>
-        <div class="game-sel-btn" onclick="selectGame('스타디움퀴즈',this)">
-          <span class="game-sel-icon">🏟️</span>
-          <div class="game-sel-name">경기장 퀴즈</div>
+        <div class="game-sel-btn" onclick="selectGame('한국사퀴즈',this)">
+          <span class="game-sel-icon">📜</span>
+          <div class="game-sel-name">한국사 퀴즈</div>
         </div>
       </div>
       <div style="font-size:11px;color:var(--muted2);margin-bottom:8px;text-align:center;" id="qbank-info">문제 풀: — 개</div>
@@ -776,6 +776,14 @@ const QB = {
     {bigImg:true,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Estadio_Akron_02-07-2022_cabecera_sur_lado_derecho_%283%29.jpg/330px-Estadio_Akron_02-07-2022_cabecera_sur_lado_derecho_%283%29.jpg",text:"멕시코에서 월드컵이 열리는 도시가 아닌 것은?",options:['멕시코시티','과달라하라','몬테레이','칸쿤'],correct:3,hint:'멕시코는 3개 도시만 개최',en:{text:'Which city in Mexico does NOT host World Cup matches?',options:['Mexico City','Guadalajara','Monterrey','Cancun'],hint:'Mexico only hosts in 3 cities'}},
     {bigImg:true,img:"https://upload.wikimedia.org/wikipedia/en/thumb/1/17/2026_FIFA_World_Cup_emblem.svg/330px-2026_FIFA_World_Cup_emblem.svg.png",text:"2026 월드컵 공식 주제가는 누가 불렀나?",options:['BTS','피타 불','샤키라','방탄소년단 정국'],correct:1,hint:'쿠바 출신 래퍼, "국제사랑"으로 유명',en:{text:'Who performed the official 2026 World Cup anthem?',options:['BTS','Pitbull','Shakira','Jungkook of BTS'],hint:'A Cuban-American rapper known for "International Love"'}},
   ]),
+  '한국사퀴즈': ()=>shuffle([
+    {bigImg:true,img:"https://commons.wikimedia.org/wiki/Special:FilePath/Hunminjeongeum.jpg?width=400",text:"세종대왕이 1446년에 창제하여 반포한 문자는?",options:['이두','한자','훈민정음(한글)','향찰'],correct:2,hint:'백성을 가르치는 바른 소리라는 뜻',en:{text:'What writing system did King Sejong create and promulgate in 1446?',options:['Idu','Hanja (Chinese characters)','Hunminjeongeum (Hangul)','Hyangchal'],hint:"Means 'the correct sounds for teaching the people'"}},
+    {bigImg:true,img:"https://commons.wikimedia.org/wiki/Special:FilePath/Gyeongbokgung(palace)_Geunjeongjeon(hall).jpg?width=400",text:"이 궁궐은 조선왕조의 법궁(정궁)으로, 이름은?",options:['창덕궁','경복궁','덕수궁','창경궁'],correct:1,hint:'1395년 창건, \'큰 복을 누리라\'는 뜻',en:{text:'This palace was the main royal palace of the Joseon dynasty. What is its name?',options:['Changdeokgung','Gyeongbokgung','Deoksugung','Changgyeonggung'],hint:"Built in 1395, the name means 'greatly blessed'"}},
+    {bigImg:true,img:"https://commons.wikimedia.org/wiki/Special:FilePath/Korea-Tongyeong_Port-Turtle_ship_replica-02.jpg?width=400",text:"임진왜란 때 이순신 장군이 활용한 이 거북 모양의 군함은?",options:['판옥선','거북선','대형 정크선','학익진선'],correct:1,hint:'등 위에 철갑을 두른 조선의 전투함',en:{text:"What is the name of this turtle-shaped warship used by Admiral Yi Sun-sin during the Japanese invasions?",options:['Panokseon','Geobukseon (Turtle Ship)','Large junk ship','Crane-wing ship'],hint:"A Joseon warship covered with an armored shell on its back"}},
+    {bigImg:true,img:"https://commons.wikimedia.org/wiki/Special:FilePath/Korean_plum_blossom_vase,_Koryo_dynasty,_12th_century,_stoneware_with_celadon_glaze_and_black_and_white_slip_inlay,_HAA.JPG?width=400",text:"고려시대를 대표하는 이 도자기 기법의 이름은?",options:['백자','분청사기','고려청자','옹기'],correct:2,hint:'비취색 유약과 상감 기법이 특징',en:{text:'What is this iconic Goryeo-era ceramic technique called?',options:['Baekja (white porcelain)','Buncheong ware','Goryeo celadon','Onggi (earthenware)'],hint:'Known for its jade-green glaze and inlay (sanggam) technique'}},
+    {bigImg:true,img:"https://commons.wikimedia.org/wiki/Special:FilePath/Yu_Gwan-sun.JPG?width=400",text:"1919년 3·1 운동 당시 충남 천안에서 만세운동을 이끈 인물은?",options:['김구','유관순','안중근','윤봉길'],correct:1,hint:'이화학당 출신의 17세 여학생 독립운동가',en:{text:"Who led the independence protests in Cheonan during the March 1st Movement of 1919?",options:['Kim Gu','Yu Gwan-sun','An Jung-geun','Yun Bong-gil'],hint:'A 17-year-old independence activist and Ewha student'}},
+  ]),
+
   '스타디움퀴즈': ()=>shuffle([
     {bigImg:true,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Metlife_stadium_%28Aerial_view%29.jpg/330px-Metlife_stadium_%28Aerial_view%29.jpg",text:"2026 월드컵 결승전이 열리는 경기장은?",options:['AT&T 스타디움','메트라이프 스타디움','아즈테카 스타디움','BC 플레이스'],correct:1,hint:'뉴욕/뉴저지에 위치, NFL 자이언츠·제츠의 홈',en:{text:'Which stadium hosts the 2026 World Cup final?',options:['AT&T Stadium','MetLife Stadium','Estadio Azteca','BC Place'],hint:"Located in New York/New Jersey, home of the NFL's Giants and Jets"}},
     {bigImg:true,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Vista_a%C3%A9rea_del_Estadio_Azteca_-_2026_-_02.jpg/330px-Vista_a%C3%A9rea_del_Estadio_Azteca_-_2026_-_02.jpg",text:"멕시코시티의 아즈테카 스타디움에서 열리는 경기는?",options:['결승전','개막전','3·4위전','없음'],correct:1,hint:'1970, 1986년 월드컵 결승이 열렸던 역사적 경기장',en:{text:'What match is held at Estadio Azteca in Mexico City?',options:['The final','The opening match','The 3rd place match','None'],hint:'A historic stadium that hosted the 1970 and 1986 finals'}},
