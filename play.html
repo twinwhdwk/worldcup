@@ -671,6 +671,7 @@ function tick(startAt,limit){
 // ── Answer ────────────────────────────────────────────────────────
 async function answer(idx){
   if(myAnswerIdx>=0)return;
+  if(_sessState?.state!=='question')return;
   getAC();
   myAnswerIdx=idx;
   clearInterval(timerInt);
@@ -693,8 +694,6 @@ async function answer(idx){
   const _wms=document.getElementById('wait-my-score');if(_wms&&myScore>=0){_wms.textContent='현재 '+myScore.toLocaleString()+'점'+(lastKnownRank>0?' · '+lastKnownRank+'위':'');_wms.style.display='block';}else if(_wms)_wms.style.display='none';
   show('s-wait');startFactRotation();
   snd(440,.08);
-  // SSE race: if reveal already fired before this tap was processed, jump to reveal now
-  if(_sessState?.state==='reveal'){setTimeout(()=>showReveal(_sessState),50);}
 }
 
 // ── Reveal ────────────────────────────────────────────────────────
