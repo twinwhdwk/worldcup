@@ -61,6 +61,7 @@ A 2.5-second poll (`setInterval`) serves as a fallback for missed SSE events.
 - `operator.html`: `allAnsweredPending` (prevents double auto-reveal) and `revealInProgress` (prevents double `revealAnswer()` call)
 - `operator.html` → `nextQuestion()`: clears `currentAnswers={}; allAnsweredPending=false;` in synchronous code after all `await`s, before calling `renderAnswerDist()` — prevents stale Q(n) answers from triggering auto-reveal at Q(n+1) start
 - `play.html` → `answer()`: returns early if `_sessState?.state !== 'question'` — prevents `show('s-wait')` from overriding a reveal screen already in progress via `showReveal`'s internal `setTimeout`
+- `play.html` → `renderQ()`: async function that calls `await fbGet('/answers/{name}')` to check for a page-reload in-progress answer. Guard condition is `existingAns.at >= (q.startAt||0)` — without this, a stale previous-question answer returned by Firebase before the `/answers` DELETE propagates would cause the player to skip the current question entirely
 - `play.html`: `_revealQId` string prevents `showReveal()` from re-running for the same question
 
 ### Score Calculation
@@ -92,7 +93,7 @@ These also POST scores to Firebase `/scores` when a Firebase URL is configured, 
 ## Key Utilities
 
 - `enc(name)` — sanitizes Firebase path keys (replaces `.#$[]/` with `_`)
-- `fbPut/fbPatch/fbDelete/fbGet` — thin Firebase REST wrappers with 9s AbortController timeout
+- `fbPut/fbPatch/fbDelete/fbGet` — thin Firebase REST wrappers with 9s AbortController timeout. **Do not use `fbPut(path, null)` to delete** — Firebase returns HTTP 400; use `fbDelete(path)` instead
 - `renderOptHtml(text)` — converts flag emoji to `<img>` tags using flagcdn.com
 - `_fimg(code, h)` — returns `<img>` for a flag CDN image by ISO country code
 - `show(id)` in `play.html` — hides all `.screen` elements and unhides the target
@@ -103,3 +104,13 @@ These also POST scores to Firebase `/scores` when a Firebase URL is configured, 
 - Country flags: `https://flagcdn.com/w40/{code}.png` with fallback to `cdn.jsdelivr.net/npm/flag-icons`
 - Player photos: Wikipedia Commons URLs or `news.nateimg.co.kr` direct image URLs
 - Local images (e.g. `체코유니폼.png`) use relative paths and must exist in the repo root
+
+## Load Testing
+
+`load-test.js` — Node.js 18+ script, no npm dependencies. Simulates N players (default 35) with full operator automation.
+
+```bash
+node load-test.js [firebase-url] [player-count]
+```
+
+Registers bots, opens SSE connections, runs 10 built-in test questions, auto-answers with 0.3–13s random delay, cleans up on exit. Confirmed: 35 players × 10 questions = 350/350 submissions (100%), avg latency ~195ms, max ~560ms. Node.js has no native `EventSource` — the script uses manual fetch-based SSE streaming.
