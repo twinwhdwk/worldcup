@@ -605,7 +605,7 @@ async function renderQ(s){
   // Check if player already answered this question (page reload guard)
   const existingAns=await fbGet('/answers/'+enc(myName));
   if(lastQId!==capturedQId||_sessState?.state!=='question')return; // state changed during async
-  if(existingAns&&existingAns.idx>=0){
+  if(existingAns&&existingAns.idx>=0&&existingAns.at>=(q.startAt||0)){
     myAnswerIdx=existingAns.idx;
     const wpEl=document.getElementById('wait-prev');
     wpEl.innerHTML=LETTERS[existingAns.idx]+' — '+renderOptHtml(q.options?.[existingAns.idx]||'?');
