@@ -71,7 +71,19 @@ Done entirely in `operator.html`'s `revealAnswer()` at reveal time:
 - `gains` object keyed by encoded player name → sent to Firebase at `/session.scoreGains` and `/scores`
 - Players read their own gain from `s.scoreGains[enc(myName)]` in `showReveal()`
 
-## Question Banks (`QB` object in `operator.html`)
+### Ghost/Stale Player Cleanup
+
+Players in `/wc_live/players` only get removed via explicit `fbDelete` — there's no Firebase TTL. If a player closes their tab or a bot script dies mid-run, the entry sits there forever (shown as a permanently "logged in" participant on the operator screen).
+
+Mitigations in `operator.html`:
+- Each player chip shows 👻 and dims when `lastSeen` is 90s+ stale; click the ✕ on any chip to remove that one player
+- "🧹 유령 정리" button bulk-removes anyone stale 90s+ (with a confirm dialog)
+- A silent `setInterval` (every 30s) auto-removes anyone stale 270s+ (`GHOST_THRESHOLD_MS*3`) without operator action — this is the main fix for the "봇이 로그인되어 안없어지는" issue
+- `openSession()` already wipes `/players` entirely on each new session, so this only matters for long-running live sessions
+
+`load-test.js` previously only called `bot.stop()` (which deletes `/players/{name}`) on clean exit — Ctrl+C or a crash mid-run left all registered bots stuck in Firebase. Now has `SIGINT`/`SIGTERM`/`uncaughtException` handlers that trigger `emergencyCleanup()` to delete all registered bots before exiting.
+
+
 
 Three quiz types, each a function returning a shuffled array:
 
