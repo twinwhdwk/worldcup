@@ -11,6 +11,10 @@ const BASE = FIREBASE_URL + '/wc_live';
 const N = parseInt(process.argv[3] || '35');
 const NAMES = Array.from({length: N}, (_, i) => `봇${String(i+1).padStart(2,'0')}`);
 
+// Hoisted so the SIGINT/SIGTERM cleanup handler (defined below) can see
+// the live bot list regardless of where main() is in its execution.
+let _bots = [];
+
 const TEST_QUESTIONS = [
   {text:'1번: 2002 한일 월드컵에서 한국이 4강에 진출했나요?', options:['진출함','안함','결승진출','3위'],       correct:0, emoji:'🏆', timeLimit:15},
   {text:'2번: FIFA 월드컵은 몇 년마다 열리나요?',            options:['2년','4년','3년','5년'],               correct:1, emoji:'⚽', timeLimit:15},
@@ -240,6 +244,7 @@ async function main() {
 
   // 2. Register bots
   const bots = NAMES.map(n => new Bot(n));
+  _bots = bots; // expose to emergency cleanup handler
   process.stdout.write('봇 등록 중...');
   for (let i = 0; i < N; i += 10) {
     const batch = bots.slice(i, i+10);
@@ -297,4 +302,30 @@ async function main() {
   console.log('완료.');
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+// ── Ensure bot cleanup even on Ctrl+C / kill ──────────────────────────
+let _cleaningUp = false;
+async function emergencyCleanup(signal) {
+  if (_cleaningUp) return;
+  _cleaningUp = true;
+  console.log(`\n\n⚠️  ${signal} 감지 — 봇 데이터 정리 중...`);
+  try {
+    if (_bots.length) {
+      await Promise.allSettled(_bots.map(b => b.stop().catch(() => {})));
+    } else {
+      // Bot list not yet created — best-effort wipe of /players
+      await fbDelete('/players').catch(() => {});
+    }
+    console.log('✅ 정리 완료. 종료합니다.');
+  } catch (e) {
+    console.error('정리 중 오류:', e.message);
+  }
+  process.exit(0);
+}
+process.on('SIGINT', () => emergencyCleanup('SIGINT (Ctrl+C)'));
+process.on('SIGTERM', () => emergencyCleanup('SIGTERM'));
+process.on('uncaughtException', (e) => {
+  console.error('처리되지 않은 오류:', e);
+  emergencyCleanup('uncaughtException');
+});
+
+main().catch(e => { console.error(e); emergencyCleanup('fatal error'); });

@@ -56,6 +56,7 @@
     .qr-url{font-size:10px;color:var(--muted2);word-break:break-all;max-width:240px;text-align:center;}
     .player-chips{display:flex;flex-wrap:wrap;gap:8px;max-width:360px;align-content:flex-start;max-height:272px;overflow-y:auto;padding-top:4px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;}
     .player-chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:6px 14px;font-size:13px;font-weight:700;transition:border-color .4s,opacity .4s,background .3s,color .3s;animation:chipPop .4s cubic-bezier(.34,1.56,.64,1);}
+    .player-chip span:hover{opacity:1!important;color:#ef4444;}
     .player-chip.answered{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.55);color:#86efac;}
     @keyframes chipPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
     .player-chips-title{font-size:11px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
@@ -263,7 +264,10 @@
           <div class="qr-url" id="qr-url"></div>
         </div>
         <div id="player-chips-wrap" style="display:none;">
-          <div class="player-chips-title">참가자 목록</div>
+          <div class="player-chips-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <span>참가자 목록</span>
+            <button id="btn-clean-ghosts" onclick="cleanGhostPlayers()" title="60초 이상 응답없는 참가자(유령/봇)를 목록에서 제거합니다" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#ef4444;border-radius:8px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">🧹 유령 정리</button>
+          </div>
           <div class="player-chips" id="player-chips"></div>
         </div>
       </div>
@@ -961,6 +965,49 @@ function scheduleReconnect(){
   _reconnDelayOp=Math.min(_reconnDelayOp*2,30000);
 }
 
+// ── Ghost/stale player management ───────────────────────────────
+const GHOST_THRESHOLD_MS=90000; // 90s with no heartbeat = considered a ghost/abandoned bot
+async function removePlayer(name){
+  if(!name)return;
+  try{
+    await fbDelete('/players/'+enc(name));
+    toast('🗑️ '+esc(name)+' 제거됨');
+  }catch(e){toast('❌ 제거 실패');}
+}
+
+async function cleanGhostPlayers(){
+  const now=Date.now();
+  const stale=Object.values(currentPlayers||{}).filter(p=>p&&p.name&&(!p.lastSeen||(now-p.lastSeen)>=GHOST_THRESHOLD_MS));
+  if(!stale.length){toast('✨ 정리할 유령 참가자가 없어요');return;}
+  if(!confirm(`${Math.round(GHOST_THRESHOLD_MS/1000)}초 이상 응답 없는 참가자 ${stale.length}명을 제거할까요?\n(${stale.map(p=>p.name).slice(0,8).join(', ')}${stale.length>8?' 외 '+(stale.length-8)+'명':''})`))return;
+  const btn=document.getElementById('btn-clean-ghosts');
+  if(btn){btn.disabled=true;btn.textContent='정리 중...';}
+  try{
+    await Promise.allSettled(stale.map(p=>fbDelete('/players/'+enc(p.name))));
+    toast('🧹 유령 참가자 '+stale.length+'명 정리 완료');
+  }catch(e){toast('❌ 정리 중 오류 발생');}
+  finally{if(btn){btn.disabled=false;btn.textContent='🧹 유령 정리';}}
+}
+
+// Silent background sweep — runs every 30s, removes anything stale
+// for 3x the ghost threshold (4.5min) without needing operator action.
+// This is the actual fix for "봇이 로그인되어 안없어지는" — abandoned
+// load-test bots or players who closed the tab never send a final
+// delete, so without this they'd sit in /players forever.
+let _autoCleanInFlight=false;
+setInterval(async()=>{
+  if(_autoCleanInFlight||!USE_FB)return;
+  const now=Date.now();
+  const veryStale=Object.values(currentPlayers||{}).filter(p=>p&&p.name&&(!p.lastSeen||(now-p.lastSeen)>=GHOST_THRESHOLD_MS*3));
+  if(!veryStale.length)return;
+  _autoCleanInFlight=true;
+  try{
+    await Promise.allSettled(veryStale.map(p=>fbDelete('/players/'+enc(p.name))));
+    console.log('[auto-cleanup] removed',veryStale.length,'abandoned player(s):',veryStale.map(p=>p.name));
+  }catch(e){}
+  finally{_autoCleanInFlight=false;}
+},30000);
+
 // ── Listening (단일 루트 SSE — HTTP 연결 1개만 사용) ───────────────
 let prevPlayerCount=0,_knownNames=new Set();
 function startListening(){
@@ -982,7 +1029,16 @@ function startListening(){
     const wrap=document.getElementById('player-chips-wrap');
     const chips=document.getElementById('player-chips');
     if(wrap&&chips){
-      if(n>0){wrap.style.display='block';const _now2=Date.now();const _sorted=[...players].sort((a,b)=>{const ao=a.lastSeen&&(_now2-a.lastSeen)<30000?1:0;const bo=b.lastSeen&&(_now2-b.lastSeen)<30000?1:0;return bo-ao;});chips.innerHTML=_sorted.map(p=>`<div class="player-chip">${esc(p.name)}</div>`).join('');}
+      if(n>0){
+        wrap.style.display='block';
+        const _now2=Date.now();
+        const _sorted=[...players].sort((a,b)=>{const ao=a.lastSeen&&(_now2-a.lastSeen)<30000?1:0;const bo=b.lastSeen&&(_now2-b.lastSeen)<30000?1:0;return bo-ao;});
+        chips.innerHTML=_sorted.map(p=>{
+          const isStale=!p.lastSeen||(_now2-p.lastSeen)>=GHOST_THRESHOLD_MS;
+          const staleAttr=isStale?' style="opacity:.45;border-style:dashed;"':'';
+          return `<div class="player-chip"${staleAttr}>${esc(p.name)}${isStale?' 👻':''}<span onclick="removePlayer('${esc(p.name).replace(/'/g,"\\'")}')" title="이 참가자 제거" style="margin-left:6px;cursor:pointer;opacity:.6;font-weight:700;">✕</span></div>`;
+        }).join('');
+      }
       else{wrap.style.display='none';}
     }
   };
